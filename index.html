@@ -15,10 +15,10 @@
             --card: rgba(22, 12, 36, 0.75);
             --side: #080410;
             --fg: #ffffff;
-            --mut: #8b80a6;
-            --pri: #7c3aed;
-            --acc: #c084fc;
-            --cy: #d8b4fe;
+            --mut: #a69bbd;
+            --pri: #a855f7;
+            --acc: #e9d5ff;
+            --cy: #f3e8ff;
             --line: rgba(255, 255, 255, .09)
         }
 
@@ -34,7 +34,7 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 0%, #1e0938 0%, var(--bg) 75%);
+            background: radial-gradient(circle at 50% 0%, #2e1052 0%, var(--bg) 75%);
             background-attachment: fixed;
             color: var(--fg);
             font: 14px/1.5 Inter, sans-serif;
@@ -126,9 +126,9 @@
         }
 
         nav button.on {
-            background: linear-gradient(90deg, rgba(124, 58, 237, .28) 0%, rgba(192, 132, 252, .1) 100%);
+            background: linear-gradient(90deg, rgba(168, 85, 247, .32) 0%, rgba(243, 232, 255, .12) 100%);
             color: #ffffff;
-            border: 1px solid rgba(168, 85, 247, .35)
+            border: 1px solid rgba(233, 213, 255, .4)
         }
 
         nav button.on::after {
@@ -170,9 +170,9 @@
             place-items: center;
             font-size: 12px;
             font-weight: 700;
-            color: #fff;
+            color: #05030a;
             flex-shrink: 0;
-            box-shadow: 0 0 10px rgba(124, 58, 237, .4)
+            box-shadow: 0 0 10px rgba(233, 213, 255, .4)
         }
 
         .user b {
@@ -290,7 +290,7 @@
         }
 
         .card {
-            background: linear-gradient(135deg, rgba(28, 14, 48, 0.6) 0%, rgba(10, 5, 18, 0.85) 100%);
+            background: linear-gradient(135deg, rgba(38, 18, 64, 0.65) 0%, rgba(10, 5, 18, 0.85) 100%);
             border: 1px solid var(--line);
             border-radius: 12px;
             padding: 20px;
@@ -336,9 +336,9 @@
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 99px;
-            background: rgba(192, 132, 252, .15);
+            background: rgba(233, 213, 255, .15);
             color: var(--acc);
-            border: 1px solid rgba(192, 132, 252, .25)
+            border: 1px solid rgba(233, 213, 255, .3)
         }
 
         .stat .ic {
@@ -367,9 +367,9 @@
         }
 
         .rng button.on {
-            background: rgba(124, 58, 237, .25);
+            background: rgba(168, 85, 247, .25);
             color: #ffffff;
-            border: 1px solid rgba(124, 58, 237, .35)
+            border: 1px solid rgba(233, 213, 255, .4)
         }
 
         .leg {
@@ -643,9 +643,9 @@
         const GROWTH = [["Jan", 120, 45], ["Feb", 134, 52], ["Mar", 148, 61], ["Apr", 165, 55], ["May", 180, 78], ["Jun", 192, 90], ["Jul", 205, 83], ["Aug", 218, 95], ["Sep", 234, 102], ["Oct", 251, 118], ["Nov", 267, 125], ["Dec", 284, 140]].map(([m, a, b]) => ({ m, members: a, subs: b }));
         const ACT = [[1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"], [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"], [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"], [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"], [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"], [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"], [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]].map(([id, user, action, subject, time, type]) => ({ id, user, action, subject, time, type }));
         const PROJ = [["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"], ["Neural Interface Lab", "Sciences", "Prof. M. Reyes", "Active", 45, 5, "Jun 2027"], ["Renewable Energy Grid Study", "Engineering", "Dr. K. Obi", "Active", 88, 12, "Feb 2027"], ["Biomedical Sensor Array", "Sciences", "J. Okonkwo", "Pending", 21, 4, "Sep 2027"], ["Climate Modeling Framework", "Research", "Dr. S. Brennan", "Active", 61, 7, "Apr 2027"], ["Advanced Materials Lab", "Engineering", "Prof. L. Wei", "Completed", 100, 9, "Dec 2026"], ["Educational AI Platform", "Education", "Dr. A. Nakamura", "On Hold", 34, 3, "Aug 2027"]].map(([name, cat, lead, status, prog, team, due]) => ({ name, cat, lead, status, prog, team, due }));
-        const CAT = { Engineering: "#7c3aed", Sciences: "#d8b4fe", Education: "#e879f9", Research: "#a855f7" };
-        const ST = { Active: ["rgba(192,132,252,.15)", "#c084fc"], Pending: ["rgba(234,179,8,.15)", "#eab308"], Completed: ["rgba(124,58,237,.18)", "#d8b4fe"], "On Hold": ["rgba(244,63,94,.15)", "#fb7185"] };
-        const AI = { report: "#c084fc", member: "#7c3aed", milestone: "#eab308", event: "#d8b4fe", update: "#8b80a6" };
+        const CAT = { Engineering: "#a855f7", Sciences: "#f3e8ff", Education: "#e9d5ff", Research: "#c084fc" };
+        const ST = { Active: ["rgba(233,213,255,.18)", "#e9d5ff"], Pending: ["rgba(250,204,21,.18)", "#facc15"], Completed: ["rgba(168,85,247,.2)", "#f3e8ff"], "On Hold": ["rgba(244,63,94,.18)", "#fb7185"] };
+        const AI = { report: "#e9d5ff", member: "#a855f7", milestone: "#facc15", event: "#f3e8ff", update: "#a69bbd" };
         const NAV = [["dashboard", "Dashboard", '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'], ["members", "Members", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'], ["reports", "Reports", '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>']];
         const S = { tab: "dashboard", q: "", range: 12 };
         const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -657,16 +657,16 @@
             const W = 600, H = 210, L = 34, B = 24, T = 8, R = 6, iw = W - L - R, ih = H - T - B, max = Math.ceil(Math.max(...d.flatMap(x => [x.members, x.subs])) / 50) * 50;
             const X = i => L + (d.length > 1 ? i * iw / (d.length - 1) : iw / 2), Y = v => T + ih - v / max * ih;
             const line = k => d.map((x, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(x[k]).toFixed(1)}`).join("");
-            const fill = (k, c, id) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stop-color="${c}" stop-opacity=".35"/><stop offset="95%" stop-color="${c}" stop-opacity="0"/></linearGradient><path d="${line(k)}L${X(d.length - 1)},${T + ih}L${X(0)},${T + ih}Z" fill="url(#${id})"/><path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2"/>`;
+            const fill = (k, c, id) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stop-color="${c}" stop-opacity=".4"/><stop offset="95%" stop-color="${c}" stop-opacity="0"/></linearGradient><path d="${line(k)}L${X(d.length - 1)},${T + ih}L${X(0)},${T + ih}Z" fill="url(#${id})"/><path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2"/>`;
             let g = ""; for (let i = 0; i <= 4; i++) { const v = max * i / 4, y = Y(v); g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.04)"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${v}</text>` }
             const dots = k => d.map((x, i) => `<circle cx="${X(i)}" cy="${Y(x[k])}" r="6" fill="transparent"><title>${x.m} · ${k === "subs" ? "Submissions" : "Members"}: ${x[k]}</title></circle>`).join("");
-            return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Members and submissions over time">${g}${d.map((x, i) => `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${x.m}</text>`).join("")}${fill("members", "#7c3aed", "gm")}${fill("subs", "#d8b4fe", "gs")}${dots("members")}${dots("subs")}</svg>`
+            return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Members and submissions over time">${g}${d.map((x, i) => `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${x.m}</text>`).join("")}${fill("members", "#a855f7", "gm")}${fill("subs", "#f3e8ff", "gs")}${dots("members")}${dots("subs")}</svg>`
         }
 
         function bars(d) {
             const W = 400, H = 190, L = 30, B = 22, T = 8, ih = H - T - B, max = Math.ceil(Math.max(...d.map(x => x.v)) / 50) * 50, bw = (W - L) / d.length; let s = "";
             for (let i = 0; i <= 4; i++) { const v = max * i / 4, y = T + ih - v / max * ih; s += `<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.04)"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${v}</text>` }
-            s += `<defs><linearGradient id="barG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>`;
+            s += `<defs><linearGradient id="barG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3e8ff"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs>`;
             d.forEach((x, i) => { const h = x.v / max * ih, cx = L + bw * i + bw / 2; s += `<rect x="${cx - 12}" y="${T + ih - h}" width="24" height="${h}" rx="4" fill="url(#barG)"><title>${x.m}: ${x.v}</title></rect><text x="${cx}" y="${H - 6}" text-anchor="middle">${x.m}</text>` });
             return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly reports">${s}</svg>`
         }
@@ -677,7 +677,7 @@
             return `<svg class="ch" viewBox="-90 -90 180 180" style="height:170px" role="img" aria-label="Projects by category"><g transform="rotate(-90)">${arcs}</g></svg>`
         }
 
-        function proj(list) { return `<div class="card" style="padding:0"><div style="padding:16px 20px;border-bottom:1px solid var(--line)"><h3 class="disp">PROJECT STATUS</h3><div class="sub mono" style="margin:2px 0 0">${list.length} of ${PROJ.length} projects</div></div><div class="tw"><table><thead><tr>${["#", "Project", "Category", "Lead", "Status", "Progress", "Team", "Due"].map(h => `<th>${h.toUpperCase()}</th>`).join("")}</tr></thead><tbody>${list.length ? list.map((p, i) => { const [bg, fg] = ST[p.status]; return `<tr><td class="mono">${String(i + 1).padStart(2, "0")}</td><td class="n">${esc(p.name)}</td><td>${p.cat}</td><td>${esc(p.lead)}</td><td><span class="pill" style="background:${bg};color:${fg};border:1px solid ${fg}33">${p.status}</span></td><td><div class="bar"><div><i style="width:${p.prog}\%;background:${p.prog === 100 ? "#c084fc" : "linear-gradient(90deg, #7c3aed, #d8b4fe)"}"></i></div><span class="mono" style="font-size:10px">${p.prog}%</span></div></td><td class="mono" style="text-align:center">${p.team}</td><td class="mono">${p.due}</td></tr>` }).join("") : `<tr><td colspan="8" class="empty">No projects match your search.</td></tr>`}</tbody></table></div></div>` }
+        function proj(list) { return `<div class="card" style="padding:0"><div style="padding:16px 20px;border-bottom:1px solid var(--line)"><h3 class="disp">PROJECT STATUS</h3><div class="sub mono" style="margin:2px 0 0">${list.length} of ${PROJ.length} projects</div></div><div class="tw"><table><thead><tr>${["#", "Project", "Category", "Lead", "Status", "Progress", "Team", "Due"].map(h => `<th>${h.toUpperCase()}</th>`).join("")}</tr></thead><tbody>${list.length ? list.map((p, i) => { const [bg, fg] = ST[p.status]; return `<tr><td class="mono">${String(i + 1).padStart(2, "0")}</td><td class="n">${esc(p.name)}</td><td>${p.cat}</td><td>${esc(p.lead)}</td><td><span class="pill" style="background:${bg};color:${fg};border:1px solid ${fg}33">${p.status}</span></td><td><div class="bar"><div><i style="width:${p.prog}\%;background:${p.prog === 100 ? "#e9d5ff" : "linear-gradient(90deg, #a855f7, #f3e8ff)"}"></i></div><span class="mono" style="font-size:10px">${p.prog}%</span></div></td><td class="mono" style="text-align:center">${p.team}</td><td class="mono">${p.due}</td></tr>` }).join("") : `<tr><td colspan="8" class="empty">No projects match your search.</td></tr>`}</tbody></table></div></div>` }
 
         function dash() {
             const list = PROJ.filter(p => has(`${p.name} ${p.lead} ${p.cat}`, S.q));
@@ -686,8 +686,8 @@
             const cats = Object.entries(PROJ.reduce((o, p) => (o[p.cat] = (o[p.cat] || 0) + 1, o), {})).map(([name, n]) => ({ name, value: Math.round(n / PROJ.length * 100), color: CAT[name] }));
             const stat = (l, v, c, col, bg, ic) => `<div class="card stat"><span class="chg mono">▲ ${c}%</span><div class="l mono">${l}</div><div class="v mono">${v}</div><div class="sub mono" style="margin:0">vs last quarter</div><div class="ic" style="background:${bg};color:${col}">${icon(ic)}</div></div>`;
             const u = NAV[1][2];
-            return `<div class="grid g2">${stat("Total members", tot.toLocaleString(), ch, "#c084fc", "rgba(124,58,237,.18)", u)}${stat("Members on active projects", act.toLocaleString(), "6.1", "#d8b4fe", "rgba(216,180,254,.18)", u)}</div>
-<div class="grid g3"><div class="card"><div class="top"><div><h3 class="disp">ACTIVITY OVERVIEW</h3><div class="sub mono">Member growth &amp; report submissions</div></div><div class="rng">${[["3M", 3], ["6M", 6], ["1Y", 12]].map(([l, n]) => `<button class="mono ${S.range === n ? "on" : ""}" data-r="${n}">${l}</button>`).join("")}</div></div><div class="leg mono"><span><i style="background:#7c3aed"></i>Members</span><span><i style="background:#d8b4fe"></i>Submissions</span></div>${area(g)}</div>
+            return `<div class="grid g2">${stat("Total members", tot.toLocaleString(), ch, "#e9d5ff", "rgba(168,85,247,.2)", u)}${stat("Members on active projects", act.toLocaleString(), "6.1", "#f3e8ff", "rgba(243,232,255,.18)", u)}</div>
+<div class="grid g3"><div class="card"><div class="top"><div><h3 class="disp">ACTIVITY OVERVIEW</h3><div class="sub mono">Member growth &amp; report submissions</div></div><div class="rng">${[["3M", 3], ["6M", 6], ["1Y", 12]].map(([l, n]) => `<button class="mono ${S.range === n ? "on" : ""}" data-r="${n}">${l}</button>`).join("")}</div></div><div class="leg mono"><span><i style="background:#a855f7"></i>Members</span><span><i style="background:#f3e8ff"></i>Submissions</span></div>${area(g)}</div>
 <div class="card"><h3 class="disp">CATEGORY BREAKDOWN</h3><div class="sub mono">Projects by discipline</div>${donut(cats)}${cats.map(c => `<div class="row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c.color};margin-right:8px"></i>${c.name}</span><b>${c.value}%</b></div>`).join("")}</div></div>
 <div class="grid g2"><div class="card"><h3 class="disp">MONTHLY REPORTS</h3><div class="sub mono">Last 6 months</div>${bars(GROWTH.slice(-6).map(x => ({ m: x.m, v: x.subs })))}</div>
 <div class="card"><h3 class="disp">RECENT ACTIVITY</h3><div class="sub mono">Latest updates</div><div class="act">${ACT.map(a => `<div class="a"><div class="ic" style="background:${AI[a.type]}22;color:${AI[a.type]}">${icon('<circle cx="12" cy="12" r="4"/>')}</div><div><p><b>${esc(a.user)}</b> <span>${a.action}</span> <em>${esc(a.subject)}</em></p><small class="mono">${a.time}</small></div></div>`).join("")}</div></div></div>${proj(list)}`
