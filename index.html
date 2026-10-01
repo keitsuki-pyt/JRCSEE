@@ -285,10 +285,6 @@
             grid-template-columns: repeat(2, 1fr)
         }
 
-        .g3 {
-            grid-template-columns: 2fr 1fr
-        }
-
         .card {
             background: linear-gradient(135deg, rgba(38, 18, 64, 0.65) 0%, rgba(10, 5, 18, 0.85) 100%);
             border: 1px solid var(--line);
@@ -408,11 +404,6 @@
             color: var(--mut)
         }
 
-        .row b {
-            color: var(--fg);
-            font-family: 'DM Mono', monospace
-        }
-
         .act {
             max-height: 215px;
             overflow-y: auto;
@@ -454,87 +445,6 @@
             color: var(--mut)
         }
 
-        .tw {
-            overflow-x: auto
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px
-        }
-
-        th {
-            text-align: left;
-            padding: 12px 16px;
-            font: 600 10px 'DM Mono', monospace;
-            letter-spacing: .1em;
-            color: var(--mut);
-            white-space: nowrap;
-            border-bottom: 1px solid var(--line)
-        }
-
-        td {
-            padding: 12px 16px;
-            color: var(--mut);
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(255, 255, 255, .03)
-        }
-
-        tr:last-child td {
-            border: 0
-        }
-
-        tbody tr:hover {
-            background: rgba(255, 255, 255, .02)
-        }
-
-        td.n {
-            color: var(--fg);
-            font-weight: 500;
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis
-        }
-
-        .pill {
-            display: inline-flex;
-            gap: 6px;
-            align-items: center;
-            padding: 4px 8px;
-            border-radius: 99px;
-            font: 600 10px 'DM Mono', monospace
-        }
-
-        .pill::before {
-            content: "";
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: currentColor
-        }
-
-        .bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 120px
-        }
-
-        .bar div {
-            flex: 1;
-            height: 6px;
-            border-radius: 99px;
-            background: rgba(255, 255, 255, .06);
-            overflow: hidden
-        }
-
-        .bar i {
-            display: block;
-            height: 100%;
-            border-radius: 99px
-        }
-
         .empty {
             padding: 24px;
             text-align: center;
@@ -561,12 +471,6 @@
             background: rgba(0, 0, 0, .75);
             backdrop-filter: blur(4px);
             z-index: 30
-        }
-
-        @media(max-width:1023px) {
-            .g3 {
-                grid-template-columns: 1fr
-            }
         }
 
         @media(max-width:767px) {
@@ -643,8 +547,6 @@
         const GROWTH = [["Jan", 120, 45], ["Feb", 134, 52], ["Mar", 148, 61], ["Apr", 165, 55], ["May", 180, 78], ["Jun", 192, 90], ["Jul", 205, 83], ["Aug", 218, 95], ["Sep", 234, 102], ["Oct", 251, 118], ["Nov", 267, 125], ["Dec", 284, 140]].map(([m, a, b]) => ({ m, members: a, subs: b }));
         const ACT = [[1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"], [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"], [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"], [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"], [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"], [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"], [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]].map(([id, user, action, subject, time, type]) => ({ id, user, action, subject, time, type }));
         const PROJ = [["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"], ["Neural Interface Lab", "Sciences", "Prof. M. Reyes", "Active", 45, 5, "Jun 2027"], ["Renewable Energy Grid Study", "Engineering", "Dr. K. Obi", "Active", 88, 12, "Feb 2027"], ["Biomedical Sensor Array", "Sciences", "J. Okonkwo", "Pending", 21, 4, "Sep 2027"], ["Climate Modeling Framework", "Research", "Dr. S. Brennan", "Active", 61, 7, "Apr 2027"], ["Advanced Materials Lab", "Engineering", "Prof. L. Wei", "Completed", 100, 9, "Dec 2026"], ["Educational AI Platform", "Education", "Dr. A. Nakamura", "On Hold", 34, 3, "Aug 2027"]].map(([name, cat, lead, status, prog, team, due]) => ({ name, cat, lead, status, prog, team, due }));
-        const CAT = { Engineering: "#a855f7", Sciences: "#f3e8ff", Education: "#e9d5ff", Research: "#c084fc" };
-        const ST = { Active: ["rgba(233,213,255,.18)", "#e9d5ff"], Pending: ["rgba(250,204,21,.18)", "#facc15"], Completed: ["rgba(168,85,247,.2)", "#f3e8ff"], "On Hold": ["rgba(244,63,94,.18)", "#fb7185"] };
         const AI = { report: "#e9d5ff", member: "#a855f7", milestone: "#facc15", event: "#f3e8ff", update: "#a69bbd" };
         const NAV = [["dashboard", "Dashboard", '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'], ["members", "Members", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'], ["reports", "Reports", '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>']];
         const S = { tab: "dashboard", q: "", range: 12 };
@@ -671,26 +573,15 @@
             return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly reports">${s}</svg>`
         }
 
-        function donut(c) {
-            const r = 62, C = 2 * Math.PI * r; let off = 0;
-            const arcs = c.map(x => { const len = x.value / 100 * C, a = `<circle r="${r}" fill="none" stroke="${x.color}" stroke-width="26" stroke-dasharray="${Math.max(len - 3, 0)} ${C}" stroke-dashoffset="${-off}"><title>${x.name}: ${x.value}%</title></circle>`; off += len; return a }).join("");
-            return `<svg class="ch" viewBox="-90 -90 180 180" style="height:170px" role="img" aria-label="Projects by category"><g transform="rotate(-90)">${arcs}</g></svg>`
-        }
-
-        function proj(list) { return `<div class="card" style="padding:0"><div style="padding:16px 20px;border-bottom:1px solid var(--line)"><h3 class="disp">PROJECT STATUS</h3><div class="sub mono" style="margin:2px 0 0">${list.length} of ${PROJ.length} projects</div></div><div class="tw"><table><thead><tr>${["#", "Project", "Category", "Lead", "Status", "Progress", "Team", "Due"].map(h => `<th>${h.toUpperCase()}</th>`).join("")}</tr></thead><tbody>${list.length ? list.map((p, i) => { const [bg, fg] = ST[p.status]; return `<tr><td class="mono">${String(i + 1).padStart(2, "0")}</td><td class="n">${esc(p.name)}</td><td>${p.cat}</td><td>${esc(p.lead)}</td><td><span class="pill" style="background:${bg};color:${fg};border:1px solid ${fg}33">${p.status}</span></td><td><div class="bar"><div><i style="width:${p.prog}\%;background:${p.prog === 100 ? "#e9d5ff" : "linear-gradient(90deg, #a855f7, #f3e8ff)"}"></i></div><span class="mono" style="font-size:10px">${p.prog}%</span></div></td><td class="mono" style="text-align:center">${p.team}</td><td class="mono">${p.due}</td></tr>` }).join("") : `<tr><td colspan="8" class="empty">No projects match your search.</td></tr>`}</tbody></table></div></div>` }
-
         function dash() {
-            const list = PROJ.filter(p => has(`${p.name} ${p.lead} ${p.cat}`, S.q));
             const g = GROWTH.slice(-S.range), tot = GROWTH.at(-1).members, prev = GROWTH.at(-4).members, ch = ((tot - prev) / prev * 100).toFixed(1);
             const act = PROJ.filter(p => p.status === "Active").reduce((n, p) => n + p.team, 0);
-            const cats = Object.entries(PROJ.reduce((o, p) => (o[p.cat] = (o[p.cat] || 0) + 1, o), {})).map(([name, n]) => ({ name, value: Math.round(n / PROJ.length * 100), color: CAT[name] }));
             const stat = (l, v, c, col, bg, ic) => `<div class="card stat"><span class="chg mono">▲ ${c}%</span><div class="l mono">${l}</div><div class="v mono">${v}</div><div class="sub mono" style="margin:0">vs last quarter</div><div class="ic" style="background:${bg};color:${col}">${icon(ic)}</div></div>`;
             const u = NAV[1][2];
             return `<div class="grid g2">${stat("Total members", tot.toLocaleString(), ch, "#e9d5ff", "rgba(168,85,247,.2)", u)}${stat("Members on active projects", act.toLocaleString(), "6.1", "#f3e8ff", "rgba(243,232,255,.18)", u)}</div>
-<div class="grid g3"><div class="card"><div class="top"><div><h3 class="disp">ACTIVITY OVERVIEW</h3><div class="sub mono">Member growth &amp; report submissions</div></div><div class="rng">${[["3M", 3], ["6M", 6], ["1Y", 12]].map(([l, n]) => `<button class="mono ${S.range === n ? "on" : ""}" data-r="${n}">${l}</button>`).join("")}</div></div><div class="leg mono"><span><i style="background:#a855f7"></i>Members</span><span><i style="background:#f3e8ff"></i>Submissions</span></div>${area(g)}</div>
-<div class="card"><h3 class="disp">CATEGORY BREAKDOWN</h3><div class="sub mono">Projects by discipline</div>${donut(cats)}${cats.map(c => `<div class="row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c.color};margin-right:8px"></i>${c.name}</span><b>${c.value}%</b></div>`).join("")}</div></div>
+<div class="card"><div class="top"><div><h3 class="disp">ACTIVITY OVERVIEW</h3><div class="sub mono">Member growth &amp; report submissions</div></div><div class="rng">${[["3M", 3], ["6M", 6], ["1Y", 12]].map(([l, n]) => `<button class="mono ${S.range === n ? "on" : ""}" data-r="${n}">${l}</button>`).join("")}</div></div><div class="leg mono"><span><i style="background:#a855f7"></i>Members</span><span><i style="background:#f3e8ff"></i>Submissions</span></div>${area(g)}</div>
 <div class="grid g2"><div class="card"><h3 class="disp">MONTHLY REPORTS</h3><div class="sub mono">Last 6 months</div>${bars(GROWTH.slice(-6).map(x => ({ m: x.m, v: x.subs })))}</div>
-<div class="card"><h3 class="disp">RECENT ACTIVITY</h3><div class="sub mono">Latest updates</div><div class="act">${ACT.map(a => `<div class="a"><div class="ic" style="background:${AI[a.type]}22;color:${AI[a.type]}">${icon('<circle cx="12" cy="12" r="4"/>')}</div><div><p><b>${esc(a.user)}</b> <span>${a.action}</span> <em>${esc(a.subject)}</em></p><small class="mono">${a.time}</small></div></div>`).join("")}</div></div></div>${proj(list)}`
+<div class="card"><h3 class="disp">RECENT ACTIVITY</h3><div class="sub mono">Latest updates</div><div class="act">${ACT.map(a => `<div class="a"><div class="ic" style="background:${AI[a.type]}22;color:${AI[a.type]}">${icon('<circle cx="12" cy="12" r="4"/>')}</div><div><p><b>${esc(a.user)}</b> <span>${a.action}</span> <em>${esc(a.subject)}</em></p><small class="mono">${a.time}</small></div></div>`).join("")}</div></div></div>`
         }
 
         function members() {
