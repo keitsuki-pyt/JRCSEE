@@ -187,6 +187,20 @@
             color: var(--mut)
         }
 
+        .logout {
+            margin-left: auto;
+            font-size: 10px;
+            color: var(--mut);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        .logout:hover {
+            color: var(--fg);
+            border-color: var(--pri)
+        }
+
         .col {
             flex: 1;
             min-width: 0;
@@ -530,8 +544,9 @@
             </div>
             <nav id="nav"></nav>
             <div class="user">
-                <div class="av mono">AD</div>
-                <div><b>Admin User</b><small class="mono">admin@jrcsee.org</small></div>
+                <div class="av mono" id="userInitials">..</div>
+                <div><b id="userName">Loading...</b><small class="mono" id="userEmail"></small></div>
+                <button class="logout mono" id="logout" title="Log out">Logout</button>
             </div>
         </aside>
         <div class="veil" id="veil"></div>
@@ -560,6 +575,8 @@
             <main id="main"></main>
         </div>
     </div>
+
+    <!-- ================= DASHBOARD LOGIC ================= -->
     <script>
         const GROWTH = [["Jan", 120, 45], ["Feb", 134, 52], ["Mar", 148, 61], ["Apr", 165, 55], ["May", 180, 78], ["Jun", 192, 90], ["Jul", 205, 83], ["Aug", 218, 95], ["Sep", 234, 102], ["Oct", 251, 118], ["Nov", 267, 125], ["Dec", 284, 140]].map(([m, a, b]) => ({ m, members: a, subs: b }));
         const ACT = [[1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"], [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"], [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"], [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"], [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"], [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"], [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]].map(([id, user, action, subject, time, type]) => ({ id, user, action, subject, time, type }));
@@ -634,26 +651,57 @@
         render();
     </script>
 
+    <!-- ================= AUTH GUARD ================= -->
     <script>
-const supabase = window.supabase.createClient(
-    "https://guhwlwhdssycjpobcmfk.supabase.co",
-    "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
-);
+        // Page that holds your login form. Change this if your login file has a different name.
+        const LOGIN_PAGE = "login.html";
 
-async function checkLogin() {
+        const supabaseClient = window.supabase.createClient(
+            "https://guhwlwhdssycjpobcmfk.supabase.co",
+            "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
+        );
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+        function showUser(user) {
+            const email = user.email || "";
+            const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
+                || email.split("@")[0] || "User";
+            document.getElementById("userName").textContent = name;
+            document.getElementById("userEmail").textContent = email;
+            document.getElementById("userInitials").textContent = name.slice(0, 2).toUpperCase();
+        }
 
-    if (error || !user) {
-        window.location.href = "index.html";
-        return;
-    }
+        async function checkLogin() {
+            try {
+                // getSession reads the saved session, so it works right after login
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-    console.log("Logged in as:", user.email);
-}
+                if (error || !session) {
+                    window.location.replace(LOGIN_PAGE);
+                    return;
+                }
 
-checkLogin();
-</script>
+                console.log("Logged in as:", session.user.email);
+                showUser(session.user);
+            } catch (err) {
+                console.error("Auth check failed:", err);
+                window.location.replace(LOGIN_PAGE);
+            }
+        }
+
+        // Redirect if the user signs out (including from another tab)
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === "SIGNED_OUT" || !session) {
+                window.location.replace(LOGIN_PAGE);
+            }
+        });
+
+        document.getElementById("logout").onclick = async () => {
+            await supabaseClient.auth.signOut();
+            window.location.replace(LOGIN_PAGE);
+        };
+
+        checkLogin();
+    </script>
 
 </body>
 
