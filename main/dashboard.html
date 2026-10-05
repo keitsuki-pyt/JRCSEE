@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -164,12 +163,16 @@
             flex-shrink: 0
         }
 
+        /* ================= USER AREA ================= */
+
         .user {
             padding: 16px;
             border-top: 1px solid var(--line);
             display: flex;
+            align-items: center;
             gap: 12px;
-            align-items: center
+            width: 100%;
+            min-width: 0;
         }
 
         .av {
@@ -186,29 +189,58 @@
             box-shadow: 0 0 10px rgba(233, 213, 255, .4)
         }
 
+        /* User information */
+        .user-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
         .user b {
             font-size: 12px;
-            display: block
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .user small {
             font-size: 10px;
-            color: var(--mut)
+            color: var(--mut);
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
+        /* LOGOUT BUTTON */
         .logout {
+            flex-shrink: 0;
             margin-left: auto;
-            font-size: 10px;
-            color: var(--mut);
-            padding: 4px 8px;
+            height: 28px;
+            padding: 5px 9px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, .08)
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: var(--mut);
+            font-size: 10px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s ease;
         }
 
         .logout:hover {
             color: var(--fg);
-            border-color: var(--pri)
+            border-color: var(--pri);
+            background: rgba(168, 85, 247, .10);
         }
+
+        .logout:active {
+            transform: scale(.96);
+        }
+
+        /* ================= MAIN ================= */
 
         .col {
             flex: 1;
@@ -545,6 +577,15 @@
             main {
                 padding: 20px
             }
+
+            .user {
+                padding: 14px 12px;
+            }
+
+            .logout {
+                padding: 5px 7px;
+                font-size: 9px;
+            }
         }
     </style>
 </head>
@@ -553,6 +594,7 @@
 
     <div class="app">
 
+        <!-- SIDEBAR -->
         <aside id="side">
 
             <div class="brand">
@@ -562,16 +604,25 @@
 
             <nav id="nav"></nav>
 
+            <!-- USER -->
             <div class="user">
 
-                <div class="av mono" id="userInitials">..</div>
-
-                <div>
-                    <b id="userName">Loading...</b>
-                    <small class="mono" id="userEmail"></small>
+                <div class="av mono" id="userInitials">
+                    AD
                 </div>
 
-                <button class="logout mono" id="logout" title="Log out">
+                <div class="user-info">
+                    <b id="userName">Admin User</b>
+                    <small class="mono" id="userEmail">
+                        admin@jrcsee.org
+                    </small>
+                </div>
+
+                <button
+                    class="logout mono"
+                    id="logout"
+                    title="Log out"
+                    type="button">
                     Logout
                 </button>
 
@@ -583,9 +634,13 @@
 
         <div class="col">
 
+            <!-- HEADER -->
             <header>
 
-                <button class="menu ic" id="menu" aria-label="Open menu">
+                <button
+                    class="menu ic"
+                    id="menu"
+                    aria-label="Open menu">
 
                     <svg
                         viewBox="0 0 24 24"
@@ -604,7 +659,10 @@
 
                 <div class="grow">
 
-                    <h2 class="disp" id="title"></h2>
+                    <h2
+                        class="disp"
+                        id="title">
+                    </h2>
 
                     <div class="datetime mono">
                         <span id="date"></span>
@@ -615,10 +673,17 @@
 
                 <label class="search ic">
 
-                    <svg viewBox="0 0 24 24" stroke-linecap="round">
+                    <svg
+                        viewBox="0 0 24 24"
+                        stroke-linecap="round">
 
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.3-4.3" />
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="8" />
+
+                        <path
+                            d="m21 21-4.3-4.3" />
 
                     </svg>
 
@@ -635,7 +700,8 @@
 
                     <svg viewBox="0 0 24 24">
 
-                        <path d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.500-1.400 6-2.700 7.300" />
+                        <path
+                            d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.500-1.400 6-2.700 7.300" />
 
                     </svg>
 
@@ -649,8 +715,6 @@
 
     </div>
 
-
-    <!-- ================= DASHBOARD LOGIC ================= -->
 
     <script>
 
@@ -673,6 +737,7 @@
             subs: b
         }));
 
+
         const ACT = [
             [1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"],
             [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"],
@@ -689,6 +754,7 @@
             time,
             type
         }));
+
 
         const PROJ = [
             ["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"],
@@ -708,6 +774,7 @@
             due
         }));
 
+
         const AI = {
             report: "#e9d5ff",
             member: "#a855f7",
@@ -715,6 +782,7 @@
             event: "#f3e8ff",
             update: "#a69bbd"
         };
+
 
         const NAV = [
             [
@@ -734,11 +802,13 @@
             ]
         ];
 
+
         const S = {
             tab: "dashboard",
             q: "",
             range: 12
         };
+
 
         const esc = s =>
             String(s).replace(
@@ -751,10 +821,14 @@
                 }[c])
             );
 
-        const $ = id => document.getElementById(id);
+
+        const $ = id =>
+            document.getElementById(id);
+
 
         const has = (t, q) =>
             t.toLowerCase().includes(q.trim().toLowerCase());
+
 
         const icon = p =>
             `<svg viewBox="0 0 24 24">${p}</svg>`;
@@ -770,21 +844,22 @@
                 R = 6,
                 iw = W - L - R,
                 ih = H - T - B,
-                max =
-                    Math.ceil(
-                        Math.max(
-                            ...d.flatMap(x => [
-                                x.members,
-                                x.subs
-                            ])
-                        ) / 50
-                    ) * 50;
+                max = Math.ceil(
+                    Math.max(
+                        ...d.flatMap(x => [
+                            x.members,
+                            x.subs
+                        ])
+                    ) / 50
+                ) * 50;
 
             const X = i =>
                 L +
-                (d.length > 1
-                    ? i * iw / (d.length - 1)
-                    : iw / 2);
+                (
+                    d.length > 1
+                        ? i * iw / (d.length - 1)
+                        : iw / 2
+                );
 
             const Y = v =>
                 T + ih - v / max * ih;
@@ -825,7 +900,9 @@
                     <text
                         x="${L - 6}"
                         y="${y + 3}"
-                        text-anchor="end">${v}</text>
+                        text-anchor="end">
+                        ${v}
+                    </text>
                 `;
             }
 
@@ -837,13 +914,9 @@
                             cy="${Y(x[k])}"
                             r="6"
                             fill="transparent">
-
                             <title>
-                                ${x.m} ·
-                                ${k === "subs" ? "Submissions" : "Members"}:
-                                ${x[k]}
+                                ${x.m} · ${k === "subs" ? "Submissions" : "Members"}: ${x[k]}
                             </title>
-
                         </circle>`
                 ).join("");
 
@@ -861,7 +934,9 @@
                             `<text
                                 x="${X(i)}"
                                 y="${H - 6}"
-                                text-anchor="middle">${x.m}</text>`
+                                text-anchor="middle">
+                                ${x.m}
+                            </text>`
                     ).join("")}
 
                     ${fill("members", "#a855f7", "gm")}
@@ -883,10 +958,9 @@
                 B = 22,
                 T = 8,
                 ih = H - T - B,
-                max =
-                    Math.ceil(
-                        Math.max(...d.map(x => x.v)) / 50
-                    ) * 50,
+                max = Math.ceil(
+                    Math.max(...d.map(x => x.v)) / 50
+                ) * 50,
                 bw = (W - L) / d.length;
 
             let s = "";
@@ -907,7 +981,9 @@
                     <text
                         x="${L - 6}"
                         y="${y + 3}"
-                        text-anchor="end">${v}</text>
+                        text-anchor="end">
+                        ${v}
+                    </text>
                 `;
             }
 
@@ -979,9 +1055,11 @@
 
             const g = GROWTH.slice(-S.range);
 
-            const tot = GROWTH.at(-1).members;
+            const tot =
+                GROWTH.at(-1).members;
 
-            const prev = GROWTH.at(-4).members;
+            const prev =
+                GROWTH.at(-4).members;
 
             const ch =
                 ((tot - prev) / prev * 100).toFixed(1);
@@ -1017,9 +1095,7 @@
                         <div
                             class="ic"
                             style="background:${bg};color:${col}">
-
                             ${icon(ic)}
-
                         </div>
 
                     </div>
@@ -1050,6 +1126,7 @@
 
                 </div>
 
+
                 <div class="card">
 
                     <div class="top">
@@ -1068,23 +1145,18 @@
 
                         <div class="rng">
 
-                            ${
-                                [
-                                    ["3M", 3],
-                                    ["6M", 6],
-                                    ["1Y", 12]
-                                ]
-                                .map(
-                                    ([l, n]) =>
-                                        `
-                                        <button
-                                            class="mono ${S.range === n ? "on" : ""}"
-                                            data-r="${n}">
-                                            ${l}
-                                        </button>
-                                        `
-                                ).join("")
-                            }
+                            ${[
+                                ["3M", 3],
+                                ["6M", 6],
+                                ["1Y", 12]
+                            ].map(
+                                ([l, n]) =>
+                                    `<button
+                                        class="mono ${S.range === n ? "on" : ""}"
+                                        data-r="${n}">
+                                        ${l}
+                                    </button>`
+                            ).join("")}
 
                         </div>
 
@@ -1107,6 +1179,7 @@
                     ${area(g)}
 
                 </div>
+
 
                 <div class="grid g2">
 
@@ -1131,6 +1204,7 @@
 
                     </div>
 
+
                     <div class="card">
 
                         <h3 class="disp">
@@ -1143,51 +1217,51 @@
 
                         <div class="act">
 
-                            ${
-                                ACT.map(
-                                    a =>
-                                        `
-                                        <div class="a">
+                            ${ACT.map(
+                                a =>
+                                    `
+                                    <div class="a">
 
-                                            <div
-                                                class="ic"
-                                                style="
-                                                    background:${AI[a.type]}22;
-                                                    color:${AI[a.type]}
-                                                ">
+                                        <div
+                                            class="ic"
+                                            style="
+                                                background:${AI[a.type]}22;
+                                                color:${AI[a.type]}
+                                            ">
 
-                                                ${icon(
-                                                    '<circle cx="12" cy="12" r="4"/>'
-                                                )}
-
-                                            </div>
-
-                                            <div>
-
-                                                <p>
-                                                    <b>
-                                                        ${esc(a.user)}
-                                                    </b>
-
-                                                    <span>
-                                                        ${a.action}
-                                                    </span>
-
-                                                    <em>
-                                                        ${esc(a.subject)}
-                                                    </em>
-                                                </p>
-
-                                                <small class="mono">
-                                                    ${a.time}
-                                                </small>
-
-                                            </div>
+                                            ${icon(
+                                                '<circle cx="12" cy="12" r="4"/>'
+                                            )}
 
                                         </div>
-                                        `
-                                ).join("")
-                            }
+
+                                        <div>
+
+                                            <p>
+
+                                                <b>
+                                                    ${esc(a.user)}
+                                                </b>
+
+                                                <span>
+                                                    ${a.action}
+                                                </span>
+
+                                                <em>
+                                                    ${esc(a.subject)}
+                                                </em>
+
+                                            </p>
+
+                                            <small class="mono">
+                                                ${a.time}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+                                    `
+                            ).join("")}
 
                         </div>
 
@@ -1210,9 +1284,7 @@
 
             const r =
                 Object.entries(m)
-                    .filter(
-                        ([n]) => has(n, S.q)
-                    );
+                    .filter(([n]) => has(n, S.q));
 
             return `
                 <div class="card list">
@@ -1220,9 +1292,7 @@
                     <h3
                         class="disp"
                         style="margin-bottom:12px">
-
                         PROJECT LEADS
-
                     </h3>
 
                     ${
@@ -1243,6 +1313,7 @@
                                     </div>
                                     `
                             ).join("")
+
                             : `
                                 <div class="empty">
                                     No members match your search.
@@ -1273,9 +1344,7 @@
                     <h3
                         class="disp"
                         style="margin-bottom:12px">
-
                         SUBMITTED REPORTS
-
                     </h3>
 
                     ${
@@ -1296,6 +1365,7 @@
                                     </div>
                                     `
                             ).join("")
+
                             : `
                                 <div class="empty">
                                     No reports match your search.
@@ -1368,6 +1438,8 @@
         }
 
 
+        /* ================= NAVIGATION ================= */
+
         $("nav").onclick = e => {
 
             const b =
@@ -1377,7 +1449,9 @@
 
                 S.tab = b.dataset.t;
 
-                $("side").classList.remove("open");
+                $("side")
+                    .classList
+                    .remove("open");
 
                 render();
             }
@@ -1391,7 +1465,8 @@
 
             if (b) {
 
-                S.range = +b.dataset.r;
+                S.range =
+                    +b.dataset.r;
 
                 render();
             }
@@ -1400,7 +1475,8 @@
 
         $("q").oninput = e => {
 
-            S.q = e.target.value;
+            S.q =
+                e.target.value;
 
             const y =
                 $("main").scrollTop;
@@ -1419,6 +1495,8 @@
             $("side").classList.remove("open");
 
 
+        /* ================= CLOCK ================= */
+
         updateClock();
 
         setInterval(
@@ -1426,238 +1504,98 @@
             1000
         );
 
+
+        /* ================= INITIAL RENDER ================= */
+
         render();
 
     </script>
 
 
-    <!-- ================= AUTH GUARD ================= -->
+    <!-- ================= SUPABASE AUTH ================= -->
 
     <script>
 
-        /*
-         * LOGIN PAGE
-         *
-         * Your login file is index.html
-         */
-        const LOGIN_PAGE = "index.html";
-
-
-        /*
-         * SUPABASE CLIENT
-         */
-        const supabaseClient =
+        const supabase =
             window.supabase.createClient(
-
                 "https://guhwlwhdssycjpobcmfk.supabase.co",
-
                 "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
-
             );
 
 
-        /*
-         * SHOW USER INFORMATION
-         */
-        function showUser(user) {
+        /* ================= CHECK LOGIN ================= */
 
-            const email =
-                user.email || "";
-
-            const name =
-                (
-                    user.user_metadata &&
-                    (
-                        user.user_metadata.full_name ||
-                        user.user_metadata.name
-                    )
-                )
-                ||
-                email.split("@")[0]
-                ||
-                "User";
-
-
-            document.getElementById(
-                "userName"
-            ).textContent = name;
-
-
-            document.getElementById(
-                "userEmail"
-            ).textContent = email;
-
-
-            document.getElementById(
-                "userInitials"
-            ).textContent =
-                name
-                    .slice(0, 2)
-                    .toUpperCase();
-        }
-
-
-        /*
-         * CHECK LOGIN
-         *
-         * If there is no active session,
-         * immediately return to index.html.
-         */
         async function checkLogin() {
 
-            try {
-
-                const {
-                    data: {
-                        session
-                    },
-                    error
-                } =
-                    await supabaseClient
-                        .auth
-                        .getSession();
+            const {
+                data: { user },
+                error
+            } =
+                await supabase.auth.getUser();
 
 
-                if (
-                    error ||
-                    !session
-                ) {
-
-                    window.location.replace(
-                        LOGIN_PAGE
-                    );
-
-                    return;
-                }
-
-
-                console.log(
-                    "Logged in as:",
-                    session.user.email
-                );
-
-
-                showUser(
-                    session.user
-                );
-
-
-            } catch (err) {
-
-                console.error(
-                    "Authentication check failed:",
-                    err
-                );
+            if (error || !user) {
 
                 window.location.replace(
-                    LOGIN_PAGE
+                    "index.html"
                 );
+
+                return;
             }
+
+
+            console.log(
+                "Logged in as:",
+                user.email
+            );
+
+
+            /* Display logged-in user */
+
+            const email =
+                user.email || "Unknown";
+
+            const name =
+                user.user_metadata?.full_name ||
+                user.user_metadata?.name ||
+                "Admin User";
+
+            $("userName").textContent =
+                name;
+
+            $("userEmail").textContent =
+                email;
+
+
+            /* Create initials */
+
+            const initials =
+                name
+                    .split(" ")
+                    .filter(Boolean)
+                    .map(word => word[0])
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase();
+
+            $("userInitials").textContent =
+                initials || "AD";
         }
 
 
-        /*
-         * LISTEN FOR AUTH CHANGES
-         *
-         * If the user logs out,
-         * return to index.html.
-         */
-        supabaseClient.auth.onAuthStateChange(
-            (event, session) => {
+        /* ================= LOGOUT ================= */
 
-                console.log(
-                    "Auth event:",
-                    event
-                );
-
-
-                if (
-                    event === "SIGNED_OUT"
-                ) {
-
-                    window.location.replace(
-                        LOGIN_PAGE
-                    );
-
-                    return;
-                }
-
-
-                /*
-                 * If there is no session,
-                 * also return to login.
-                 */
-                if (!session) {
-
-                    window.location.replace(
-                        LOGIN_PAGE
-                    );
-
-                    return;
-                }
-
-
-                /*
-                 * Update user information
-                 * after sign-in/session refresh.
-                 */
-                if (
-                    event === "SIGNED_IN" ||
-                    event === "INITIAL_SESSION" ||
-                    event === "USER_UPDATED"
-                ) {
-
-                    showUser(
-                        session.user
-                    );
-                }
-
-            }
-        );
-
-
-        /*
-         * LOGOUT BUTTON
-         */
-        document
-            .getElementById("logout")
-            .onclick = async () => {
-
-                const logoutButton =
-                    document.getElementById(
-                        "logout"
-                    );
-
-
-                logoutButton.disabled =
-                    true;
-
-                logoutButton.textContent =
-                    "Logging out...";
-
+        $("logout").addEventListener(
+            "click",
+            async () => {
 
                 const {
                     error
                 } =
-                    await supabaseClient
-                        .auth
-                        .signOut({
-                            scope: "local"
-                        });
+                    await supabase.auth.signOut();
 
 
                 if (error) {
-
-                    console.error(
-                        "Logout failed:",
-                        error
-                    );
-
-                    logoutButton.disabled =
-                        false;
-
-                    logoutButton.textContent =
-                        "Logout";
 
                     alert(
                         "Logout failed: " +
@@ -1668,20 +1606,15 @@
                 }
 
 
-                /*
-                 * SIGNED_OUT will normally
-                 * perform this redirect,
-                 * but this guarantees it.
-                 */
                 window.location.replace(
-                    LOGIN_PAGE
+                    "index.html"
                 );
-            };
+            }
+        );
 
 
-        /*
-         * START AUTH CHECK
-         */
+        /* ================= START AUTH CHECK ================= */
+
         checkLogin();
 
     </script>
