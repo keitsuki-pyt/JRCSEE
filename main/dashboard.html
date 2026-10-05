@@ -1,16 +1,21 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JRCSEE</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" type="image/x-icon" href="JRCC.png">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+
     <style>
         :root {
             --bg: #05030a;
@@ -128,7 +133,11 @@
         }
 
         nav button.on {
-            background: linear-gradient(90deg, rgba(168, 85, 247, .32) 0%, rgba(243, 232, 255, .12) 100%);
+            background: linear-gradient(
+                90deg,
+                rgba(168, 85, 247, .32) 0%,
+                rgba(243, 232, 255, .12) 100%
+            );
             color: #ffffff;
             border: 1px solid rgba(233, 213, 255, .4)
         }
@@ -313,7 +322,11 @@
         }
 
         .card {
-            background: linear-gradient(135deg, rgba(38, 18, 64, 0.65) 0%, rgba(10, 5, 18, 0.85) 100%);
+            background: linear-gradient(
+                135deg,
+                rgba(38, 18, 64, 0.65) 0%,
+                rgba(10, 5, 18, 0.85) 100%
+            );
             border: 1px solid var(--line);
             border-radius: 12px;
             padding: 20px;
@@ -501,6 +514,7 @@
         }
 
         @media(max-width:767px) {
+
             aside {
                 position: fixed;
                 inset: 0 auto 0 0;
@@ -536,171 +550,1140 @@
 </head>
 
 <body>
+
     <div class="app">
+
         <aside id="side">
+
             <div class="brand">
                 <h1 class="disp">JRCSEE</h1>
                 <p class="mono">Face Recognition Web</p>
             </div>
+
             <nav id="nav"></nav>
+
             <div class="user">
+
                 <div class="av mono" id="userInitials">..</div>
-                <div><b id="userName">Loading...</b><small class="mono" id="userEmail"></small></div>
-                <button class="logout mono" id="logout" title="Log out">Logout</button>
+
+                <div>
+                    <b id="userName">Loading...</b>
+                    <small class="mono" id="userEmail"></small>
+                </div>
+
+                <button class="logout mono" id="logout" title="Log out">
+                    Logout
+                </button>
+
             </div>
+
         </aside>
+
         <div class="veil" id="veil"></div>
+
         <div class="col">
+
             <header>
-                <button class="menu ic" id="menu" aria-label="Open menu"><svg viewBox="0 0 24 24" width="20" height="20"
-                        stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round">
+
+                <button class="menu ic" id="menu" aria-label="Open menu">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-width="2"
+                        stroke-linecap="round">
+
                         <path d="M4 6h16M4 12h16M4 18h16" />
-                    </svg></button>
+
+                    </svg>
+
+                </button>
+
                 <div class="grow">
+
                     <h2 class="disp" id="title"></h2>
+
                     <div class="datetime mono">
                         <span id="date"></span>
                         <span id="time"></span>
                     </div>
+
                 </div>
-                <label class="search ic"><svg viewBox="0 0 24 24" stroke-linecap="round">
+
+                <label class="search ic">
+
+                    <svg viewBox="0 0 24 24" stroke-linecap="round">
+
                         <circle cx="11" cy="11" r="8" />
                         <path d="m21 21-4.3-4.3" />
-                    </svg><input id="q" placeholder="Search..." aria-label="Search"></label>
-                <button class="bell ic" aria-label="Notifications"><svg viewBox="0 0 24 24">
-                        <path
-                            d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.500-1.400 6-2.700 7.300" />
-                    </svg></button>
+
+                    </svg>
+
+                    <input
+                        id="q"
+                        placeholder="Search..."
+                        aria-label="Search">
+
+                </label>
+
+                <button
+                    class="bell ic"
+                    aria-label="Notifications">
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.500-1.400 6-2.700 7.300" />
+
+                    </svg>
+
+                </button>
+
             </header>
+
             <main id="main"></main>
+
         </div>
+
     </div>
 
+
     <!-- ================= DASHBOARD LOGIC ================= -->
+
     <script>
-        const GROWTH = [["Jan", 120, 45], ["Feb", 134, 52], ["Mar", 148, 61], ["Apr", 165, 55], ["May", 180, 78], ["Jun", 192, 90], ["Jul", 205, 83], ["Aug", 218, 95], ["Sep", 234, 102], ["Oct", 251, 118], ["Nov", 267, 125], ["Dec", 284, 140]].map(([m, a, b]) => ({ m, members: a, subs: b }));
-        const ACT = [[1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"], [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"], [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"], [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"], [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"], [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"], [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]].map(([id, user, action, subject, time, type]) => ({ id, user, action, subject, time, type }));
-        const PROJ = [["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"], ["Neural Interface Lab", "Sciences", "Prof. M. Reyes", "Active", 45, 5, "Jun 2027"], ["Renewable Energy Grid Study", "Engineering", "Dr. K. Obi", "Active", 88, 12, "Feb 2027"], ["Biomedical Sensor Array", "Sciences", "J. Okonkwo", "Pending", 21, 4, "Sep 2027"], ["Climate Modeling Framework", "Research", "Dr. S. Brennan", "Active", 61, 7, "Apr 2027"], ["Advanced Materials Lab", "Engineering", "Prof. L. Wei", "Completed", 100, 9, "Dec 2026"], ["Educational AI Platform", "Education", "Dr. A. Nakamura", "On Hold", 34, 3, "Aug 2027"]].map(([name, cat, lead, status, prog, team, due]) => ({ name, cat, lead, status, prog, team, due }));
-        const AI = { report: "#e9d5ff", member: "#a855f7", milestone: "#facc15", event: "#f3e8ff", update: "#a69bbd" };
-        const NAV = [["dashboard", "Dashboard", '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'], ["members", "Members", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'], ["reports", "Reports", '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>']];
-        const S = { tab: "dashboard", q: "", range: 12 };
-        const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+        const GROWTH = [
+            ["Jan", 120, 45],
+            ["Feb", 134, 52],
+            ["Mar", 148, 61],
+            ["Apr", 165, 55],
+            ["May", 180, 78],
+            ["Jun", 192, 90],
+            ["Jul", 205, 83],
+            ["Aug", 218, 95],
+            ["Sep", 234, 102],
+            ["Oct", 251, 118],
+            ["Nov", 267, 125],
+            ["Dec", 284, 140]
+        ].map(([m, a, b]) => ({
+            m,
+            members: a,
+            subs: b
+        }));
+
+        const ACT = [
+            [1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"],
+            [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"],
+            [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"],
+            [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"],
+            [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"],
+            [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"],
+            [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]
+        ].map(([id, user, action, subject, time, type]) => ({
+            id,
+            user,
+            action,
+            subject,
+            time,
+            type
+        }));
+
+        const PROJ = [
+            ["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"],
+            ["Neural Interface Lab", "Sciences", "Prof. M. Reyes", "Active", 45, 5, "Jun 2027"],
+            ["Renewable Energy Grid Study", "Engineering", "Dr. K. Obi", "Active", 88, 12, "Feb 2027"],
+            ["Biomedical Sensor Array", "Sciences", "J. Okonkwo", "Pending", 21, 4, "Sep 2027"],
+            ["Climate Modeling Framework", "Research", "Dr. S. Brennan", "Active", 61, 7, "Apr 2027"],
+            ["Advanced Materials Lab", "Engineering", "Prof. L. Wei", "Completed", 100, 9, "Dec 2026"],
+            ["Educational AI Platform", "Education", "Dr. A. Nakamura", "On Hold", 34, 3, "Aug 2027"]
+        ].map(([name, cat, lead, status, prog, team, due]) => ({
+            name,
+            cat,
+            lead,
+            status,
+            prog,
+            team,
+            due
+        }));
+
+        const AI = {
+            report: "#e9d5ff",
+            member: "#a855f7",
+            milestone: "#facc15",
+            event: "#f3e8ff",
+            update: "#a69bbd"
+        };
+
+        const NAV = [
+            [
+                "dashboard",
+                "Dashboard",
+                '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'
+            ],
+            [
+                "members",
+                "Members",
+                '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'
+            ],
+            [
+                "reports",
+                "Reports",
+                '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>'
+            ]
+        ];
+
+        const S = {
+            tab: "dashboard",
+            q: "",
+            range: 12
+        };
+
+        const esc = s =>
+            String(s).replace(
+                /[&<>"]/g,
+                c => ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;"
+                }[c])
+            );
+
         const $ = id => document.getElementById(id);
-        const has = (t, q) => t.toLowerCase().includes(q.trim().toLowerCase());
-        const icon = p => `<svg viewBox="0 0 24 24">${p}</svg>`;
+
+        const has = (t, q) =>
+            t.toLowerCase().includes(q.trim().toLowerCase());
+
+        const icon = p =>
+            `<svg viewBox="0 0 24 24">${p}</svg>`;
+
 
         function area(d) {
-            const W = 600, H = 210, L = 34, B = 24, T = 8, R = 6, iw = W - L - R, ih = H - T - B, max = Math.ceil(Math.max(...d.flatMap(x => [x.members, x.subs])) / 50) * 50;
-            const X = i => L + (d.length > 1 ? i * iw / (d.length - 1) : iw / 2), Y = v => T + ih - v / max * ih;
-            const line = k => d.map((x, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(x[k]).toFixed(1)}`).join("");
-            const fill = (k, c, id) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stop-color="${c}" stop-opacity=".4"/><stop offset="95%" stop-color="${c}" stop-opacity="0"/></linearGradient><path d="${line(k)}L${X(d.length - 1)},${T + ih}L${X(0)},${T + ih}Z" fill="url(#${id})"/><path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2"/>`;
-            let g = ""; for (let i = 0; i <= 4; i++) { const v = max * i / 4, y = Y(v); g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.04)"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${v}</text>` }
-            const dots = k => d.map((x, i) => `<circle cx="${X(i)}" cy="${Y(x[k])}" r="6" fill="transparent"><title>${x.m} · ${k === "subs" ? "Submissions" : "Members"}: ${x[k]}</title></circle>`).join("");
-            return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Members and submissions over time">${g}${d.map((x, i) => `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${x.m}</text>`).join("")}${fill("members", "#a855f7", "gm")}${fill("subs", "#f3e8ff", "gs")}${dots("members")}${dots("subs")}</svg>`
+
+            const W = 600,
+                H = 210,
+                L = 34,
+                B = 24,
+                T = 8,
+                R = 6,
+                iw = W - L - R,
+                ih = H - T - B,
+                max =
+                    Math.ceil(
+                        Math.max(
+                            ...d.flatMap(x => [
+                                x.members,
+                                x.subs
+                            ])
+                        ) / 50
+                    ) * 50;
+
+            const X = i =>
+                L +
+                (d.length > 1
+                    ? i * iw / (d.length - 1)
+                    : iw / 2);
+
+            const Y = v =>
+                T + ih - v / max * ih;
+
+            const line = k =>
+                d.map(
+                    (x, i) =>
+                        `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(x[k]).toFixed(1)}`
+                ).join("");
+
+            const fill = (k, c, id) =>
+                `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stop-color="${c}" stop-opacity=".4"/>
+                    <stop offset="95%" stop-color="${c}" stop-opacity="0"/>
+                </linearGradient>
+                <path d="${line(k)}L${X(d.length - 1)},${T + ih}L${X(0)},${T + ih}Z"
+                    fill="url(#${id})"/>
+                <path d="${line(k)}"
+                    fill="none"
+                    stroke="${c}"
+                    stroke-width="2"/>`;
+
+            let g = "";
+
+            for (let i = 0; i <= 4; i++) {
+
+                const v = max * i / 4;
+                const y = Y(v);
+
+                g += `
+                    <line
+                        x1="${L}"
+                        x2="${W - R}"
+                        y1="${y}"
+                        y2="${y}"
+                        stroke="rgba(255,255,255,.04)"/>
+
+                    <text
+                        x="${L - 6}"
+                        y="${y + 3}"
+                        text-anchor="end">${v}</text>
+                `;
+            }
+
+            const dots = k =>
+                d.map(
+                    (x, i) =>
+                        `<circle
+                            cx="${X(i)}"
+                            cy="${Y(x[k])}"
+                            r="6"
+                            fill="transparent">
+
+                            <title>
+                                ${x.m} ·
+                                ${k === "subs" ? "Submissions" : "Members"}:
+                                ${x[k]}
+                            </title>
+
+                        </circle>`
+                ).join("");
+
+            return `
+                <svg
+                    class="ch"
+                    viewBox="0 0 ${W} ${H}"
+                    role="img"
+                    aria-label="Members and submissions over time">
+
+                    ${g}
+
+                    ${d.map(
+                        (x, i) =>
+                            `<text
+                                x="${X(i)}"
+                                y="${H - 6}"
+                                text-anchor="middle">${x.m}</text>`
+                    ).join("")}
+
+                    ${fill("members", "#a855f7", "gm")}
+                    ${fill("subs", "#f3e8ff", "gs")}
+
+                    ${dots("members")}
+                    ${dots("subs")}
+
+                </svg>
+            `;
         }
+
 
         function bars(d) {
-            const W = 400, H = 190, L = 30, B = 22, T = 8, ih = H - T - B, max = Math.ceil(Math.max(...d.map(x => x.v)) / 50) * 50, bw = (W - L) / d.length; let s = "";
-            for (let i = 0; i <= 4; i++) { const v = max * i / 4, y = T + ih - v / max * ih; s += `<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.04)"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${v}</text>` }
-            s += `<defs><linearGradient id="barG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3e8ff"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs>`;
-            d.forEach((x, i) => { const h = x.v / max * ih, cx = L + bw * i + bw / 2; s += `<rect x="${cx - 12}" y="${T + ih - h}" width="24" height="${h}" rx="4" fill="url(#barG)"><title>${x.m}: ${x.v}</title></rect><text x="${cx}" y="${H - 6}" text-anchor="middle">${x.m}</text>` });
-            return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly reports">${s}</svg>`
+
+            const W = 400,
+                H = 190,
+                L = 30,
+                B = 22,
+                T = 8,
+                ih = H - T - B,
+                max =
+                    Math.ceil(
+                        Math.max(...d.map(x => x.v)) / 50
+                    ) * 50,
+                bw = (W - L) / d.length;
+
+            let s = "";
+
+            for (let i = 0; i <= 4; i++) {
+
+                const v = max * i / 4;
+                const y = T + ih - v / max * ih;
+
+                s += `
+                    <line
+                        x1="${L}"
+                        x2="${W}"
+                        y1="${y}"
+                        y2="${y}"
+                        stroke="rgba(255,255,255,.04)"/>
+
+                    <text
+                        x="${L - 6}"
+                        y="${y + 3}"
+                        text-anchor="end">${v}</text>
+                `;
+            }
+
+            s += `
+                <defs>
+                    <linearGradient
+                        id="barG"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1">
+
+                        <stop
+                            offset="0%"
+                            stop-color="#f3e8ff"/>
+
+                        <stop
+                            offset="100%"
+                            stop-color="#a855f7"/>
+
+                    </linearGradient>
+                </defs>
+            `;
+
+            d.forEach((x, i) => {
+
+                const h = x.v / max * ih;
+                const cx = L + bw * i + bw / 2;
+
+                s += `
+                    <rect
+                        x="${cx - 12}"
+                        y="${T + ih - h}"
+                        width="24"
+                        height="${h}"
+                        rx="4"
+                        fill="url(#barG)">
+
+                        <title>
+                            ${x.m}: ${x.v}
+                        </title>
+
+                    </rect>
+
+                    <text
+                        x="${cx}"
+                        y="${H - 6}"
+                        text-anchor="middle">
+                        ${x.m}
+                    </text>
+                `;
+            });
+
+            return `
+                <svg
+                    class="ch"
+                    viewBox="0 0 ${W} ${H}"
+                    role="img"
+                    aria-label="Monthly reports">
+
+                    ${s}
+
+                </svg>
+            `;
         }
+
 
         function dash() {
-            const g = GROWTH.slice(-S.range), tot = GROWTH.at(-1).members, prev = GROWTH.at(-4).members, ch = ((tot - prev) / prev * 100).toFixed(1);
-            const act = PROJ.filter(p => p.status === "Active").reduce((n, p) => n + p.team, 0);
-            const stat = (l, v, c, col, bg, ic) => `<div class="card stat"><span class="chg mono">▲ ${c}%</span><div class="l mono">${l}</div><div class="v mono">${v}</div><div class="sub mono" style="margin:0">vs last quarter</div><div class="ic" style="background:${bg};color:${col}">${icon(ic)}</div></div>`;
+
+            const g = GROWTH.slice(-S.range);
+
+            const tot = GROWTH.at(-1).members;
+
+            const prev = GROWTH.at(-4).members;
+
+            const ch =
+                ((tot - prev) / prev * 100).toFixed(1);
+
+            const act =
+                PROJ
+                    .filter(p => p.status === "Active")
+                    .reduce((n, p) => n + p.team, 0);
+
+            const stat =
+                (l, v, c, col, bg, ic) =>
+                    `
+                    <div class="card stat">
+
+                        <span class="chg mono">
+                            ▲ ${c}%
+                        </span>
+
+                        <div class="l mono">
+                            ${l}
+                        </div>
+
+                        <div class="v mono">
+                            ${v}
+                        </div>
+
+                        <div
+                            class="sub mono"
+                            style="margin:0">
+                            vs last quarter
+                        </div>
+
+                        <div
+                            class="ic"
+                            style="background:${bg};color:${col}">
+
+                            ${icon(ic)}
+
+                        </div>
+
+                    </div>
+                    `;
+
             const u = NAV[1][2];
-            return `<div class="grid g2">${stat("Total members", tot.toLocaleString(), ch, "#e9d5ff", "rgba(168,85,247,.2)", u)}${stat("Members on active projects", act.toLocaleString(), "6.1", "#f3e8ff", "rgba(243,232,255,.18)", u)}</div>
-<div class="card"><div class="top"><div><h3 class="disp">ACTIVITY OVERVIEW</h3><div class="sub mono">Member growth &amp; report submissions</div></div><div class="rng">${[["3M", 3], ["6M", 6], ["1Y", 12]].map(([l, n]) => `<button class="mono ${S.range === n ? "on" : ""}" data-r="${n}">${l}</button>`).join("")}</div></div><div class="leg mono"><span><i style="background:#a855f7"></i>Members</span><span><i style="background:#f3e8ff"></i>Submissions</span></div>${area(g)}</div>
-<div class="grid g2"><div class="card"><h3 class="disp">MONTHLY REPORTS</h3><div class="sub mono">Last 6 months</div>${bars(GROWTH.slice(-6).map(x => ({ m: x.m, v: x.subs })))}</div>
-<div class="card"><h3 class="disp">RECENT ACTIVITY</h3><div class="sub mono">Latest updates</div><div class="act">${ACT.map(a => `<div class="a"><div class="ic" style="background:${AI[a.type]}22;color:${AI[a.type]}">${icon('<circle cx="12" cy="12" r="4"/>')}</div><div><p><b>${esc(a.user)}</b> <span>${a.action}</span> <em>${esc(a.subject)}</em></p><small class="mono">${a.time}</small></div></div>`).join("")}</div></div></div>`
+
+            return `
+                <div class="grid g2">
+
+                    ${stat(
+                        "Total members",
+                        tot.toLocaleString(),
+                        ch,
+                        "#e9d5ff",
+                        "rgba(168,85,247,.2)",
+                        u
+                    )}
+
+                    ${stat(
+                        "Members on active projects",
+                        act.toLocaleString(),
+                        "6.1",
+                        "#f3e8ff",
+                        "rgba(243,232,255,.18)",
+                        u
+                    )}
+
+                </div>
+
+                <div class="card">
+
+                    <div class="top">
+
+                        <div>
+
+                            <h3 class="disp">
+                                ACTIVITY OVERVIEW
+                            </h3>
+
+                            <div class="sub mono">
+                                Member growth &amp; report submissions
+                            </div>
+
+                        </div>
+
+                        <div class="rng">
+
+                            ${
+                                [
+                                    ["3M", 3],
+                                    ["6M", 6],
+                                    ["1Y", 12]
+                                ]
+                                .map(
+                                    ([l, n]) =>
+                                        `
+                                        <button
+                                            class="mono ${S.range === n ? "on" : ""}"
+                                            data-r="${n}">
+                                            ${l}
+                                        </button>
+                                        `
+                                ).join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="leg mono">
+
+                        <span>
+                            <i style="background:#a855f7"></i>
+                            Members
+                        </span>
+
+                        <span>
+                            <i style="background:#f3e8ff"></i>
+                            Submissions
+                        </span>
+
+                    </div>
+
+                    ${area(g)}
+
+                </div>
+
+                <div class="grid g2">
+
+                    <div class="card">
+
+                        <h3 class="disp">
+                            MONTHLY REPORTS
+                        </h3>
+
+                        <div class="sub mono">
+                            Last 6 months
+                        </div>
+
+                        ${bars(
+                            GROWTH
+                                .slice(-6)
+                                .map(x => ({
+                                    m: x.m,
+                                    v: x.subs
+                                }))
+                        )}
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3 class="disp">
+                            RECENT ACTIVITY
+                        </h3>
+
+                        <div class="sub mono">
+                            Latest updates
+                        </div>
+
+                        <div class="act">
+
+                            ${
+                                ACT.map(
+                                    a =>
+                                        `
+                                        <div class="a">
+
+                                            <div
+                                                class="ic"
+                                                style="
+                                                    background:${AI[a.type]}22;
+                                                    color:${AI[a.type]}
+                                                ">
+
+                                                ${icon(
+                                                    '<circle cx="12" cy="12" r="4"/>'
+                                                )}
+
+                                            </div>
+
+                                            <div>
+
+                                                <p>
+                                                    <b>
+                                                        ${esc(a.user)}
+                                                    </b>
+
+                                                    <span>
+                                                        ${a.action}
+                                                    </span>
+
+                                                    <em>
+                                                        ${esc(a.subject)}
+                                                    </em>
+                                                </p>
+
+                                                <small class="mono">
+                                                    ${a.time}
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+                                        `
+                                ).join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
         }
+
 
         function members() {
-            const m = {}; PROJ.forEach(p => (m[p.lead] = m[p.lead] || []).push(p.name));
-            const r = Object.entries(m).filter(([n]) => has(n, S.q));
-            return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">PROJECT LEADS</h3>${r.length ? r.map(([n, l]) => `<div class="row"><span>${esc(n)}</span><span>${esc(l.join(", "))}</span></div>`).join("") : '<div class="empty">No members match your search.</div>'}</div>`
+
+            const m = {};
+
+            PROJ.forEach(
+                p =>
+                    (m[p.lead] = m[p.lead] || [])
+                        .push(p.name)
+            );
+
+            const r =
+                Object.entries(m)
+                    .filter(
+                        ([n]) => has(n, S.q)
+                    );
+
+            return `
+                <div class="card list">
+
+                    <h3
+                        class="disp"
+                        style="margin-bottom:12px">
+
+                        PROJECT LEADS
+
+                    </h3>
+
+                    ${
+                        r.length
+                            ? r.map(
+                                ([n, l]) =>
+                                    `
+                                    <div class="row">
+
+                                        <span>
+                                            ${esc(n)}
+                                        </span>
+
+                                        <span>
+                                            ${esc(l.join(", "))}
+                                        </span>
+
+                                    </div>
+                                    `
+                            ).join("")
+                            : `
+                                <div class="empty">
+                                    No members match your search.
+                                </div>
+                            `
+                    }
+
+                </div>
+            `;
         }
+
 
         function reports() {
-            const r = ACT.filter(a => a.type === "report" && has(a.user + " " + a.subject, S.q));
-            return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">SUBMITTED REPORTS</h3>${r.length ? r.map(a => `<div class="row"><span>${esc(a.subject)}</span><span>${esc(a.user)} ·${a.time}</span></div>`).join("") : '<div class="empty">No reports match your search.</div>'}</div>`
+
+            const r =
+                ACT.filter(
+                    a =>
+                        a.type === "report" &&
+                        has(
+                            a.user + " " + a.subject,
+                            S.q
+                        )
+                );
+
+            return `
+                <div class="card list">
+
+                    <h3
+                        class="disp"
+                        style="margin-bottom:12px">
+
+                        SUBMITTED REPORTS
+
+                    </h3>
+
+                    ${
+                        r.length
+                            ? r.map(
+                                a =>
+                                    `
+                                    <div class="row">
+
+                                        <span>
+                                            ${esc(a.subject)}
+                                        </span>
+
+                                        <span>
+                                            ${esc(a.user)} · ${a.time}
+                                        </span>
+
+                                    </div>
+                                    `
+                            ).join("")
+                            : `
+                                <div class="empty">
+                                    No reports match your search.
+                                </div>
+                            `
+                    }
+
+                </div>
+            `;
         }
+
 
         function render() {
-            $("title").textContent = NAV.find(n => n[0] === S.tab)[1].toUpperCase();
-            $("nav").innerHTML = NAV.map(([id, l, p]) => `<button class="${S.tab === id ? "on" : ""}" data-t="${id}">${icon(p)}${l}</button>`).join("");
-            $("main").innerHTML = { dashboard: dash, members, reports }[S.tab]();
+
+            $("title").textContent =
+                NAV.find(
+                    n => n[0] === S.tab
+                )[1].toUpperCase();
+
+            $("nav").innerHTML =
+                NAV.map(
+                    ([id, l, p]) =>
+                        `
+                        <button
+                            class="${S.tab === id ? "on" : ""}"
+                            data-t="${id}">
+
+                            ${icon(p)}
+
+                            ${l}
+
+                        </button>
+                        `
+                ).join("");
+
+            $("main").innerHTML =
+                {
+                    dashboard: dash,
+                    members,
+                    reports
+                }[S.tab]();
         }
+
 
         function updateClock() {
+
             const now = new Date();
-            $("date").textContent = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-            $("time").textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+
+            $("date").textContent =
+                now.toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
+                    }
+                );
+
+            $("time").textContent =
+                now.toLocaleTimeString(
+                    "en-US",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true
+                    }
+                );
         }
 
-        $("nav").onclick = e => { const b = e.target.closest("[data-t]"); if (b) { S.tab = b.dataset.t; $("side").classList.remove("open"); render() } };
-        $("main").onclick = e => { const b = e.target.closest("[data-r]"); if (b) { S.range = +b.dataset.r; render() } };
-        $("q").oninput = e => { S.q = e.target.value; const y = $("main").scrollTop; render(); $("main").scrollTop = y };
-        $("menu").onclick = () => $("side").classList.add("open");
-        $("veil").onclick = () => $("side").classList.remove("open");
+
+        $("nav").onclick = e => {
+
+            const b =
+                e.target.closest("[data-t]");
+
+            if (b) {
+
+                S.tab = b.dataset.t;
+
+                $("side").classList.remove("open");
+
+                render();
+            }
+        };
+
+
+        $("main").onclick = e => {
+
+            const b =
+                e.target.closest("[data-r]");
+
+            if (b) {
+
+                S.range = +b.dataset.r;
+
+                render();
+            }
+        };
+
+
+        $("q").oninput = e => {
+
+            S.q = e.target.value;
+
+            const y =
+                $("main").scrollTop;
+
+            render();
+
+            $("main").scrollTop = y;
+        };
+
+
+        $("menu").onclick = () =>
+            $("side").classList.add("open");
+
+
+        $("veil").onclick = () =>
+            $("side").classList.remove("open");
+
+
         updateClock();
-        setInterval(updateClock, 1000);
-        render();
-    </script>
 
-    <!-- ================= AUTH GUARD ================= -->
-    <script>
-        // Page that holds your login form. Change this if your login file has a different name.
-        const LOGIN_PAGE = "login.html";
-
-        const supabaseClient = window.supabase.createClient(
-            "https://guhwlwhdssycjpobcmfk.supabase.co",
-            "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
+        setInterval(
+            updateClock,
+            1000
         );
 
+        render();
+
+    </script>
+
+
+    <!-- ================= AUTH GUARD ================= -->
+
+    <script>
+
+        /*
+         * LOGIN PAGE
+         *
+         * Your login file is index.html
+         */
+        const LOGIN_PAGE = "index.html";
+
+
+        /*
+         * SUPABASE CLIENT
+         */
+        const supabaseClient =
+            window.supabase.createClient(
+
+                "https://guhwlwhdssycjpobcmfk.supabase.co",
+
+                "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
+
+            );
+
+
+        /*
+         * SHOW USER INFORMATION
+         */
         function showUser(user) {
-            const email = user.email || "";
-            const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                || email.split("@")[0] || "User";
-            document.getElementById("userName").textContent = name;
-            document.getElementById("userEmail").textContent = email;
-            document.getElementById("userInitials").textContent = name.slice(0, 2).toUpperCase();
+
+            const email =
+                user.email || "";
+
+            const name =
+                (
+                    user.user_metadata &&
+                    (
+                        user.user_metadata.full_name ||
+                        user.user_metadata.name
+                    )
+                )
+                ||
+                email.split("@")[0]
+                ||
+                "User";
+
+
+            document.getElementById(
+                "userName"
+            ).textContent = name;
+
+
+            document.getElementById(
+                "userEmail"
+            ).textContent = email;
+
+
+            document.getElementById(
+                "userInitials"
+            ).textContent =
+                name
+                    .slice(0, 2)
+                    .toUpperCase();
         }
 
-        async function checkLogin() {
-            try {
-                // getSession reads the saved session, so it works right after login
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-                if (error || !session) {
-                    window.location.replace(LOGIN_PAGE);
+        /*
+         * CHECK LOGIN
+         *
+         * If there is no active session,
+         * immediately return to index.html.
+         */
+        async function checkLogin() {
+
+            try {
+
+                const {
+                    data: {
+                        session
+                    },
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .getSession();
+
+
+                if (
+                    error ||
+                    !session
+                ) {
+
+                    window.location.replace(
+                        LOGIN_PAGE
+                    );
+
                     return;
                 }
 
-                console.log("Logged in as:", session.user.email);
-                showUser(session.user);
+
+                console.log(
+                    "Logged in as:",
+                    session.user.email
+                );
+
+
+                showUser(
+                    session.user
+                );
+
+
             } catch (err) {
-                console.error("Auth check failed:", err);
-                window.location.replace(LOGIN_PAGE);
+
+                console.error(
+                    "Authentication check failed:",
+                    err
+                );
+
+                window.location.replace(
+                    LOGIN_PAGE
+                );
             }
         }
 
-        // Redirect if the user signs out (including from another tab)
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (event === "SIGNED_OUT" || !session) {
-                window.location.replace(LOGIN_PAGE);
+
+        /*
+         * LISTEN FOR AUTH CHANGES
+         *
+         * If the user logs out,
+         * return to index.html.
+         */
+        supabaseClient.auth.onAuthStateChange(
+            (event, session) => {
+
+                console.log(
+                    "Auth event:",
+                    event
+                );
+
+
+                if (
+                    event === "SIGNED_OUT"
+                ) {
+
+                    window.location.replace(
+                        LOGIN_PAGE
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * If there is no session,
+                 * also return to login.
+                 */
+                if (!session) {
+
+                    window.location.replace(
+                        LOGIN_PAGE
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Update user information
+                 * after sign-in/session refresh.
+                 */
+                if (
+                    event === "SIGNED_IN" ||
+                    event === "INITIAL_SESSION" ||
+                    event === "USER_UPDATED"
+                ) {
+
+                    showUser(
+                        session.user
+                    );
+                }
+
             }
-        });
+        );
 
-        document.getElementById("logout").onclick = async () => {
-            await supabaseClient.auth.signOut();
-            window.location.replace(LOGIN_PAGE);
-        };
 
+        /*
+         * LOGOUT BUTTON
+         */
+        document
+            .getElementById("logout")
+            .onclick = async () => {
+
+                const logoutButton =
+                    document.getElementById(
+                        "logout"
+                    );
+
+
+                logoutButton.disabled =
+                    true;
+
+                logoutButton.textContent =
+                    "Logging out...";
+
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .auth
+                        .signOut({
+                            scope: "local"
+                        });
+
+
+                if (error) {
+
+                    console.error(
+                        "Logout failed:",
+                        error
+                    );
+
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.textContent =
+                        "Logout";
+
+                    alert(
+                        "Logout failed: " +
+                        error.message
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * SIGNED_OUT will normally
+                 * perform this redirect,
+                 * but this guarantees it.
+                 */
+                window.location.replace(
+                    LOGIN_PAGE
+                );
+            };
+
+
+        /*
+         * START AUTH CHECK
+         */
         checkLogin();
+
     </script>
 
 </body>
