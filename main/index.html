@@ -326,6 +326,28 @@
             color: #77777d;
         }
 
+        /* Keep saved/autofilled credentials dark in Chromium browsers */
+        .input-box input,
+        .input-box input:focus,
+        .input-box input:-webkit-autofill,
+        .input-box input:-webkit-autofill:hover,
+        .input-box input:-webkit-autofill:focus,
+        .input-box input:-webkit-autofill:active {
+            color: #fff !important;
+            -webkit-text-fill-color: #fff !important;
+            caret-color: #fff;
+            color-scheme: dark;
+        }
+        .input-box input:-webkit-autofill,
+        .input-box input:-webkit-autofill:hover,
+        .input-box input:-webkit-autofill:focus,
+        .input-box input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #0b0712 inset !important;
+            box-shadow: 0 0 0 1000px #0b0712 inset !important;
+            transition: background-color 99999s ease-out 0s;
+            border-radius: 6px;
+        }
+
         .eye {
             font-size: 19px;
             cursor: pointer;
@@ -399,6 +421,109 @@
             transform: none;
         }
 
+        .login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .button-spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+        .login-btn.loading .button-spinner { display: inline-block; }
+        .login-btn.loading .button-label { letter-spacing: .03em; }
+
+        /* ================= INTRO + LOADING ================= */
+        .intro-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #05030a;
+            transition: opacity .65s ease, visibility .65s ease;
+        }
+        .intro-screen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        .intro-glow {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: rgba(112, 39, 233, .18);
+            filter: blur(70px);
+            animation: introPulse 1.8s ease-in-out infinite alternate;
+        }
+        .intro-logo {
+            position: relative;
+            width: 115px;
+            height: 115px;
+            object-fit: contain;
+            opacity: 0;
+            animation: introRise .75s .12s ease forwards;
+            filter: drop-shadow(0 0 22px rgba(116, 40, 255, .35));
+        }
+        .intro-brand {
+            position: relative;
+            margin-top: 12px;
+            font: 800 clamp(42px, 8vw, 64px)/1 "Barlow Condensed", sans-serif;
+            letter-spacing: .16em;
+            background: linear-gradient(110deg, #fff, #c8a8ff, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: 0;
+            animation: introRise .75s .28s ease forwards;
+        }
+        .intro-subtitle {
+            position: relative;
+            margin-top: 10px;
+            color: #a69bbd;
+            font-size: 10px;
+            letter-spacing: .28em;
+            opacity: 0;
+            animation: introRise .75s .42s ease forwards;
+        }
+        .intro-progress { position: relative; width: 150px; height: 2px; margin-top: 32px; overflow: hidden; background: #241536; border-radius: 9px; }
+        .intro-progress span { display: block; width: 45%; height: 100%; background: #a855f7; box-shadow: 0 0 12px #a855f7; animation: introLoad 1.25s ease-in-out infinite; }
+        @keyframes introRise { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes introPulse { from { transform: scale(.85); opacity: .55; } to { transform: scale(1.15); opacity: 1; } }
+        @keyframes introLoad { from { transform: translateX(-110%); } to { transform: translateX(340%); } }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(3, 1, 8, .78);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+        .loading-overlay.show { opacity: 1; visibility: visible; }
+        .loading-panel {
+            width: min(330px, 100%);
+            padding: 28px 24px;
+            text-align: center;
+            background: rgba(13, 7, 23, .96);
+            border: 1px solid rgba(168, 85, 247, .45);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(112, 39, 233, .2);
+        }
+        .loading-spinner {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 16px;
+            border: 3px solid rgba(168, 85, 247, .2);
+            border-top-color: #c084fc;
+            border-right-color: #7027e9;
+            border-radius: 50%;
+            animation: spin .75s linear infinite;
+        }
+        .loading-title { font-weight: 700; letter-spacing: .06em; }
+        .loading-message { margin-top: 7px; color: #a69bbd; font-size: 12px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+            .intro-glow, .intro-logo, .intro-brand, .intro-subtitle, .intro-progress span, .loading-spinner { animation-duration: 2s; }
+        }
+
         /* ================= SMALL SCREENS ================= */
 
         @media (max-width: 700px) {
@@ -454,7 +579,24 @@
     </style>
 </head>
 
-<body>
+<body class="intro-active">
+    <!-- INTRO SPLASH -->
+    <div class="intro-screen" id="introScreen" aria-label="JRCSEE welcome screen">
+        <div class="intro-glow"></div>
+        <img src="JRCC.png" class="intro-logo" alt="JRCC Logo">
+        <div class="intro-brand">JRCSEE</div>
+        <div class="intro-subtitle">FACE RECOGNITION WEB</div>
+        <div class="intro-progress"><span></span></div>
+    </div>
+
+    <!-- LOGIN LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay" aria-live="polite" aria-hidden="true">
+        <div class="loading-panel">
+            <div class="loading-spinner"></div>
+            <div class="loading-title">Authenticating</div>
+            <div class="loading-message">Please wait while we securely sign you in.</div>
+        </div>
+    </div>
 
     <!-- ANIMATED BACKGROUND -->
     <div class="background">
@@ -524,7 +666,7 @@
                 <div class="forgot" onclick="forgotPassword()">Forgot password?</div>
             </div>
 
-            <button class="login-btn" onclick="login()">LOGIN</button>
+            <button class="login-btn" id="loginButton" onclick="login()"><span class="button-label">LOGIN</span><span class="button-spinner" aria-hidden="true"></span></button>
 
         </div>
     </div>
@@ -566,7 +708,8 @@
         async function login() {
             const email = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value;
-            const button = document.querySelector(".login-btn");
+            const button = document.getElementById("loginButton");
+            const overlay = document.getElementById("loadingOverlay");
 
             if (!email || !password) {
                 alert("Please enter your email and password.");
@@ -574,26 +717,30 @@
             }
 
             button.disabled = true;
-            button.textContent = "PLEASE WAIT...";
+            button.classList.add("loading");
+            button.querySelector(".button-label").textContent = "SIGNING IN...";
+            overlay.classList.add("show");
+            overlay.setAttribute("aria-hidden", "false");
 
             try {
-                const { error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
                 });
 
-                if (error) {
-                    alert("Login failed: " + error.message);
-                    return;
-                }
+                if (error) throw error;
 
-                window.location.href = "./dashboard.html";
+                // Store the selected role for the dashboard profile label.
+                localStorage.setItem("jrcsee_role", selectedRole);
+                window.location.replace("./dashboard.html");
             } catch (err) {
-                console.error(err);
-                alert("Unable to connect to Supabase. Check your internet connection.");
-            } finally {
+                console.error("Login error:", err);
+                overlay.classList.remove("show");
+                overlay.setAttribute("aria-hidden", "true");
+                alert("Login failed: " + (err.message || "Unable to connect to Supabase."));
                 button.disabled = false;
-                button.textContent = "LOGIN";
+                button.classList.remove("loading");
+                button.querySelector(".button-label").textContent = "LOGIN";
             }
         }
 
@@ -620,7 +767,20 @@
         /* ================= ENTER KEY ================= */
 
         document.addEventListener("keydown", e => {
-            if (e.key === "Enter") login();
+            if (e.key === "Enter" && !e.repeat) {
+                e.preventDefault();
+                login();
+            }
+        });
+
+        // Brief branded intro, then reveal the login page.
+        window.addEventListener("DOMContentLoaded", () => {
+            const intro = document.getElementById("introScreen");
+            window.setTimeout(() => {
+                intro.classList.add("hide");
+                document.body.classList.remove("intro-active");
+                window.setTimeout(() => intro.remove(), 700);
+            }, 1750);
         });
     </script>
 
