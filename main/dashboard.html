@@ -1537,6 +1537,7 @@
         /* ================= CHECK LOGIN ================= */
 
         let isLoggingOut = false;
+        let authCheckComplete = false;
 
         async function checkLogin() {
             try {
@@ -1544,12 +1545,14 @@
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
                 if (sessionError || !session || !session.user) {
+                    authCheckComplete = true;
                     if (!isLoggingOut) {
-                        window.location.replace("index.html");
+                        window.location.replace("./index.html");
                     }
                     return;
                 }
 
+                authCheckComplete = true;
                 // User is authenticated - display information
                 displayUserInfo(session.user);
 
@@ -1564,8 +1567,9 @@
 
             } catch (err) {
                 console.error("Auth check error:", err);
+                authCheckComplete = true;
                 if (!isLoggingOut) {
-                    window.location.replace("index.html");
+                    window.location.replace("./index.html");
                 }
             }
         }
@@ -1575,8 +1579,8 @@
 
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === "SIGNED_OUT" || !session) {
-                if (!isLoggingOut) {
-                    window.location.replace("index.html");
+                if (authCheckComplete && !isLoggingOut) {
+                    window.location.replace("./index.html");
                 }
             } else if (session?.user) {
                 displayUserInfo(session.user);
@@ -1589,35 +1593,35 @@
         const logoutBtn = $("logout");
         if (logoutBtn) {
             logoutBtn.addEventListener("click", async (e) => {
-                if (e) e.preventDefault();
+                e.preventDefault();
+                if (isLoggingOut) return;
+
                 isLoggingOut = true;
                 logoutBtn.disabled = true;
                 logoutBtn.textContent = "Logging out...";
 
+                // Redirect even if the network request to sign out fails.
                 try {
-                    // Sign out from Supabase client
-                    await supabase.auth.signOut();
+                    await supabase.auth.signOut({ scope: "local" });
                 } catch (error) {
-                    console.warn("Logout notice:", error);
-                }
-
-                // Explicitly purge any Supabase & JRCSEE auth tokens from storage
-                try {
-                    for (let i = localStorage.length - 1; i >= 0; i--) {
-                        const key = localStorage.key(i);
-                        if (key && (key.startsWith("sb-") || key.includes("supabase") || key.startsWith("jrcsee"))) {
-                            localStorage.removeItem(key);
+                    console.warn("Supabase sign-out request failed:", error);
+                } finally {
+                    try {
+                        for (let i = localStorage.length - 1; i >= 0; i--) {
+                            const key = localStorage.key(i);
+                            if (key && (key.startsWith("sb-") || key.toLowerCase().includes("supabase") || key.startsWith("jrcsee"))) {
+                                localStorage.removeItem(key);
+                            }
                         }
+                        sessionStorage.clear();
+                    } catch (storageError) {
+                        console.warn("Could not clear session storage:", storageError);
                     }
-                    sessionStorage.clear();
-                } catch (err) {
-                    console.warn("Storage purge notice:", err);
-                }
 
-                window.location.replace("index.html");
+                    window.location.replace("./index.html?loggedout=1");
+                }
             });
         }
-
 
         /* ================= START AUTH CHECK ================= */
 
