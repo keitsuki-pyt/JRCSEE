@@ -1482,152 +1482,111 @@
 
 
     <!-- ================= SUPABASE AUTH ================= -->
-
-    <script>
-
-        const supabase =
-            window.supabase.createClient(
-                "https://guhwlwhdssycjpobcmfk.supabase.co",
-                "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
-                {
-                    auth: {
-                        persistSession: true,
-                        autoRefreshToken: true,
-                        detectSessionInUrl: true,
-                        storage: window.localStorage
-                    }
-                }
-            );
-
-
-        /* ================= DISPLAY USER INFO ================= */
-
-        function displayUserInfo(user) {
-            if (!user) return;
-
-            const email = user.email || "admin@jrcsee.org";
-            const role = localStorage.getItem("jrcsee_role");
-            const roleTitle = role ? (role.charAt(0).toUpperCase() + role.slice(1) + " User") : "Admin User";
-
-            const name =
-                user.user_metadata?.full_name ||
-                user.user_metadata?.name ||
-                roleTitle;
-
-            const nameEl = $("userName");
-            const emailEl = $("userEmail");
-            const initialsEl = $("userInitials");
-
-            if (nameEl) nameEl.textContent = name;
-            if (emailEl) emailEl.textContent = email;
-
-            const initials =
-                name
-                    .split(" ")
-                    .filter(Boolean)
-                    .map(word => word[0])
-                    .join("")
-                    .substring(0, 2)
-                    .toUpperCase();
-
-            if (initialsEl) initialsEl.textContent = initials || "AD";
-        }
-
-
-        /* ================= CHECK LOGIN ================= */
-
-        let isLoggingOut = false;
-        let authCheckComplete = false;
-
-        async function checkLogin() {
-            try {
-                // Check locally cached session first to prevent premature redirect
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError || !session || !session.user) {
-                    authCheckComplete = true;
-                    if (!isLoggingOut) {
-                        window.location.replace("./index.html");
-                    }
-                    return;
-                }
-
-                authCheckComplete = true;
-                // User is authenticated - display information
-                displayUserInfo(session.user);
-
-                // Asynchronously verify user with Supabase in the background
-                supabase.auth.getUser().then(({ data, error }) => {
-                    if (data?.user && !error) {
-                        displayUserInfo(data.user);
-                    }
-                }).catch(err => {
-                    console.warn("Background user verification:", err);
-                });
-
-            } catch (err) {
-                console.error("Auth check error:", err);
-                authCheckComplete = true;
-                if (!isLoggingOut) {
-                    window.location.replace("./index.html");
-                }
+<script>
+    const supabaseClient = window.supabase.createClient(
+        "https://guhwlwhdssycjpobcmfk.supabase.co",
+        "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage
             }
         }
+    );
 
+    let isLoggingOut = false;
+    let authCheckComplete = false;
 
-        /* ================= AUTH STATE LISTENER ================= */
+    function displayUserInfo(user) {
+        if (!user) return;
 
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === "SIGNED_OUT" || !session) {
-                if (authCheckComplete && !isLoggingOut) {
-                    window.location.replace("./index.html");
+        const email = user.email || "admin@jrcsee.org";
+        const role = localStorage.getItem("jrcsee_role");
+        const roleTitle = role
+            ? role.charAt(0).toUpperCase() + role.slice(1) + " User"
+            : "Admin User";
+        const name = user.user_metadata?.full_name || user.user_metadata?.name || roleTitle;
+
+        const nameEl = document.getElementById("userName");
+        const emailEl = document.getElementById("userEmail");
+        const initialsEl = document.getElementById("userInitials");
+
+        if (nameEl) nameEl.textContent = name;
+        if (emailEl) emailEl.textContent = email;
+
+        const initials = name.split(" ").filter(Boolean).map(word => word[0]).join("").substring(0, 2).toUpperCase();
+        if (initialsEl) initialsEl.textContent = initials || "AD";
+    }
+
+    async function checkLogin() {
+        try {
+            const { data, error } = await supabaseClient.auth.getSession();
+            authCheckComplete = true;
+
+            if (isLoggingOut) return;
+
+            if (error || !data.session || !data.session.user) {
+                window.location.replace("./index.html");
+                return;
+            }
+
+            displayUserInfo(data.session.user);
+        } catch (error) {
+            console.error("Session check failed:", error);
+            authCheckComplete = true;
+            if (!isLoggingOut) window.location.replace("./index.html");
+        }
+    }
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT") {
+            if (authCheckComplete && !isLoggingOut) {
+                window.location.replace("./index.html");
+            }
+            return;
+        }
+
+        if (session?.user) displayUserInfo(session.user);
+    });
+
+    const logoutBtn = document.getElementById("logout");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async function (event) {
+            event.preventDefault();
+            if (isLoggingOut) return;
+
+            isLoggingOut = true;
+            logoutBtn.disabled = true;
+            logoutBtn.textContent = "Logging out...";
+
+            try {
+                const { error } = await supabaseClient.auth.signOut({ scope: "local" });
+                if (error) console.error("Supabase logout error:", error);
+            } catch (error) {
+                console.error("Logout request failed:", error);
+            } finally {
+                try {
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if (key && (key.startsWith("sb-") || key.toLowerCase().includes("supabase"))) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                    localStorage.removeItem("jrcsee_role");
+                    sessionStorage.clear();
+                } catch (error) {
+                    console.error("Storage cleanup failed:", error);
                 }
-            } else if (session?.user) {
-                displayUserInfo(session.user);
+
+                window.location.replace("./index.html?loggedout=1");
             }
         });
+    }
 
-
-        /* ================= LOGOUT ================= */
-
-        const logoutBtn = $("logout");
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", async (e) => {
-                e.preventDefault();
-                if (isLoggingOut) return;
-
-                isLoggingOut = true;
-                logoutBtn.disabled = true;
-                logoutBtn.textContent = "Logging out...";
-
-                // Redirect even if the network request to sign out fails.
-                try {
-                    await supabase.auth.signOut({ scope: "local" });
-                } catch (error) {
-                    console.warn("Supabase sign-out request failed:", error);
-                } finally {
-                    try {
-                        for (let i = localStorage.length - 1; i >= 0; i--) {
-                            const key = localStorage.key(i);
-                            if (key && (key.startsWith("sb-") || key.toLowerCase().includes("supabase") || key.startsWith("jrcsee"))) {
-                                localStorage.removeItem(key);
-                            }
-                        }
-                        sessionStorage.clear();
-                    } catch (storageError) {
-                        console.warn("Could not clear session storage:", storageError);
-                    }
-
-                    window.location.replace("./index.html?loggedout=1");
-                }
-            });
-        }
-
-        /* ================= START AUTH CHECK ================= */
-
-        checkLogin();
-
-    </script>
+    checkLogin();
+</script>
 
 </body>
 
