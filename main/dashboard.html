@@ -95,6 +95,7 @@
             line-height: 1;
             background: linear-gradient(135deg, #ffffff 0%, var(--acc) 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent
         }
 
@@ -1487,55 +1488,38 @@
         const supabase =
             window.supabase.createClient(
                 "https://guhwlwhdssycjpobcmfk.supabase.co",
-                "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
+                "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
+                {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: true,
+                        storage: window.localStorage
+                    }
+                }
             );
 
 
-        /* ================= CHECK LOGIN ================= */
+        /* ================= DISPLAY USER INFO ================= */
 
-        async function checkLogin() {
+        function displayUserInfo(user) {
+            if (!user) return;
 
-            const {
-                data: { user },
-                error
-            } =
-                await supabase.auth.getUser();
-
-
-            if (error || !user) {
-
-                window.location.replace(
-                    "index.html"
-                );
-
-                return;
-            }
-
-
-            console.log(
-                "Logged in as:",
-                user.email
-            );
-
-
-            /* Display logged-in user */
-
-            const email =
-                user.email || "Unknown";
+            const email = user.email || "admin@jrcsee.org";
+            const role = localStorage.getItem("jrcsee_role");
+            const roleTitle = role ? (role.charAt(0).toUpperCase() + role.slice(1) + " User") : "Admin User";
 
             const name =
                 user.user_metadata?.full_name ||
                 user.user_metadata?.name ||
-                "Admin User";
+                roleTitle;
 
-            $("userName").textContent =
-                name;
+            const nameEl = $("userName");
+            const emailEl = $("userEmail");
+            const initialsEl = $("userInitials");
 
-            $("userEmail").textContent =
-                email;
-
-
-            /* Create initials */
+            if (nameEl) nameEl.textContent = name;
+            if (emailEl) emailEl.textContent = email;
 
             const initials =
                 name
@@ -1546,39 +1530,93 @@
                     .substring(0, 2)
                     .toUpperCase();
 
-            $("userInitials").textContent =
-                initials || "AD";
+            if (initialsEl) initialsEl.textContent = initials || "AD";
         }
+
+
+        /* ================= CHECK LOGIN ================= */
+
+        let isLoggingOut = false;
+
+        async function checkLogin() {
+            try {
+                // Check locally cached session first to prevent premature redirect
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError || !session || !session.user) {
+                    if (!isLoggingOut) {
+                        window.location.replace("index.html");
+                    }
+                    return;
+                }
+
+                // User is authenticated - display information
+                displayUserInfo(session.user);
+
+                // Asynchronously verify user with Supabase in the background
+                supabase.auth.getUser().then(({ data, error }) => {
+                    if (data?.user && !error) {
+                        displayUserInfo(data.user);
+                    }
+                }).catch(err => {
+                    console.warn("Background user verification:", err);
+                });
+
+            } catch (err) {
+                console.error("Auth check error:", err);
+                if (!isLoggingOut) {
+                    window.location.replace("index.html");
+                }
+            }
+        }
+
+
+        /* ================= AUTH STATE LISTENER ================= */
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "SIGNED_OUT" || !session) {
+                if (!isLoggingOut) {
+                    window.location.replace("index.html");
+                }
+            } else if (session?.user) {
+                displayUserInfo(session.user);
+            }
+        });
 
 
         /* ================= LOGOUT ================= */
 
-        $("logout").addEventListener(
-            "click",
-            async () => {
+        const logoutBtn = $("logout");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+                if (e) e.preventDefault();
+                isLoggingOut = true;
+                logoutBtn.disabled = true;
+                logoutBtn.textContent = "Logging out...";
 
-                const {
-                    error
-                } =
+                try {
+                    // Sign out from Supabase client
                     await supabase.auth.signOut();
-
-
-                if (error) {
-
-                    alert(
-                        "Logout failed: " +
-                        error.message
-                    );
-
-                    return;
+                } catch (error) {
+                    console.warn("Logout notice:", error);
                 }
 
+                // Explicitly purge any Supabase & JRCSEE auth tokens from storage
+                try {
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if (key && (key.startsWith("sb-") || key.includes("supabase") || key.startsWith("jrcsee"))) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                    sessionStorage.clear();
+                } catch (err) {
+                    console.warn("Storage purge notice:", err);
+                }
 
-                window.location.replace(
-                    "index.html"
-                );
-            }
-        );
+                window.location.replace("index.html");
+            });
+        }
 
 
         /* ================= START AUTH CHECK ================= */
