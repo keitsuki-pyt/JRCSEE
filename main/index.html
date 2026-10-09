@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark">
     <title>JRCSEE Login</title>
     <link rel="icon" type="image/x-icon" href="JRCC.png">
 
@@ -16,10 +15,6 @@
         rel="stylesheet">
 
     <style>
-        :root {
-            color-scheme: dark;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -322,42 +317,35 @@
             border: none;
             outline: none;
             background: transparent;
-            color: #ffffff;
+            color: white;
             font-size: 14px;
             font-family: "Poppins", sans-serif;
-            color-scheme: dark;
         }
 
         .input-box input::placeholder {
             color: #77777d;
         }
 
-        /* Keep saved/autofilled credentials dark in Chromium, Firefox, and WebKit browsers */
+        /* Keep saved/autofilled credentials dark in Chromium browsers */
+        .input-box input,
+        .input-box input:focus,
         .input-box input:-webkit-autofill,
         .input-box input:-webkit-autofill:hover,
         .input-box input:-webkit-autofill:focus,
-        .input-box input:-webkit-autofill:active,
-        .input-box input:autofill,
-        .input-box input:autofill:hover,
-        .input-box input:autofill:focus,
-        .input-box input:autofill:active {
+        .input-box input:-webkit-autofill:active {
+            color: #fff !important;
+            -webkit-text-fill-color: #fff !important;
+            caret-color: #fff;
+            color-scheme: dark;
+        }
+        .input-box input:-webkit-autofill,
+        .input-box input:-webkit-autofill:hover,
+        .input-box input:-webkit-autofill:focus,
+        .input-box input:-webkit-autofill:active {
             -webkit-box-shadow: 0 0 0 1000px #0b0712 inset !important;
             box-shadow: 0 0 0 1000px #0b0712 inset !important;
-            -webkit-text-fill-color: #ffffff !important;
-            color: #ffffff !important;
-            caret-color: #ffffff !important;
-            transition: background-color 5000000s ease-in-out 0s, color 5000000s ease-in-out 0s !important;
+            transition: background-color 99999s ease-out 0s;
             border-radius: 6px;
-            font-family: "Poppins", sans-serif !important;
-            font-size: 14px !important;
-        }
-
-        .input-box input:-webkit-autofill::first-line,
-        .input-box input:autofill::first-line {
-            -webkit-text-fill-color: #ffffff !important;
-            color: #ffffff !important;
-            font-family: "Poppins", sans-serif !important;
-            font-size: 14px !important;
         }
 
         .eye {
