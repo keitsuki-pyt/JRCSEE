@@ -576,6 +576,15 @@
         .registry-empty-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 4px; color: var(--acc); background: var(--acc-soft); border-radius: 14px; }
         .registry-empty strong { color: var(--fg); font-size: 13px; }
         .registry-empty span:last-child { max-width: 360px; }
+        .registry-add { border: 1px solid var(--pri); border-radius: 8px; padding: 10px 13px; background: var(--pri-soft); color: var(--acc); font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .registry-table-wrap { width: 100%; overflow-x: auto; }
+        .registry-table { width: 100%; border-collapse: collapse; min-width: 650px; text-align: left; }
+        .registry-table th { color: var(--mut); font-size: 9px; letter-spacing: .1em; font-weight: 700; padding: 13px 12px; border-bottom: 1px solid var(--line); }
+        .registry-table td { color: var(--fg); font-size: 11px; padding: 14px 12px; border-bottom: 1px solid var(--line); }
+        .registry-table tbody tr:hover { background: rgba(255,255,255,.025); }
+        .registry-delete { color: #fca5a5; background: transparent; border: 1px solid rgba(252,165,165,.25); border-radius: 6px; padding: 5px 8px; font-size: 10px; }
+        .registry-table-footer { text-align: right; padding-top: 12px; color: var(--mut); font-size: 9px; }
+        @media(max-width:600px) { .registry-detail-heading { flex-direction: column; } .registry-add { width: 100%; } }
 
         .veil {
             display: none;
@@ -1346,6 +1355,11 @@
         }
 
 
+        function getRegistryRecords() {
+            try { return JSON.parse(localStorage.getItem("jrcsee_registry_records") || "{}"); }
+            catch (_) { return {}; }
+        }
+
         function registry() {
             const categories = [
                 { name: "Student", description: "Student registration records", icon: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2"/>' },
@@ -1353,42 +1367,31 @@
                 { name: "Visitors", description: "Visitor registration records", icon: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"/>' }
             ];
             const active = categories.find(c => c.name === S.registryCategory) || categories[0];
+            const recordsByCategory = getRegistryRecords();
+            const records = (recordsByCategory[active.name] || []).filter(r => has([r.name, r.code, r.detail].join(" "), S.q));
+            const total = (recordsByCategory[active.name] || []).length;
             const filtered = categories.filter(c => has(c.name + " " + c.description, S.q));
             return `
                 <section class="card registry-card">
-                    <div class="top">
-                        <div>
-                            <h3 class="disp">REGISTRY</h3>
-                            <p class="theme-intro">Choose a registry category to view its records.</p>
-                        </div>
-                    </div>
+                    <div class="top"><div><h3 class="disp">REGISTRY</h3><p class="theme-intro">Select a category to manage its records.</p></div></div>
                     <div class="registry-grid">
-                        ${filtered.map(c => `
-                            <button type="button" class="registry-option ${S.registryCategory === c.name ? "selected" : ""}" data-registry-category="${c.name}" aria-pressed="${S.registryCategory === c.name}">
-                                <span class="registry-icon">${icon(c.icon)}</span>
-                                <span class="registry-option-text"><strong>${c.name}</strong><small>${c.description}</small></span>
-                                <span class="registry-arrow">${S.registryCategory === c.name ? "✓" : "›"}</span>
-                            </button>
-                        `).join("") || '<div class="empty">No registry categories match your search.</div>'}
+                        ${filtered.map(c => {
+                            const count = (recordsByCategory[c.name] || []).length;
+                            return `<button type="button" class="registry-option ${S.registryCategory === c.name ? "selected" : ""}" data-registry-category="${c.name}" aria-pressed="${S.registryCategory === c.name}">
+                                <span class="registry-icon">${icon(c.icon)}</span><span class="registry-option-text"><strong>${c.name}</strong><small>${c.description}</small></span>
+                                <span class="registry-count mono">${count}</span>
+                            </button>`;
+                        }).join("") || '<div class="empty">No registry categories match your search.</div>'}
                     </div>
                 </section>
                 <section class="card list">
-                    <div class="registry-detail-heading">
-                        <div>
-                            <h3 class="disp">${active.name.toUpperCase()} LIST</h3>
-                            <p class="theme-intro">${active.description}</p>
-                        </div>
-                        <span class="registry-count mono">0 RECORDS</span>
-                    </div>
-                    <div class="empty registry-empty">
-                        <span class="registry-empty-icon">${icon(active.icon)}</span>
-                        <strong>No ${active.name.toLowerCase()} records yet</strong>
-                        <span>Registry entries will appear here once records are connected to your database.</span>
-                    </div>
-                </section>
-            `;
+                    <div class="registry-detail-heading"><div><h3 class="disp">${active.name.toUpperCase()} RECORDS</h3><p class="theme-intro">${active.description}. Records saved in this browser are shown below.</p></div>
+                    <button class="primary registry-add" type="button" data-add-registry>+ Add ${active.name === "Visitors" ? "Visitor" : active.name}</button></div>
+                    <div class="registry-table-wrap"><table class="registry-table"><thead><tr><th>NAME</th><th>${active.name === "Student" ? "STUDENT ID" : active.name === "Staff" ? "STAFF ID" : "VISITOR ID"}</th><th>${active.name === "Student" ? "COURSE / YEAR" : active.name === "Staff" ? "POSITION / DEPT." : "PURPOSE / HOST"}</th><th>DATE ADDED</th><th>ACTION</th></tr></thead><tbody>
+                    ${records.length ? records.map(r => `<tr><td><strong>${esc(r.name)}</strong></td><td class="mono">${esc(r.code || "—")}</td><td>${esc(r.detail || "—")}</td><td>${esc(r.date || "—")}</td><td><button type="button" class="registry-delete" data-delete-registry="${esc(r.id)}" aria-label="Delete ${esc(r.name)}">Delete</button></td></tr>`).join("") : `<tr><td colspan="5"><div class="registry-empty"><span class="registry-empty-icon">${icon(active.icon)}</span><strong>${S.q ? "No matching records" : `No ${active.name.toLowerCase()} records yet`}</strong><span>${S.q ? "Try another search term." : `Use “Add ${active.name === "Visitors" ? "Visitor" : active.name}” to add the first record to this list.`}</span></div></td></tr>`}
+                    </tbody></table></div><div class="registry-table-footer mono">${records.length} SHOWN · ${total} TOTAL RECORDS</div>
+                </section>`;
         }
-
 
         function reports() {
 
@@ -1534,6 +1537,30 @@
             const categoryButton = e.target.closest("[data-registry-category]");
             if (categoryButton) {
                 S.registryCategory = categoryButton.dataset.registryCategory;
+                render();
+                return;
+            }
+            const addRegistryButton = e.target.closest("[data-add-registry]");
+            if (addRegistryButton) {
+                const category = S.registryCategory;
+                const name = window.prompt(`Enter ${category.toLowerCase()} full name:`);
+                if (!name || !name.trim()) return;
+                const code = window.prompt(`${category} ID / reference number (optional):`) || "";
+                const detailLabel = category === "Student" ? "Course / year level" : category === "Staff" ? "Position / department" : "Visit purpose / host";
+                const detail = window.prompt(`${detailLabel} (optional):`) || "";
+                const all = getRegistryRecords();
+                all[category] = all[category] || [];
+                all[category].push({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: name.trim(), code: code.trim(), detail: detail.trim(), date: new Date().toLocaleDateString() });
+                localStorage.setItem("jrcsee_registry_records", JSON.stringify(all));
+                render();
+                return;
+            }
+            const deleteRegistryButton = e.target.closest("[data-delete-registry]");
+            if (deleteRegistryButton) {
+                const all = getRegistryRecords();
+                const category = S.registryCategory;
+                all[category] = (all[category] || []).filter(r => r.id !== deleteRegistryButton.dataset.deleteRegistry);
+                localStorage.setItem("jrcsee_registry_records", JSON.stringify(all));
                 render();
                 return;
             }
