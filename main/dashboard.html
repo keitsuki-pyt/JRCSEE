@@ -29,6 +29,11 @@
             --acc: #e9d5ff;
             --cy: #f3e8ff;
             --line: rgba(255, 255, 255, .09);
+            --chart1: #a855f7;
+            --chart2: #e9d5ff;
+            --chart-grid: rgba(255,255,255,.12);
+            --pri-soft: rgba(168,85,247,.22);
+            --acc-soft: rgba(233,213,255,.16);
             --swatch-dark: #080410;
             --swatch-mid: #2e1052
         }
@@ -81,7 +86,7 @@
         aside {
             width: 240px;
             flex-shrink: 0;
-            background: linear-gradient(180deg, var(--side) 0%, #030106 100%);
+            background: linear-gradient(180deg, var(--side) 0%, var(--bg) 100%);
             border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
@@ -139,10 +144,10 @@
 
         nav button.on {
             background: linear-gradient(90deg,
-                    rgba(168, 85, 247, .32) 0%,
-                    rgba(243, 232, 255, .12) 100%);
+                    var(--pri-soft) 0%,
+                    var(--acc-soft) 100%);
             color: #ffffff;
-            border: 1px solid rgba(233, 213, 255, .4)
+            border: 1px solid color-mix(in srgb, var(--acc) 40%, transparent)
         }
 
         nav button.on::after {
@@ -188,9 +193,9 @@
             place-items: center;
             font-size: 12px;
             font-weight: 700;
-            color: #05030a;
+            color: var(--bg);
             flex-shrink: 0;
-            box-shadow: 0 0 10px rgba(233, 213, 255, .4)
+            box-shadow: 0 0 10px color-mix(in srgb, var(--acc) 40%, transparent)
         }
 
         /* User information */
@@ -237,7 +242,7 @@
         .logout:hover {
             color: var(--fg);
             border-color: var(--pri);
-            background: rgba(168, 85, 247, .10);
+            background: var(--pri-soft);
         }
 
         .logout:active {
@@ -259,7 +264,7 @@
             align-items: center;
             gap: 16px;
             padding: 16px 24px;
-            background: rgba(5, 3, 10, .85);
+            background: color-mix(in srgb, var(--bg) 88%, transparent);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--line)
         }
@@ -406,9 +411,9 @@
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 99px;
-            background: rgba(233, 213, 255, .15);
+            background: var(--acc-soft);
             color: var(--acc);
-            border: 1px solid rgba(233, 213, 255, .3)
+            border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent)
         }
 
         .stat .ic {
@@ -437,9 +442,9 @@
         }
 
         .rng button.on {
-            background: rgba(168, 85, 247, .25);
+            background: var(--pri-soft);
             color: #ffffff;
-            border: 1px solid rgba(233, 213, 255, .4)
+            border: 1px solid color-mix(in srgb, var(--acc) 40%, transparent)
         }
 
         .leg {
@@ -769,11 +774,11 @@
 
 
         const AI = {
-            report: "#e9d5ff",
-            member: "#a855f7",
-            milestone: "#facc15",
-            event: "#f3e8ff",
-            update: "#a69bbd"
+            report: "var(--chart2)",
+            member: "var(--chart1)",
+            milestone: "var(--acc)",
+            event: "var(--cy)",
+            update: "var(--mut)"
         };
 
 
@@ -805,22 +810,22 @@
             purple: {
                 name: "Midnight Purple",
                 colors: ["#05030a", "#2e1052", "#a855f7", "#e9d5ff"],
-                vars: { "--bg": "#05030a", "--glow": "#2e1052", "--side": "#080410", "--pri": "#a855f7", "--acc": "#e9d5ff", "--cy": "#f3e8ff", "--mut": "#a69bbd", "--card-top": "rgba(38, 18, 64, 0.65)", "--card-bottom": "rgba(10, 5, 18, 0.85)", "--line": "rgba(255,255,255,.09)" }
+                vars: { "--bg": "#05030a", "--glow": "#2e1052", "--side": "#080410", "--pri": "#a855f7", "--acc": "#e9d5ff", "--cy": "#f3e8ff", "--mut": "#a69bbd", "--card-top": "rgba(38, 18, 64, 0.65)", "--card-bottom": "rgba(10, 5, 18, 0.85)", "--line": "rgba(255,255,255,.09)", "--chart1": "#a855f7", "--chart2": "#e9d5ff", "--chart-grid": "rgba(255,255,255,.12)", "--pri-soft": "rgba(168,85,247,.22)", "--acc-soft": "rgba(233,213,255,.16)" }
             },
             ember: {
                 name: "Warm Ember",
                 colors: ["#1b110e", "#30201b", "#e28b59", "#ffc18e"],
-                vars: { "--bg": "#1b110e", "--glow": "#30201b", "--side": "#120b09", "--pri": "#e28b59", "--acc": "#ffc18e", "--cy": "#e28b59", "--mut": "#c6a99a", "--card-top": "rgba(48, 32, 27, .92)", "--card-bottom": "rgba(27, 17, 14, .96)", "--line": "rgba(255,193,142,.16)" }
+                vars: { "--bg": "#1b110e", "--glow": "#30201b", "--side": "#120b09", "--pri": "#e28b59", "--acc": "#ffc18e", "--cy": "#e28b59", "--mut": "#c6a99a", "--card-top": "rgba(48, 32, 27, .92)", "--card-bottom": "rgba(27, 17, 14, .96)", "--line": "rgba(255,193,142,.16)", "--chart1": "#e28b59", "--chart2": "#ffc18e", "--chart-grid": "rgba(255,193,142,.13)", "--pri-soft": "rgba(226,139,89,.22)", "--acc-soft": "rgba(255,193,142,.16)" }
             },
             ocean: {
                 name: "Deep Ocean",
                 colors: ["#06131b", "#0b3445", "#2aa6b8", "#a5f3fc"],
-                vars: { "--bg": "#06131b", "--glow": "#0b3445", "--side": "#030c11", "--pri": "#2aa6b8", "--acc": "#a5f3fc", "--cy": "#cffafe", "--mut": "#9ab9c3", "--card-top": "rgba(11, 52, 69, .75)", "--card-bottom": "rgba(3, 12, 17, .92)", "--line": "rgba(165,243,252,.12)" }
+                vars: { "--bg": "#06131b", "--glow": "#0b3445", "--side": "#030c11", "--pri": "#2aa6b8", "--acc": "#a5f3fc", "--cy": "#cffafe", "--mut": "#9ab9c3", "--card-top": "rgba(11, 52, 69, .75)", "--card-bottom": "rgba(3, 12, 17, .92)", "--line": "rgba(165,243,252,.12)", "--chart1": "#2aa6b8", "--chart2": "#a5f3fc", "--chart-grid": "rgba(165,243,252,.13)", "--pri-soft": "rgba(42,166,184,.22)", "--acc-soft": "rgba(165,243,252,.16)" }
             },
             forest: {
                 name: "Forest Green",
                 colors: ["#07140e", "#143526", "#4caf78", "#b7f7cf"],
-                vars: { "--bg": "#07140e", "--glow": "#143526", "--side": "#030a06", "--pri": "#4caf78", "--acc": "#b7f7cf", "--cy": "#d1fae5", "--mut": "#9ab9a7", "--card-top": "rgba(20, 53, 38, .78)", "--card-bottom": "rgba(3, 10, 6, .92)", "--line": "rgba(183,247,207,.13)" }
+                vars: { "--bg": "#07140e", "--glow": "#143526", "--side": "#030a06", "--pri": "#4caf78", "--acc": "#b7f7cf", "--cy": "#d1fae5", "--mut": "#9ab9a7", "--card-top": "rgba(20, 53, 38, .78)", "--card-bottom": "rgba(3, 10, 6, .92)", "--line": "rgba(183,247,207,.13)", "--chart1": "#4caf78", "--chart2": "#b7f7cf", "--chart-grid": "rgba(183,247,207,.13)", "--pri-soft": "rgba(76,175,120,.22)", "--acc-soft": "rgba(183,247,207,.16)" }
             }
         };
 
@@ -946,7 +951,7 @@
                         x2="${W - R}"
                         y1="${y}"
                         y2="${y}"
-                        stroke="rgba(255,255,255,.04)"/>
+                        stroke="var(--chart-grid)"/>
 
                     <text
                         x="${L - 6}"
@@ -990,8 +995,8 @@
                             </text>`
             ).join("")}
 
-                    ${fill("members", "#a855f7", "gm")}
-                    ${fill("subs", "#f3e8ff", "gs")}
+                    ${fill("members", "var(--chart1)", "gm")}
+                    ${fill("subs", "var(--chart2)", "gs")}
 
                     ${dots("members")}
                     ${dots("subs")}
@@ -1027,7 +1032,7 @@
                         x2="${W}"
                         y1="${y}"
                         y2="${y}"
-                        stroke="rgba(255,255,255,.04)"/>
+                        stroke="var(--chart-grid)"/>
 
                     <text
                         x="${L - 6}"
@@ -1049,11 +1054,11 @@
 
                         <stop
                             offset="0%"
-                            stop-color="#f3e8ff"/>
+                            stop-color="var(--chart2)"/>
 
                         <stop
                             offset="100%"
-                            stop-color="#a855f7"/>
+                            stop-color="var(--chart1)"/>
 
                     </linearGradient>
                 </defs>
@@ -1161,8 +1166,8 @@
                 "Total members",
                 tot.toLocaleString(),
                 ch,
-                "#e9d5ff",
-                "rgba(168,85,247,.2)",
+                "var(--acc)",
+                "var(--pri-soft)",
                 u
             )}
 
@@ -1170,8 +1175,8 @@
                 "Members on active projects",
                 act.toLocaleString(),
                 "6.1",
-                "#f3e8ff",
-                "rgba(243,232,255,.18)",
+                "var(--cy)",
+                "var(--acc-soft)",
                 u
             )}
 
@@ -1216,12 +1221,12 @@
                     <div class="leg mono">
 
                         <span>
-                            <i style="background:#a855f7"></i>
+                            <i style="background:var(--chart1)"></i>
                             Members
                         </span>
 
                         <span>
-                            <i style="background:#f3e8ff"></i>
+                            <i style="background:var(--chart2)"></i>
                             Submissions
                         </span>
 
