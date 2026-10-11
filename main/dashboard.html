@@ -18,14 +18,19 @@
     <style>
         :root {
             --bg: #05030a;
+            --glow: #2e1052;
             --card: rgba(22, 12, 36, 0.75);
+            --card-top: rgba(38, 18, 64, 0.65);
+            --card-bottom: rgba(10, 5, 18, 0.85);
             --side: #080410;
             --fg: #ffffff;
             --mut: #a69bbd;
             --pri: #a855f7;
             --acc: #e9d5ff;
             --cy: #f3e8ff;
-            --line: rgba(255, 255, 255, .09)
+            --line: rgba(255, 255, 255, .09);
+            --swatch-dark: #080410;
+            --swatch-mid: #2e1052
         }
 
         * {
@@ -40,7 +45,7 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 0%, #2e1052 0%, var(--bg) 75%);
+            background: radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--bg) 75%);
             background-attachment: fixed;
             color: var(--fg);
             font: 14px/1.5 Inter, sans-serif;
@@ -354,8 +359,8 @@
 
         .card {
             background: linear-gradient(135deg,
-                    rgba(38, 18, 64, 0.65) 0%,
-                    rgba(10, 5, 18, 0.85) 100%);
+                    var(--card-top) 0%,
+                    var(--card-bottom) 100%);
             border: 1px solid var(--line);
             border-radius: 12px;
             padding: 20px;
@@ -532,6 +537,23 @@
             color: var(--fg);
             font-weight: 500
         }
+
+        /* ================= THEME SETTINGS ================= */
+        .settings-card { max-width: 760px; }
+        .theme-intro { color: var(--mut); font-size: 12px; margin: 6px 0 22px; }
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+        .theme-option {
+            text-align: left; padding: 14px; border-radius: 12px;
+            border: 1px solid var(--line); background: rgba(255,255,255,.025);
+            transition: border-color .2s, transform .2s, background .2s;
+        }
+        .theme-option:hover { border-color: var(--pri); transform: translateY(-2px); }
+        .theme-option.selected { border-color: var(--acc); background: rgba(255,255,255,.06); box-shadow: 0 0 0 1px var(--acc); }
+        .theme-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; font-weight: 600; font-size: 12px; }
+        .theme-check { color: var(--acc); font-size: 10px; }
+        .theme-swatches { display: flex; gap: 7px; }
+        .theme-swatches i { display: block; height: 32px; flex: 1; border-radius: 6px; background: var(--swatch); border: 1px solid rgba(255,255,255,.12); }
+        .theme-note { color: var(--mut); font-size: 10px; margin-top: 18px; }
 
         .veil {
             display: none;
@@ -770,9 +792,67 @@
                 "reports",
                 "Reports",
                 '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>'
+            ],
+            [
+                "settings",
+                "Settings",
+                '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/>'
             ]
         ];
 
+
+        const THEMES = {
+            purple: {
+                name: "Midnight Purple",
+                colors: ["#05030a", "#2e1052", "#a855f7", "#e9d5ff"],
+                vars: { "--bg": "#05030a", "--glow": "#2e1052", "--side": "#080410", "--pri": "#a855f7", "--acc": "#e9d5ff", "--cy": "#f3e8ff", "--mut": "#a69bbd", "--card-top": "rgba(38, 18, 64, 0.65)", "--card-bottom": "rgba(10, 5, 18, 0.85)", "--line": "rgba(255,255,255,.09)" }
+            },
+            ember: {
+                name: "Warm Ember",
+                colors: ["#1b110e", "#30201b", "#e28b59", "#ffc18e"],
+                vars: { "--bg": "#1b110e", "--glow": "#30201b", "--side": "#120b09", "--pri": "#e28b59", "--acc": "#ffc18e", "--cy": "#e28b59", "--mut": "#c6a99a", "--card-top": "rgba(48, 32, 27, .92)", "--card-bottom": "rgba(27, 17, 14, .96)", "--line": "rgba(255,193,142,.16)" }
+            },
+            ocean: {
+                name: "Deep Ocean",
+                colors: ["#06131b", "#0b3445", "#2aa6b8", "#a5f3fc"],
+                vars: { "--bg": "#06131b", "--glow": "#0b3445", "--side": "#030c11", "--pri": "#2aa6b8", "--acc": "#a5f3fc", "--cy": "#cffafe", "--mut": "#9ab9c3", "--card-top": "rgba(11, 52, 69, .75)", "--card-bottom": "rgba(3, 12, 17, .92)", "--line": "rgba(165,243,252,.12)" }
+            },
+            forest: {
+                name: "Forest Green",
+                colors: ["#07140e", "#143526", "#4caf78", "#b7f7cf"],
+                vars: { "--bg": "#07140e", "--glow": "#143526", "--side": "#030a06", "--pri": "#4caf78", "--acc": "#b7f7cf", "--cy": "#d1fae5", "--mut": "#9ab9a7", "--card-top": "rgba(20, 53, 38, .78)", "--card-bottom": "rgba(3, 10, 6, .92)", "--line": "rgba(183,247,207,.13)" }
+            }
+        };
+
+        function applyTheme(themeId) {
+            const theme = THEMES[themeId] || THEMES.purple;
+            Object.entries(theme.vars).forEach(([name, value]) => {
+                document.documentElement.style.setProperty(name, value);
+            });
+            localStorage.setItem("jrcsee_theme", themeId in THEMES ? themeId : "purple");
+            document.documentElement.dataset.theme = themeId in THEMES ? themeId : "purple";
+        }
+
+        function settings() {
+            const activeTheme = localStorage.getItem("jrcsee_theme") || "purple";
+            return `
+                <section class="card settings-card">
+                    <h3 class="disp">APPEARANCE</h3>
+                    <p class="theme-intro">Choose a color theme for your JRCSEE dashboard. Your choice will be saved on this device.</p>
+                    <div class="theme-grid">
+                        ${Object.entries(THEMES).map(([id, theme]) => `
+                            <button type="button" class="theme-option ${activeTheme === id ? "selected" : ""}" data-theme="${id}" aria-pressed="${activeTheme === id}">
+                                <span class="theme-name">${theme.name}<span class="theme-check">${activeTheme === id ? "✓ SELECTED" : ""}</span></span>
+                                <span class="theme-swatches">
+                                    ${theme.colors.map(color => `<i style="--swatch:${color}" title="${color}"></i>`).join("")}
+                                </span>
+                            </button>
+                        `).join("")}
+                    </div>
+                    <p class="theme-note">The Warm Ember palette includes your colors: #1b110e, #30201b, #e28b59, and #ffc18e.</p>
+                </section>
+            `;
+        }
 
         const S = {
             tab: "dashboard",
@@ -1374,7 +1454,8 @@
                 {
                     dashboard: dash,
                     members,
-                    reports
+                    reports,
+                    settings
                 }[S.tab]();
         }
 
@@ -1429,14 +1510,16 @@
 
         $("main").onclick = e => {
 
-            const b =
-                e.target.closest("[data-r]");
+            const themeButton = e.target.closest("[data-theme]");
+            if (themeButton) {
+                applyTheme(themeButton.dataset.theme);
+                render();
+                return;
+            }
 
+            const b = e.target.closest("[data-r]");
             if (b) {
-
-                S.range =
-                    +b.dataset.r;
-
+                S.range = +b.dataset.r;
                 render();
             }
         };
@@ -1476,6 +1559,7 @@
 
         /* ================= INITIAL RENDER ================= */
 
+        applyTheme(localStorage.getItem("jrcsee_theme") || "purple");
         render();
 
     </script>
