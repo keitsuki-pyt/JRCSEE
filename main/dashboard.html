@@ -559,6 +559,23 @@
         .theme-swatches { display: flex; gap: 7px; }
         .theme-swatches i { display: block; height: 32px; flex: 1; border-radius: 6px; background: var(--swatch); border: 1px solid rgba(255,255,255,.12); }
         .theme-note { color: var(--mut); font-size: 10px; margin-top: 18px; }
+        .registry-card { max-width: 100%; }
+        .registry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+        .registry-option { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 16px; text-align: left; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card-top) 55%, transparent); transition: .2s ease; }
+        .registry-option:hover { border-color: var(--pri); transform: translateY(-1px); }
+        .registry-option.selected { border-color: var(--acc); background: var(--pri-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 25%, transparent); }
+        .registry-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; color: var(--acc); background: var(--acc-soft); }
+        .registry-icon svg, .registry-empty-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .registry-option-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .registry-option-text strong { color: var(--fg); font-size: 13px; }
+        .registry-option-text small { color: var(--mut); font-size: 10px; }
+        .registry-arrow { margin-left: auto; color: var(--acc); font-size: 18px; }
+        .registry-detail-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .registry-count { color: var(--acc); background: var(--acc-soft); border: 1px solid var(--line); border-radius: 99px; padding: 4px 8px; font-size: 10px; white-space: nowrap; }
+        .registry-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 170px; justify-content: center; }
+        .registry-empty-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 4px; color: var(--acc); background: var(--acc-soft); border-radius: 14px; }
+        .registry-empty strong { color: var(--fg); font-size: 13px; }
+        .registry-empty span:last-child { max-width: 360px; }
 
         .veil {
             display: none;
@@ -789,8 +806,8 @@
                 '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'
             ],
             [
-                "members",
-                "Members",
+                "registry",
+                "Registry",
                 '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'
             ],
             [
@@ -862,7 +879,8 @@
         const S = {
             tab: "dashboard",
             q: "",
-            range: 12
+            range: 12,
+            registryCategory: "Student"
         };
 
 
@@ -1328,55 +1346,46 @@
         }
 
 
-        function members() {
-
-            const m = {};
-
-            PROJ.forEach(
-                p =>
-                    (m[p.lead] = m[p.lead] || [])
-                        .push(p.name)
-            );
-
-            const r =
-                Object.entries(m)
-                    .filter(([n]) => has(n, S.q));
-
+        function registry() {
+            const categories = [
+                { name: "Student", description: "Student registration records", icon: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2"/>' },
+                { name: "Staff", description: "Faculty and staff records", icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 3.5a4 4 0 0 1 0 7"/>' },
+                { name: "Visitors", description: "Visitor registration records", icon: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"/>' }
+            ];
+            const active = categories.find(c => c.name === S.registryCategory) || categories[0];
+            const filtered = categories.filter(c => has(c.name + " " + c.description, S.q));
             return `
-                <div class="card list">
-
-                    <h3
-                        class="disp"
-                        style="margin-bottom:12px">
-                        PROJECT LEADS
-                    </h3>
-
-                    ${r.length
-                    ? r.map(
-                        ([n, l]) =>
-                            `
-                                    <div class="row">
-
-                                        <span>
-                                            ${esc(n)}
-                                        </span>
-
-                                        <span>
-                                            ${esc(l.join(", "))}
-                                        </span>
-
-                                    </div>
-                                    `
-                    ).join("")
-
-                    : `
-                                <div class="empty">
-                                    No members match your search.
-                                </div>
-                            `
-                }
-
-                </div>
+                <section class="card registry-card">
+                    <div class="top">
+                        <div>
+                            <h3 class="disp">REGISTRY</h3>
+                            <p class="theme-intro">Choose a registry category to view its records.</p>
+                        </div>
+                    </div>
+                    <div class="registry-grid">
+                        ${filtered.map(c => `
+                            <button type="button" class="registry-option ${S.registryCategory === c.name ? "selected" : ""}" data-registry-category="${c.name}" aria-pressed="${S.registryCategory === c.name}">
+                                <span class="registry-icon">${icon(c.icon)}</span>
+                                <span class="registry-option-text"><strong>${c.name}</strong><small>${c.description}</small></span>
+                                <span class="registry-arrow">${S.registryCategory === c.name ? "✓" : "›"}</span>
+                            </button>
+                        `).join("") || '<div class="empty">No registry categories match your search.</div>'}
+                    </div>
+                </section>
+                <section class="card list">
+                    <div class="registry-detail-heading">
+                        <div>
+                            <h3 class="disp">${active.name.toUpperCase()} LIST</h3>
+                            <p class="theme-intro">${active.description}</p>
+                        </div>
+                        <span class="registry-count mono">0 RECORDS</span>
+                    </div>
+                    <div class="empty registry-empty">
+                        <span class="registry-empty-icon">${icon(active.icon)}</span>
+                        <strong>No ${active.name.toLowerCase()} records yet</strong>
+                        <span>Registry entries will appear here once records are connected to your database.</span>
+                    </div>
+                </section>
             `;
         }
 
@@ -1458,7 +1467,7 @@
             $("main").innerHTML =
                 {
                     dashboard: dash,
-                    members,
+                    registry,
                     reports,
                     settings
                 }[S.tab]();
@@ -1518,6 +1527,13 @@
             const themeButton = e.target.closest("[data-theme]");
             if (themeButton) {
                 applyTheme(themeButton.dataset.theme);
+                render();
+                return;
+            }
+
+            const categoryButton = e.target.closest("[data-registry-category]");
+            if (categoryButton) {
+                S.registryCategory = categoryButton.dataset.registryCategory;
                 render();
                 return;
             }
