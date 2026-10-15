@@ -17,25 +17,21 @@
 
     <style>
         :root {
+            color-scheme: dark;
             --bg: #05030a;
-            --glow: #2e1052;
+            --bg-glow: #2e1052;
             --card: rgba(22, 12, 36, 0.75);
-            --card-top: rgba(38, 18, 64, 0.65);
-            --card-bottom: rgba(10, 5, 18, 0.85);
             --side: #080410;
             --fg: #ffffff;
             --mut: #a69bbd;
             --pri: #a855f7;
+            --pri-rgb: 168, 85, 247;
             --acc: #e9d5ff;
+            --acc-rgb: 233, 213, 255;
             --cy: #f3e8ff;
+            --cy-rgb: 243, 232, 255;
             --line: rgba(255, 255, 255, .09);
-            --chart1: #a855f7;
-            --chart2: #e9d5ff;
-            --chart-grid: rgba(255,255,255,.12);
-            --pri-soft: rgba(168,85,247,.22);
-            --acc-soft: rgba(233,213,255,.16);
-            --swatch-dark: #080410;
-            --swatch-mid: #2e1052
+            --glass-blur: 16px
         }
 
         * {
@@ -50,11 +46,34 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--bg) 75%);
+            background: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg) 75%);
             background-attachment: fixed;
             color: var(--fg);
             font: 14px/1.5 Inter, sans-serif;
-            overflow: hidden
+            overflow: hidden;
+            transition: background .25s ease, color .2s ease
+        }
+
+        body.no-glow {
+            background: var(--bg)
+        }
+
+        body.compact main {
+            padding: 16px;
+            gap: 16px
+        }
+
+        body.compact .card {
+            padding: 14px
+        }
+
+        body.compact .stat .v {
+            font-size: 20px;
+            margin: 6px 0 2px
+        }
+
+        body.compact header {
+            padding: 12px 20px
         }
 
         button,
@@ -86,7 +105,7 @@
         aside {
             width: 240px;
             flex-shrink: 0;
-            background: linear-gradient(180deg, var(--side) 0%, var(--bg) 100%);
+            background: linear-gradient(180deg, var(--side) 0%, #030106 100%);
             border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
@@ -144,10 +163,10 @@
 
         nav button.on {
             background: linear-gradient(90deg,
-                    var(--pri-soft) 0%,
-                    var(--acc-soft) 100%);
+                    rgba(168, 85, 247, .32) 0%,
+                    rgba(243, 232, 255, .12) 100%);
             color: #ffffff;
-            border: 1px solid color-mix(in srgb, var(--acc) 40%, transparent)
+            border: 1px solid rgba(233, 213, 255, .4)
         }
 
         nav button.on::after {
@@ -193,9 +212,9 @@
             place-items: center;
             font-size: 12px;
             font-weight: 700;
-            color: var(--bg);
+            color: #05030a;
             flex-shrink: 0;
-            box-shadow: 0 0 10px color-mix(in srgb, var(--acc) 40%, transparent)
+            box-shadow: 0 0 10px rgba(233, 213, 255, .4)
         }
 
         /* User information */
@@ -242,7 +261,7 @@
         .logout:hover {
             color: var(--fg);
             border-color: var(--pri);
-            background: var(--pri-soft);
+            background: rgba(168, 85, 247, .10);
         }
 
         .logout:active {
@@ -264,7 +283,7 @@
             align-items: center;
             gap: 16px;
             padding: 16px 24px;
-            background: color-mix(in srgb, var(--bg) 88%, transparent);
+            background: rgba(5, 3, 10, .85);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--line)
         }
@@ -341,7 +360,78 @@
             border: 1px solid rgba(255, 255, 255, .08);
             color: var(--mut);
             display: grid;
-            place-items: center
+            place-items: center;
+            position: relative;
+            transition: all .2s ease
+        }
+
+        .bell:hover {
+            color: var(--fg);
+            border-color: rgba(255, 255, 255, .2);
+            background: rgba(255, 255, 255, .08)
+        }
+
+        .bell-dot {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--pri);
+            box-shadow: 0 0 8px var(--pri);
+            pointer-events: none;
+            transition: opacity .2s ease
+        }
+
+        .bell-dot.hidden {
+            display: none
+        }
+
+        .settings-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: var(--mut);
+            display: grid;
+            place-items: center;
+            transition: all .2s ease;
+            position: relative;
+            cursor: pointer
+        }
+
+        .settings-btn:hover {
+            color: var(--fg);
+            border-color: var(--pri);
+            background: rgba(var(--pri-rgb), .12);
+            box-shadow: 0 0 12px rgba(var(--pri-rgb), .3);
+            transform: rotate(25deg)
+        }
+
+        .settings-btn:active {
+            transform: rotate(50deg) scale(.95)
+        }
+
+        .settings-user-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: var(--mut);
+            display: grid;
+            place-items: center;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            cursor: pointer
+        }
+
+        .settings-user-btn:hover {
+            color: var(--fg);
+            border-color: var(--pri);
+            background: rgba(var(--pri-rgb), .12);
+            transform: rotate(25deg)
         }
 
         main {
@@ -364,13 +454,15 @@
 
         .card {
             background: linear-gradient(135deg,
-                    var(--card-top) 0%,
-                    var(--card-bottom) 100%);
+                    rgba(var(--pri-rgb), 0.12) 0%,
+                    var(--card) 60%,
+                    rgba(10, 5, 18, 0.9) 100%);
             border: 1px solid var(--line);
             border-radius: 12px;
             padding: 20px;
             min-width: 0;
-            backdrop-filter: blur(12px)
+            backdrop-filter: blur(var(--glass-blur, 12px));
+            transition: border-color .2s ease
         }
 
         .card h3 {
@@ -411,9 +503,9 @@
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 99px;
-            background: var(--acc-soft);
+            background: rgba(233, 213, 255, .15);
             color: var(--acc);
-            border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent)
+            border: 1px solid rgba(233, 213, 255, .3)
         }
 
         .stat .ic {
@@ -442,9 +534,9 @@
         }
 
         .rng button.on {
-            background: var(--pri-soft);
+            background: rgba(168, 85, 247, .25);
             color: #ffffff;
-            border: 1px solid color-mix(in srgb, var(--acc) 40%, transparent)
+            border: 1px solid rgba(233, 213, 255, .4)
         }
 
         .leg {
@@ -543,49 +635,6 @@
             font-weight: 500
         }
 
-        /* ================= THEME SETTINGS ================= */
-        .settings-card { max-width: 760px; }
-        .theme-intro { color: var(--mut); font-size: 12px; margin: 6px 0 22px; }
-        .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
-        .theme-option {
-            text-align: left; padding: 14px; border-radius: 12px;
-            border: 1px solid var(--line); background: rgba(255,255,255,.025);
-            transition: border-color .2s, transform .2s, background .2s;
-        }
-        .theme-option:hover { border-color: var(--pri); transform: translateY(-2px); }
-        .theme-option.selected { border-color: var(--acc); background: rgba(255,255,255,.06); box-shadow: 0 0 0 1px var(--acc); }
-        .theme-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; font-weight: 600; font-size: 12px; }
-        .theme-check { color: var(--acc); font-size: 10px; }
-        .theme-swatches { display: flex; gap: 7px; }
-        .theme-swatches i { display: block; height: 32px; flex: 1; border-radius: 6px; background: var(--swatch); border: 1px solid rgba(255,255,255,.12); }
-        .theme-note { color: var(--mut); font-size: 10px; margin-top: 18px; }
-        .registry-card { max-width: 100%; }
-        .registry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-        .registry-option { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 16px; text-align: left; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card-top) 55%, transparent); transition: .2s ease; }
-        .registry-option:hover { border-color: var(--pri); transform: translateY(-1px); }
-        .registry-option.selected { border-color: var(--acc); background: var(--pri-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 25%, transparent); }
-        .registry-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; color: var(--acc); background: var(--acc-soft); }
-        .registry-icon svg, .registry-empty-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-        .registry-option-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .registry-option-text strong { color: var(--fg); font-size: 13px; }
-        .registry-option-text small { color: var(--mut); font-size: 10px; }
-        .registry-arrow { margin-left: auto; color: var(--acc); font-size: 18px; }
-        .registry-detail-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-        .registry-count { color: var(--acc); background: var(--acc-soft); border: 1px solid var(--line); border-radius: 99px; padding: 4px 8px; font-size: 10px; white-space: nowrap; }
-        .registry-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 170px; justify-content: center; }
-        .registry-empty-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 4px; color: var(--acc); background: var(--acc-soft); border-radius: 14px; }
-        .registry-empty strong { color: var(--fg); font-size: 13px; }
-        .registry-empty span:last-child { max-width: 360px; }
-        .registry-add { border: 1px solid var(--pri); border-radius: 8px; padding: 10px 13px; background: var(--pri-soft); color: var(--acc); font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .registry-table-wrap { width: 100%; overflow-x: auto; }
-        .registry-table { width: 100%; border-collapse: collapse; min-width: 650px; text-align: left; }
-        .registry-table th { color: var(--mut); font-size: 9px; letter-spacing: .1em; font-weight: 700; padding: 13px 12px; border-bottom: 1px solid var(--line); }
-        .registry-table td { color: var(--fg); font-size: 11px; padding: 14px 12px; border-bottom: 1px solid var(--line); }
-        .registry-table tbody tr:hover { background: rgba(255,255,255,.025); }
-        .registry-delete { color: #fca5a5; background: transparent; border: 1px solid rgba(252,165,165,.25); border-radius: 6px; padding: 5px 8px; font-size: 10px; }
-        .registry-table-footer { text-align: right; padding-top: 12px; color: var(--mut); font-size: 9px; }
-        @media(max-width:600px) { .registry-detail-heading { flex-direction: column; } .registry-add { width: 100%; } }
-
         .veil {
             display: none;
             position: fixed;
@@ -636,6 +685,809 @@
                 padding: 5px 7px;
                 font-size: 9px;
             }
+
+            .settings-drawer {
+                width: 100vw;
+            }
+
+            .notif-popover {
+                right: 12px;
+                width: calc(100vw - 24px);
+            }
+        }
+
+        /* ================= NOTIFICATIONS POPOVER ================= */
+
+        .notif-popover {
+            position: absolute;
+            top: 64px;
+            right: 72px;
+            width: 320px;
+            background: rgba(14, 8, 24, .95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, .6);
+            z-index: 50;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeInDown .2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .notif-popover.open {
+            display: flex;
+        }
+
+        .notif-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .notif-clear-btn {
+            font-size: 10px;
+            color: var(--mut);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            transition: all .2s;
+        }
+
+        .notif-clear-btn:hover {
+            color: var(--fg);
+            border-color: var(--pri);
+            background: rgba(var(--pri-rgb), .1);
+        }
+
+        .notif-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .notif-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .02);
+            font-size: 11px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            transition: background .15s;
+        }
+
+        .notif-item:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .notif-item-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--pri);
+            margin-top: 5px;
+            flex-shrink: 0;
+            box-shadow: 0 0 6px var(--pri);
+        }
+
+        .notif-item b {
+            display: block;
+            color: var(--fg);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .notif-item span {
+            color: var(--mut);
+            font-size: 10px;
+        }
+
+        /* ================= SETTINGS DRAWER ================= */
+
+        .settings-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        .settings-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .settings-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 440px;
+            max-width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: linear-gradient(180deg, var(--side) 0%, #030106 100%);
+            border-left: 1px solid var(--line);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, .7);
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .settings-drawer.open {
+            transform: translateX(0);
+        }
+
+        .sd-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, .02);
+            flex-shrink: 0;
+        }
+
+        .sd-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sd-tag {
+            font-size: 9px;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--mut);
+        }
+
+        .sd-head h2 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            background: linear-gradient(135deg, #ffffff 0%, var(--acc) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sd-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: var(--mut);
+            display: grid;
+            place-items: center;
+            transition: all .2s;
+        }
+
+        .sd-close:hover {
+            color: var(--fg);
+            border-color: var(--pri);
+            background: rgba(var(--pri-rgb), .12);
+            transform: rotate(90deg);
+        }
+
+        .sd-tabs {
+            display: flex;
+            padding: 8px 16px;
+            gap: 6px;
+            background: rgba(0, 0, 0, .3);
+            border-bottom: 1px solid var(--line);
+            flex-shrink: 0;
+        }
+
+        .sd-tab {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--mut);
+            border: 1px solid transparent;
+            text-align: center;
+            transition: all .2s;
+        }
+
+        .sd-tab:hover {
+            color: var(--fg);
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .sd-tab.on {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(var(--pri-rgb), .3) 0%, rgba(var(--cy-rgb), .1) 100%);
+            border-color: rgba(var(--acc-rgb), .4);
+            box-shadow: 0 0 10px rgba(var(--pri-rgb), .15);
+        }
+
+        .sd-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .sd-pane {
+            display: none;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .sd-pane.on {
+            display: flex;
+        }
+
+        /* Live Preview Card */
+        .preview-card {
+            background: linear-gradient(135deg, rgba(var(--pri-rgb), .2) 0%, rgba(10, 5, 20, .85) 100%);
+            border: 1px solid rgba(var(--acc-rgb), .35);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 0 20px rgba(var(--pri-rgb), .15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 99px;
+            background: rgba(var(--acc-rgb), .18);
+            color: var(--acc);
+            border: 1px solid rgba(var(--acc-rgb), .3);
+            font-weight: 600;
+        }
+
+        .preview-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .preview-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--pri) 0%, var(--cy) 100%);
+            color: #05030a;
+            box-shadow: 0 0 12px rgba(var(--pri-rgb), .4);
+            border: none;
+        }
+
+        .preview-pill {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 99px;
+            background: rgba(var(--acc-rgb), .15);
+            color: var(--acc);
+            border: 1px solid rgba(var(--acc-rgb), .3);
+        }
+
+        .preview-bar-track {
+            height: 6px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, .08);
+            overflow: hidden;
+        }
+
+        .preview-bar-fill {
+            width: 68%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--pri), var(--cy));
+            border-radius: 99px;
+            box-shadow: 0 0 8px var(--pri);
+        }
+
+        /* Sections */
+        .sd-sec {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sd-sec-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            color: var(--fg);
+        }
+
+        .sd-sec-desc {
+            font-size: 11px;
+            color: var(--mut);
+            line-height: 1.4;
+            margin-top: -4px;
+        }
+
+        /* Preset Grid */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .preset-card {
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .08);
+            cursor: pointer;
+            transition: all .2s ease;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .preset-card:hover {
+            border-color: rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .06);
+            transform: translateY(-1px);
+        }
+
+        .preset-card.on {
+            border-color: var(--acc);
+            background: rgba(var(--pri-rgb), .15);
+            box-shadow: 0 0 14px rgba(var(--pri-rgb), .25);
+        }
+
+        .preset-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preset-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .preset-badge {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, .08);
+            color: var(--mut);
+        }
+
+        .preset-swatches {
+            display: flex;
+            gap: 6px;
+        }
+
+        .preset-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, .4);
+            box-shadow: 0 0 4px rgba(0, 0, 0, .4);
+        }
+
+        /* Color Picker Rows */
+        .color-picker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cp-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid rgba(255, 255, 255, .06);
+            transition: border-color .2s;
+        }
+
+        .cp-row:hover {
+            border-color: rgba(255, 255, 255, .15);
+        }
+
+        .cp-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .cp-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .cp-hint {
+            font-size: 10px;
+            color: var(--mut);
+        }
+
+        .cp-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .cp-input {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, .2);
+            cursor: pointer;
+            padding: 0;
+            background: none;
+            overflow: hidden;
+        }
+
+        .cp-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .cp-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+
+        .cp-hex {
+            width: 72px;
+            padding: 5px 6px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .1);
+            color: var(--fg);
+            text-align: center;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .cp-hex:focus {
+            border-color: var(--pri);
+        }
+
+        /* Option Groups & Segmented Buttons */
+        .opt-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .opt-label-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .opt-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .opt-sub {
+            font-size: 10px;
+            color: var(--mut);
+        }
+
+        .btn-group {
+            display: flex;
+            background: rgba(0, 0, 0, .4);
+            border-radius: 6px;
+            padding: 3px;
+            gap: 3px;
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .btn-opt {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--mut);
+            text-align: center;
+            transition: all .2s;
+        }
+
+        .btn-opt:hover {
+            color: var(--fg);
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .btn-opt.on {
+            background: rgba(var(--pri-rgb), .35);
+            color: #ffffff;
+            border: 1px solid rgba(var(--acc-rgb), .4);
+            box-shadow: 0 0 8px rgba(var(--pri-rgb), .2);
+        }
+
+        /* Toggle Switches */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .15);
+            transition: .25s ease;
+            border-radius: 22px;
+        }
+
+        .slider::before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: #ffffff;
+            transition: .25s ease;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--pri);
+            border-color: var(--acc);
+            box-shadow: 0 0 10px rgba(var(--pri-rgb), .4);
+        }
+
+        input:checked + .slider::before {
+            transform: translateX(16px);
+            background: #ffffff;
+        }
+
+        .test-sound-btn {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .1);
+            color: var(--mut);
+            transition: all .2s;
+        }
+
+        .test-sound-btn:hover {
+            color: var(--fg);
+            border-color: var(--pri);
+        }
+
+        /* Backup Tab Actions */
+        .backup-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .sd-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .1);
+            color: var(--fg);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all .2s;
+        }
+
+        .sd-action-btn:hover {
+            border-color: var(--pri);
+            background: rgba(var(--pri-rgb), .12);
+        }
+
+        .sd-action-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .import-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .import-area {
+            width: 100%;
+            padding: 10px;
+            font-size: 11px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, .4);
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: var(--fg);
+            outline: none;
+            resize: vertical;
+        }
+
+        .import-area:focus {
+            border-color: var(--pri);
+        }
+
+        .danger-zone {
+            padding: 14px;
+            border-radius: 8px;
+            background: rgba(244, 63, 94, .08);
+            border: 1px solid rgba(244, 63, 94, .25);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .danger-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #fda4af;
+            letter-spacing: .1em;
+        }
+
+        .danger-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(244, 63, 94, .2);
+            color: #ffffff;
+            border: 1px solid rgba(244, 63, 94, .4);
+            transition: all .2s;
+            text-align: center;
+        }
+
+        .danger-btn:hover {
+            background: rgba(244, 63, 94, .35);
+            border-color: #f43f5e;
+        }
+
+        /* Drawer Footer */
+        .sd-foot {
+            padding: 16px 24px;
+            border-top: 1px solid var(--line);
+            background: rgba(255, 255, 255, .02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .sd-foot-reset {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--mut);
+            border: 1px solid rgba(255, 255, 255, .08);
+            transition: all .2s;
+        }
+
+        .sd-foot-reset:hover {
+            color: var(--fg);
+            border-color: rgba(255, 255, 255, .2);
+        }
+
+        .sd-foot-save {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--pri) 0%, var(--cy) 100%);
+            color: #05030a;
+            box-shadow: 0 0 12px rgba(var(--pri-rgb), .35);
+            border: none;
+            transition: all .2s;
+        }
+
+        .sd-foot-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 16px rgba(var(--pri-rgb), .5);
+        }
+
+        /* Toast */
+        .sd-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: rgba(14, 8, 26, .96);
+            border: 1px solid var(--acc);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .7), 0 0 15px rgba(var(--pri-rgb), .3);
+            color: #ffffff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 200;
+            transform: translateY(80px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sd-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .sd-toast svg {
+            stroke: var(--acc);
+            fill: none;
+            stroke-width: 2.5;
+            flex-shrink: 0;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -667,6 +1519,13 @@
                         admin@jrcsee.org
                     </small>
                 </div>
+
+                <button class="settings-user-btn ic" id="openSettingsUser" title="Settings &amp; Customization" type="button" aria-label="Settings">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
 
                 <button class="logout mono" id="logout" title="Log out" type="button">
                     Logout
@@ -720,7 +1579,7 @@
 
                 </label>
 
-                <button class="bell ic" aria-label="Notifications">
+                <button class="bell ic" id="notifBell" aria-label="Notifications" title="Notifications">
 
                     <svg viewBox="0 0 24 24">
 
@@ -729,9 +1588,34 @@
 
                     </svg>
 
+                    <span class="bell-dot" id="bellDot"></span>
+
+                </button>
+
+                <!-- SETTINGS BUTTON -->
+                <button class="settings-btn ic" id="openSettings" aria-label="Settings" title="Customize Theme &amp; Web Options">
+
+                    <svg viewBox="0 0 24 24">
+
+                        <circle cx="12" cy="12" r="3" />
+
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+
+                    </svg>
+
                 </button>
 
             </header>
+
+            <!-- NOTIFICATIONS POPOVER -->
+            <div class="notif-popover" id="notifPopover" role="dialog" aria-hidden="true">
+                <div class="notif-header">
+                    <span class="mono" style="font-size:11px;font-weight:700;letter-spacing:.08em;">SYSTEM ALERTS</span>
+                    <button class="notif-clear-btn mono" id="clearNotifBtn" type="button">Clear</button>
+                </div>
+                <div class="notif-list" id="notifList"></div>
+            </div>
 
             <main id="main"></main>
 
@@ -739,8 +1623,573 @@
 
     </div>
 
+    <!-- ================= SETTINGS DRAWER ================= -->
+    <div class="settings-backdrop" id="settingsBackdrop" aria-hidden="true"></div>
+
+    <aside class="settings-drawer" id="settingsDrawer" role="dialog" aria-modal="true" aria-label="Settings Panel" aria-hidden="true">
+
+        <div class="sd-head">
+            <div class="sd-title-wrap">
+                <div class="sd-tag mono">CUSTOMIZATION</div>
+                <h2 class="disp">THEME &amp; WEB OPTIONS</h2>
+            </div>
+            <button class="sd-close ic" id="settingsCloseBtn" aria-label="Close settings" type="button">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Segmented Tab Switcher -->
+        <div class="sd-tabs">
+            <button class="sd-tab on mono" data-stab="colors" type="button">🎨 Theme Colors</button>
+            <button class="sd-tab mono" data-stab="options" type="button">🌐 Web Options</button>
+            <button class="sd-tab mono" data-stab="backup" type="button">⚡ Backup</button>
+        </div>
+
+        <!-- Scrollable Drawer Body -->
+        <div class="sd-body">
+
+            <!-- TAB 1: COLORS & THEMES -->
+            <div class="sd-pane on" id="paneColors">
+
+                <!-- Live Preview Widget -->
+                <div class="preview-card">
+                    <div class="preview-head">
+                        <span class="mono" style="font-size:10px;text-transform:uppercase;color:var(--mut);">Active Palette Preview</span>
+                        <span class="preview-badge mono" id="activePresetName">Cosmic Purple</span>
+                    </div>
+                    <div class="preview-row">
+                        <button class="preview-btn mono" type="button">Interactive Button</button>
+                        <span class="preview-pill mono">▲ 14.2% Growth</span>
+                    </div>
+                    <div class="preview-bar-track">
+                        <div class="preview-bar-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Curated Palette Presets -->
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">COLOR PALETTE PRESETS</div>
+                    <p class="sd-sec-desc">Choose from curated high-tech palettes or build your own below</p>
+                    <div class="preset-grid" id="presetGrid"></div>
+                </div>
+
+                <!-- Custom Color Pickers -->
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">FINE-TUNE CUSTOM COLORS</div>
+                    <p class="sd-sec-desc">Customize specific hex codes in real-time across cards, charts &amp; accents</p>
+
+                    <div class="color-picker-list">
+                        <!-- Primary Accent -->
+                        <div class="cp-row">
+                            <div class="cp-info">
+                                <label class="cp-label" for="colPri">Primary Color</label>
+                                <span class="cp-hint">Key buttons, charts, highlights &amp; glows</span>
+                            </div>
+                            <div class="cp-controls">
+                                <input type="color" class="cp-input" id="colPri" value="#a855f7" aria-label="Primary Color">
+                                <input type="text" class="cp-hex mono" id="hexPri" value="#a855f7" maxlength="7" aria-label="Primary Hex">
+                            </div>
+                        </div>
+
+                        <!-- Secondary / Accent -->
+                        <div class="cp-row">
+                            <div class="cp-info">
+                                <label class="cp-label" for="colAcc">Secondary Accent</label>
+                                <span class="cp-hint">Gradients, stat pills &amp; card glow outlines</span>
+                            </div>
+                            <div class="cp-controls">
+                                <input type="color" class="cp-input" id="colAcc" value="#e9d5ff" aria-label="Secondary Accent">
+                                <input type="text" class="cp-hex mono" id="hexAcc" value="#e9d5ff" maxlength="7" aria-label="Secondary Hex">
+                            </div>
+                        </div>
+
+                        <!-- Highlight / Cyan -->
+                        <div class="cp-row">
+                            <div class="cp-info">
+                                <label class="cp-label" for="colCy">Tertiary Highlight</label>
+                                <span class="cp-hint">Clock time digits &amp; chart secondary line</span>
+                            </div>
+                            <div class="cp-controls">
+                                <input type="color" class="cp-input" id="colCy" value="#f3e8ff" aria-label="Tertiary Highlight">
+                                <input type="text" class="cp-hex mono" id="hexCy" value="#f3e8ff" maxlength="7" aria-label="Tertiary Hex">
+                            </div>
+                        </div>
+
+                        <!-- Radial Glow Tint -->
+                        <div class="cp-row">
+                            <div class="cp-info">
+                                <label class="cp-label" for="colBgGlow">Ambient Glow Tint</label>
+                                <span class="cp-hint">Top radial ambient background atmosphere</span>
+                            </div>
+                            <div class="cp-controls">
+                                <input type="color" class="cp-input" id="colBgGlow" value="#2e1052" aria-label="Ambient Glow Tint">
+                                <input type="text" class="cp-hex mono" id="hexBgGlow" value="#2e1052" maxlength="7" aria-label="Ambient Glow Hex">
+                            </div>
+                        </div>
+
+                        <!-- Background Deep Tone -->
+                        <div class="cp-row">
+                            <div class="cp-info">
+                                <label class="cp-label" for="colBg">Canvas Base Background</label>
+                                <span class="cp-hint">Base dark background canvas shade</span>
+                            </div>
+                            <div class="cp-controls">
+                                <input type="color" class="cp-input" id="colBg" value="#05030a" aria-label="Base Background">
+                                <input type="text" class="cp-hex mono" id="hexBg" value="#05030a" maxlength="7" aria-label="Base Background Hex">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: WEB & INTERFACE OPTIONS -->
+            <div class="sd-pane" id="paneOptions">
+
+                <!-- Visual Atmosphere -->
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">VISUAL ATMOSPHERE</div>
+
+                    <!-- Ambient Glow -->
+                    <div class="opt-group">
+                        <div class="opt-label-group">
+                            <span class="opt-title">Ambient Background Glow</span>
+                            <span class="opt-sub">Radial spotlight behind the dashboard</span>
+                        </div>
+                        <div class="btn-group" id="glowGroup">
+                            <button class="mono btn-opt on" data-val="vivid" type="button">Vivid</button>
+                            <button class="mono btn-opt" data-val="soft" type="button">Soft</button>
+                            <button class="mono btn-opt" data-val="off" type="button">Off</button>
+                        </div>
+                    </div>
+
+                    <!-- Glassmorphism Blur -->
+                    <div class="opt-group">
+                        <div class="opt-label-group">
+                            <span class="opt-title">Glassmorphism Blur</span>
+                            <span class="opt-sub">Backdrop blur filter on cards and header</span>
+                        </div>
+                        <div class="btn-group" id="blurGroup">
+                            <button class="mono btn-opt on" data-val="high" type="button">High (16px)</button>
+                            <button class="mono btn-opt" data-val="low" type="button">Low (6px)</button>
+                            <button class="mono btn-opt" data-val="off" type="button">Solid</button>
+                        </div>
+                    </div>
+
+                    <!-- Layout Density -->
+                    <div class="opt-group">
+                        <div class="opt-label-group">
+                            <span class="opt-title">Interface Density</span>
+                            <span class="opt-sub">Spacing and card padding mode</span>
+                        </div>
+                        <div class="btn-group" id="densityGroup">
+                            <button class="mono btn-opt on" data-val="standard" type="button">Standard</button>
+                            <button class="mono btn-opt" data-val="compact" type="button">Compact</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clock & Header -->
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">CLOCK &amp; HEADER</div>
+
+                    <!-- Time Format -->
+                    <div class="opt-group">
+                        <div class="opt-label-group">
+                            <span class="opt-title">Clock Format</span>
+                            <span class="opt-sub">12-Hour AM/PM or 24-Hour Military format</span>
+                        </div>
+                        <div class="btn-group" id="clockFormatGroup">
+                            <button class="mono btn-opt on" data-val="12" type="button">12-Hour (AM/PM)</button>
+                            <button class="mono btn-opt" data-val="24" type="button">24-Hour</button>
+                        </div>
+                    </div>
+
+                    <!-- Show Seconds Toggle -->
+                    <div class="toggle-row">
+                        <div class="opt-label-group">
+                            <label class="opt-title" for="toggleSeconds">Display Seconds</label>
+                            <span class="opt-sub">Show live ticking seconds in clock</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleSeconds" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Show Date Toggle -->
+                    <div class="toggle-row">
+                        <div class="opt-label-group">
+                            <label class="opt-title" for="toggleDate">Display Calendar Date</label>
+                            <span class="opt-sub">Show full day, month and year</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleDate" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Web Experience -->
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">WEB EXPERIENCE</div>
+
+                    <!-- Notification Dot -->
+                    <div class="toggle-row">
+                        <div class="opt-label-group">
+                            <label class="opt-title" for="toggleBellDot">Unread Notification Dot</label>
+                            <span class="opt-sub">Show glowing alert dot on header bell</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleBellDot" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Tactile Audio Feedback -->
+                    <div class="toggle-row">
+                        <div class="opt-label-group">
+                            <label class="opt-title" for="toggleSound">Interface Sound Feedback</label>
+                            <span class="opt-sub">Subtle synthesized click tone on interactions</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <button class="test-sound-btn mono" id="testSoundBtn" type="button" title="Test click sound">Test</button>
+                            <label class="switch">
+                                <input type="checkbox" id="toggleSound">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Default Starting Tab -->
+                    <div class="opt-group">
+                        <div class="opt-label-group">
+                            <span class="opt-title">Default Startup View</span>
+                            <span class="opt-sub">Landing view when loading the dashboard</span>
+                        </div>
+                        <div class="btn-group" id="startTabGroup">
+                            <button class="mono btn-opt on" data-val="dashboard" type="button">Dashboard</button>
+                            <button class="mono btn-opt" data-val="members" type="button">Members</button>
+                            <button class="mono btn-opt" data-val="reports" type="button">Reports</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 3: BACKUP & PRESETS -->
+            <div class="sd-pane" id="paneBackup">
+                <div class="sd-sec">
+                    <div class="sd-sec-title disp">CONFIGURATION BACKUP &amp; RESET</div>
+                    <p class="sd-sec-desc">Save your customizations, share them as JSON, or restore default settings.</p>
+
+                    <div class="backup-actions">
+                        <button class="sd-action-btn mono" id="exportBtn" type="button">
+                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            Export Configuration to Clipboard
+                        </button>
+
+                        <div class="import-wrap">
+                            <textarea class="import-area mono" id="importInput" placeholder="Paste exported JSON settings here..." rows="3"></textarea>
+                            <button class="sd-action-btn mono" id="importBtn" type="button">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                Import &amp; Apply Configuration
+                            </button>
+                        </div>
+
+                        <div class="danger-zone">
+                            <div class="danger-title mono">FACTORY RESET</div>
+                            <p class="sd-sec-desc" style="margin-bottom:10px;">Reverts all theme colors and web options to default cosmic purple.</p>
+                            <button class="danger-btn mono" id="resetAllBtn" type="button">Reset All to Factory Defaults</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="sd-foot">
+            <button class="sd-foot-reset mono" id="footerResetBtn" type="button">Reset Defaults</button>
+            <button class="sd-foot-save mono" id="footerSaveBtn" type="button">Done</button>
+        </div>
+    </aside>
+
+    <!-- Floating Toast Notification -->
+    <div class="sd-toast mono" id="settingsToast" aria-live="polite">
+        <svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="toastMsg">Settings updated successfully!</span>
+    </div>
 
     <script>
+
+        /* ================= THEME & SETTINGS ENGINE ================= */
+
+        const THEME_PRESETS = {
+            purple: {
+                id: "purple",
+                name: "Cosmic Purple",
+                pri: "#a855f7",
+                acc: "#e9d5ff",
+                cy: "#f3e8ff",
+                bg: "#05030a",
+                bgGlow: "#2e1052",
+                badge: "Default"
+            },
+            cyan: {
+                id: "cyan",
+                name: "Cyber Neon Cyan",
+                pri: "#06b6d4",
+                acc: "#67e8f9",
+                cy: "#cffafe",
+                bg: "#020617",
+                bgGlow: "#082f49",
+                badge: "Cyber"
+            },
+            emerald: {
+                id: "emerald",
+                name: "Emerald Matrix",
+                pri: "#10b981",
+                acc: "#6ee7b7",
+                cy: "#d1fae5",
+                bg: "#020d08",
+                bgGlow: "#064e3b",
+                badge: "Matrix"
+            },
+            amber: {
+                id: "amber",
+                name: "Solar Amber",
+                pri: "#f59e0b",
+                acc: "#fde047",
+                cy: "#fef9c3",
+                bg: "#080502",
+                bgGlow: "#451a03",
+                badge: "Warm"
+            },
+            ruby: {
+                id: "ruby",
+                name: "Crimson Rose",
+                pri: "#f43f5e",
+                acc: "#fda4af",
+                cy: "#ffe4e6",
+                bg: "#080205",
+                bgGlow: "#4c0519",
+                badge: "Vivid"
+            },
+            sapphire: {
+                id: "sapphire",
+                name: "Electric Sapphire",
+                pri: "#3b82f6",
+                acc: "#93c5fd",
+                cy: "#dbeafe",
+                bg: "#030712",
+                bgGlow: "#172554",
+                badge: "Tech"
+            },
+            slate: {
+                id: "slate",
+                name: "Stealth Slate",
+                pri: "#94a3b8",
+                acc: "#e2e8f0",
+                cy: "#f8fafc",
+                bg: "#000000",
+                bgGlow: "#1e293b",
+                badge: "OLED"
+            }
+        };
+
+        const DEFAULT_SETTINGS = {
+            preset: "purple",
+            pri: "#a855f7",
+            acc: "#e9d5ff",
+            cy: "#f3e8ff",
+            bg: "#05030a",
+            bgGlow: "#2e1052",
+            glowMode: "vivid",
+            blurMode: "high",
+            density: "standard",
+            clockFormat: "12",
+            clockSeconds: true,
+            clockDate: true,
+            bellDot: true,
+            soundEffects: false,
+            startTab: "dashboard"
+        };
+
+        function hexToRgb(hex) {
+            if (!hex) return "168, 85, 247";
+            hex = String(hex).replace("#", "").trim();
+            if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+            const num = parseInt(hex, 16);
+            if (isNaN(num)) return "168, 85, 247";
+            return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+        }
+
+        let appSettings = (() => {
+            try {
+                const raw = localStorage.getItem("jrcsee_web_settings");
+                if (raw) {
+                    return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+                }
+            } catch (e) {
+                console.warn("Could not load settings:", e);
+            }
+            return Object.assign({}, DEFAULT_SETTINGS);
+        })();
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const toast = $("settingsToast");
+            const text = $("toastMsg");
+            if (!toast || !text) return;
+            text.textContent = msg;
+            toast.classList.add("show");
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove("show");
+            }, 2600);
+        }
+
+        function playClickSound() {
+            if (!appSettings.soundEffects) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.04, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.04);
+            } catch (err) {}
+        }
+
+        function applySettings(cfg, save = true) {
+            appSettings = Object.assign({}, appSettings, cfg);
+            const root = document.documentElement;
+
+            root.style.setProperty("--pri", appSettings.pri);
+            root.style.setProperty("--pri-rgb", hexToRgb(appSettings.pri));
+            root.style.setProperty("--acc", appSettings.acc);
+            root.style.setProperty("--acc-rgb", hexToRgb(appSettings.acc));
+            root.style.setProperty("--cy", appSettings.cy);
+            root.style.setProperty("--cy-rgb", hexToRgb(appSettings.cy));
+            root.style.setProperty("--bg", appSettings.bg);
+
+            // Glow Mode
+            if (appSettings.glowMode === "off") {
+                document.body.classList.add("no-glow");
+                root.style.setProperty("--bg-glow", appSettings.bg);
+            } else {
+                document.body.classList.remove("no-glow");
+                root.style.setProperty("--bg-glow", appSettings.bgGlow);
+            }
+
+            // Blur Mode
+            if (appSettings.blurMode === "off") {
+                root.style.setProperty("--glass-blur", "0px");
+            } else if (appSettings.blurMode === "low") {
+                root.style.setProperty("--glass-blur", "6px");
+            } else {
+                root.style.setProperty("--glass-blur", "16px");
+            }
+
+            // Density
+            if (appSettings.density === "compact") {
+                document.body.classList.add("compact");
+            } else {
+                document.body.classList.remove("compact");
+            }
+
+            // Sync AI activity colors
+            if (typeof AI !== "undefined") {
+                AI.member = appSettings.pri;
+                AI.report = appSettings.acc;
+                AI.event = appSettings.cy;
+            }
+
+            // Bell dot indicator
+            const bellDot = $("bellDot");
+            if (bellDot) {
+                bellDot.classList.toggle("hidden", !appSettings.bellDot);
+            }
+
+            // Sync Drawer Controls
+            syncDrawerControls();
+
+            // Clock update
+            if (typeof updateClock === "function") {
+                updateClock();
+            }
+
+            if (save) {
+                try {
+                    localStorage.setItem("jrcsee_web_settings", JSON.stringify(appSettings));
+                } catch (e) {
+                    console.warn("Could not save settings:", e);
+                }
+            }
+        }
+
+        function syncDrawerControls() {
+            // Active preset name in preview
+            const presetObj = THEME_PRESETS[appSettings.preset];
+            const badgeEl = $("activePresetName");
+            if (badgeEl) {
+                badgeEl.textContent = presetObj ? presetObj.name : "Custom Palette";
+            }
+
+            // Color inputs & hex inputs
+            const colorMap = [
+                ["colPri", "hexPri", appSettings.pri],
+                ["colAcc", "hexAcc", appSettings.acc],
+                ["colCy", "hexCy", appSettings.cy],
+                ["colBgGlow", "hexBgGlow", appSettings.bgGlow],
+                ["colBg", "hexBg", appSettings.bg]
+            ];
+            colorMap.forEach(([colId, hexId, val]) => {
+                const cEl = $(colId);
+                const hEl = $(hexId);
+                if (cEl && val) cEl.value = val;
+                if (hEl && val) hEl.value = val;
+            });
+
+            // Preset grid active state
+            document.querySelectorAll(".preset-card").forEach(el => {
+                el.classList.toggle("on", el.dataset.preset === appSettings.preset);
+            });
+
+            // Option groups
+            const syncGroup = (groupId, currentVal) => {
+                const grp = $(groupId);
+                if (!grp) return;
+                grp.querySelectorAll(".btn-opt").forEach(btn => {
+                    btn.classList.toggle("on", btn.dataset.val === String(currentVal));
+                });
+            };
+
+            syncGroup("glowGroup", appSettings.glowMode);
+            syncGroup("blurGroup", appSettings.blurMode);
+            syncGroup("densityGroup", appSettings.density);
+            syncGroup("clockFormatGroup", appSettings.clockFormat);
+            syncGroup("startTabGroup", appSettings.startTab);
+
+            // Switches
+            const setCheck = (id, val) => {
+                const el = $(id);
+                if (el) el.checked = Boolean(val);
+            };
+            setCheck("toggleSeconds", appSettings.clockSeconds);
+            setCheck("toggleDate", appSettings.clockDate);
+            setCheck("toggleBellDot", appSettings.bellDot);
+            setCheck("toggleSound", appSettings.soundEffects);
+        }
 
         const GROWTH = [
             ["Jan", 120, 45],
@@ -800,11 +2249,11 @@
 
 
         const AI = {
-            report: "var(--chart2)",
-            member: "var(--chart1)",
-            milestone: "var(--acc)",
-            event: "var(--cy)",
-            update: "var(--mut)"
+            report: appSettings.acc,
+            member: appSettings.pri,
+            milestone: "#facc15",
+            event: appSettings.cy,
+            update: "#a69bbd"
         };
 
 
@@ -815,81 +2264,22 @@
                 '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'
             ],
             [
-                "registry",
-                "Registry",
+                "members",
+                "Members",
                 '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'
             ],
             [
                 "reports",
                 "Reports",
                 '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7zM14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h8"/>'
-            ],
-            [
-                "settings",
-                "Settings",
-                '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/>'
             ]
         ];
 
 
-        const THEMES = {
-            purple: {
-                name: "Midnight Purple",
-                colors: ["#05030a", "#2e1052", "#a855f7", "#e9d5ff"],
-                vars: { "--bg": "#05030a", "--glow": "#2e1052", "--side": "#080410", "--pri": "#a855f7", "--acc": "#e9d5ff", "--cy": "#f3e8ff", "--mut": "#a69bbd", "--card-top": "rgba(38, 18, 64, 0.65)", "--card-bottom": "rgba(10, 5, 18, 0.85)", "--line": "rgba(255,255,255,.09)", "--chart1": "#a855f7", "--chart2": "#e9d5ff", "--chart-grid": "rgba(255,255,255,.12)", "--pri-soft": "rgba(168,85,247,.22)", "--acc-soft": "rgba(233,213,255,.16)" }
-            },
-            ember: {
-                name: "Warm Ember",
-                colors: ["#1b110e", "#30201b", "#e28b59", "#ffc18e"],
-                vars: { "--bg": "#1b110e", "--glow": "#30201b", "--side": "#120b09", "--pri": "#e28b59", "--acc": "#ffc18e", "--cy": "#e28b59", "--mut": "#c6a99a", "--card-top": "rgba(48, 32, 27, .92)", "--card-bottom": "rgba(27, 17, 14, .96)", "--line": "rgba(255,193,142,.16)", "--chart1": "#e28b59", "--chart2": "#ffc18e", "--chart-grid": "rgba(255,193,142,.13)", "--pri-soft": "rgba(226,139,89,.22)", "--acc-soft": "rgba(255,193,142,.16)" }
-            },
-            ocean: {
-                name: "Deep Ocean",
-                colors: ["#06131b", "#0b3445", "#2aa6b8", "#a5f3fc"],
-                vars: { "--bg": "#06131b", "--glow": "#0b3445", "--side": "#030c11", "--pri": "#2aa6b8", "--acc": "#a5f3fc", "--cy": "#cffafe", "--mut": "#9ab9c3", "--card-top": "rgba(11, 52, 69, .75)", "--card-bottom": "rgba(3, 12, 17, .92)", "--line": "rgba(165,243,252,.12)", "--chart1": "#2aa6b8", "--chart2": "#a5f3fc", "--chart-grid": "rgba(165,243,252,.13)", "--pri-soft": "rgba(42,166,184,.22)", "--acc-soft": "rgba(165,243,252,.16)" }
-            },
-            forest: {
-                name: "Forest Green",
-                colors: ["#07140e", "#143526", "#4caf78", "#b7f7cf"],
-                vars: { "--bg": "#07140e", "--glow": "#143526", "--side": "#030a06", "--pri": "#4caf78", "--acc": "#b7f7cf", "--cy": "#d1fae5", "--mut": "#9ab9a7", "--card-top": "rgba(20, 53, 38, .78)", "--card-bottom": "rgba(3, 10, 6, .92)", "--line": "rgba(183,247,207,.13)", "--chart1": "#4caf78", "--chart2": "#b7f7cf", "--chart-grid": "rgba(183,247,207,.13)", "--pri-soft": "rgba(76,175,120,.22)", "--acc-soft": "rgba(183,247,207,.16)" }
-            }
-        };
-
-        function applyTheme(themeId) {
-            const theme = THEMES[themeId] || THEMES.purple;
-            Object.entries(theme.vars).forEach(([name, value]) => {
-                document.documentElement.style.setProperty(name, value);
-            });
-            localStorage.setItem("jrcsee_theme", themeId in THEMES ? themeId : "purple");
-            document.documentElement.dataset.theme = themeId in THEMES ? themeId : "purple";
-        }
-
-        function settings() {
-            const activeTheme = localStorage.getItem("jrcsee_theme") || "purple";
-            return `
-                <section class="card settings-card">
-                    <h3 class="disp">APPEARANCE</h3>
-                    <p class="theme-intro">Choose a color theme for your JRCSEE dashboard. Your choice will be saved on this device.</p>
-                    <div class="theme-grid">
-                        ${Object.entries(THEMES).map(([id, theme]) => `
-                            <button type="button" class="theme-option ${activeTheme === id ? "selected" : ""}" data-theme="${id}" aria-pressed="${activeTheme === id}">
-                                <span class="theme-name">${theme.name}<span class="theme-check">${activeTheme === id ? "✓ SELECTED" : ""}</span></span>
-                                <span class="theme-swatches">
-                                    ${theme.colors.map(color => `<i style="--swatch:${color}" title="${color}"></i>`).join("")}
-                                </span>
-                            </button>
-                        `).join("")}
-                    </div>
-                    <p class="theme-note">The Warm Ember palette includes your colors: #1b110e, #30201b, #e28b59, and #ffc18e.</p>
-                </section>
-            `;
-        }
-
         const S = {
-            tab: "dashboard",
+            tab: appSettings.startTab || "dashboard",
             q: "",
-            range: 12,
-            registryCategory: "Student"
+            range: 12
         };
 
 
@@ -978,7 +2368,7 @@
                         x2="${W - R}"
                         y1="${y}"
                         y2="${y}"
-                        stroke="var(--chart-grid)"/>
+                        stroke="rgba(255,255,255,.04)"/>
 
                     <text
                         x="${L - 6}"
@@ -1022,8 +2412,8 @@
                             </text>`
             ).join("")}
 
-                    ${fill("members", "var(--chart1)", "gm")}
-                    ${fill("subs", "var(--chart2)", "gs")}
+                    ${fill("members", appSettings.pri, "gm")}
+                    ${fill("subs", appSettings.cy, "gs")}
 
                     ${dots("members")}
                     ${dots("subs")}
@@ -1059,7 +2449,7 @@
                         x2="${W}"
                         y1="${y}"
                         y2="${y}"
-                        stroke="var(--chart-grid)"/>
+                        stroke="rgba(255,255,255,.04)"/>
 
                     <text
                         x="${L - 6}"
@@ -1081,11 +2471,11 @@
 
                         <stop
                             offset="0%"
-                            stop-color="var(--chart2)"/>
+                            stop-color="${appSettings.cy}"/>
 
                         <stop
                             offset="100%"
-                            stop-color="var(--chart1)"/>
+                            stop-color="${appSettings.pri}"/>
 
                     </linearGradient>
                 </defs>
@@ -1193,8 +2583,8 @@
                 "Total members",
                 tot.toLocaleString(),
                 ch,
-                "var(--acc)",
-                "var(--pri-soft)",
+                appSettings.acc,
+                `rgba(${hexToRgb(appSettings.pri)}, .2)`,
                 u
             )}
 
@@ -1202,8 +2592,8 @@
                 "Members on active projects",
                 act.toLocaleString(),
                 "6.1",
-                "var(--cy)",
-                "var(--acc-soft)",
+                appSettings.cy,
+                `rgba(${hexToRgb(appSettings.cy)}, .18)`,
                 u
             )}
 
@@ -1248,12 +2638,12 @@
                     <div class="leg mono">
 
                         <span>
-                            <i style="background:var(--chart1)"></i>
+                            <i style="background:${appSettings.pri}"></i>
                             Members
                         </span>
 
                         <span>
-                            <i style="background:var(--chart2)"></i>
+                            <i style="background:${appSettings.cy}"></i>
                             Submissions
                         </span>
 
@@ -1355,43 +2745,58 @@
         }
 
 
-        function getRegistryRecords() {
-            try { return JSON.parse(localStorage.getItem("jrcsee_registry_records") || "{}"); }
-            catch (_) { return {}; }
+        function members() {
+
+            const m = {};
+
+            PROJ.forEach(
+                p =>
+                    (m[p.lead] = m[p.lead] || [])
+                        .push(p.name)
+            );
+
+            const r =
+                Object.entries(m)
+                    .filter(([n]) => has(n, S.q));
+
+            return `
+                <div class="card list">
+
+                    <h3
+                        class="disp"
+                        style="margin-bottom:12px">
+                        PROJECT LEADS
+                    </h3>
+
+                    ${r.length
+                    ? r.map(
+                        ([n, l]) =>
+                            `
+                                    <div class="row">
+
+                                        <span>
+                                            ${esc(n)}
+                                        </span>
+
+                                        <span>
+                                            ${esc(l.join(", "))}
+                                        </span>
+
+                                    </div>
+                                    `
+                    ).join("")
+
+                    : `
+                                <div class="empty">
+                                    No members match your search.
+                                </div>
+                            `
+                }
+
+                </div>
+            `;
         }
 
-        function registry() {
-            const categories = [
-                { name: "Student", description: "Student registration records", icon: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2"/>' },
-                { name: "Staff", description: "Faculty and staff records", icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 3.5a4 4 0 0 1 0 7"/>' },
-                { name: "Visitors", description: "Visitor registration records", icon: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"/>' }
-            ];
-            const active = categories.find(c => c.name === S.registryCategory) || categories[0];
-            const recordsByCategory = getRegistryRecords();
-            const records = (recordsByCategory[active.name] || []).filter(r => has([r.name, r.code, r.detail].join(" "), S.q));
-            const total = (recordsByCategory[active.name] || []).length;
-            const filtered = categories.filter(c => has(c.name + " " + c.description, S.q));
-            return `
-                <section class="card registry-card">
-                    <div class="top"><div><h3 class="disp">REGISTRY</h3><p class="theme-intro">Select a category to manage its records.</p></div></div>
-                    <div class="registry-grid">
-                        ${filtered.map(c => {
-                            const count = (recordsByCategory[c.name] || []).length;
-                            return `<button type="button" class="registry-option ${S.registryCategory === c.name ? "selected" : ""}" data-registry-category="${c.name}" aria-pressed="${S.registryCategory === c.name}">
-                                <span class="registry-icon">${icon(c.icon)}</span><span class="registry-option-text"><strong>${c.name}</strong><small>${c.description}</small></span>
-                                <span class="registry-count mono">${count}</span>
-                            </button>`;
-                        }).join("") || '<div class="empty">No registry categories match your search.</div>'}
-                    </div>
-                </section>
-                <section class="card list">
-                    <div class="registry-detail-heading"><div><h3 class="disp">${active.name.toUpperCase()} RECORDS</h3><p class="theme-intro">${active.description}. Records saved in this browser are shown below.</p></div>
-                    <button class="primary registry-add" type="button" data-add-registry>+ Add ${active.name === "Visitors" ? "Visitor" : active.name}</button></div>
-                    <div class="registry-table-wrap"><table class="registry-table"><thead><tr><th>NAME</th><th>${active.name === "Student" ? "STUDENT ID" : active.name === "Staff" ? "STAFF ID" : "VISITOR ID"}</th><th>${active.name === "Student" ? "COURSE / YEAR" : active.name === "Staff" ? "POSITION / DEPT." : "PURPOSE / HOST"}</th><th>DATE ADDED</th><th>ACTION</th></tr></thead><tbody>
-                    ${records.length ? records.map(r => `<tr><td><strong>${esc(r.name)}</strong></td><td class="mono">${esc(r.code || "—")}</td><td>${esc(r.detail || "—")}</td><td>${esc(r.date || "—")}</td><td><button type="button" class="registry-delete" data-delete-registry="${esc(r.id)}" aria-label="Delete ${esc(r.name)}">Delete</button></td></tr>`).join("") : `<tr><td colspan="5"><div class="registry-empty"><span class="registry-empty-icon">${icon(active.icon)}</span><strong>${S.q ? "No matching records" : `No ${active.name.toLowerCase()} records yet`}</strong><span>${S.q ? "Try another search term." : `Use “Add ${active.name === "Visitors" ? "Visitor" : active.name}” to add the first record to this list.`}</span></div></td></tr>`}
-                    </tbody></table></div><div class="registry-table-footer mono">${records.length} SHOWN · ${total} TOTAL RECORDS</div>
-                </section>`;
-        }
 
         function reports() {
 
@@ -1470,9 +2875,8 @@
             $("main").innerHTML =
                 {
                     dashboard: dash,
-                    registry,
-                    reports,
-                    settings
+                    members,
+                    reports
                 }[S.tab]();
         }
 
@@ -1481,27 +2885,326 @@
 
             const now = new Date();
 
-            $("date").textContent =
-                now.toLocaleDateString(
-                    "en-US",
-                    {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                    }
-                );
+            const dateEl = $("date");
+            if (dateEl) {
+                if (appSettings.clockDate) {
+                    dateEl.style.display = "";
+                    dateEl.textContent =
+                        now.toLocaleDateString(
+                            "en-US",
+                            {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric"
+                            }
+                        );
+                } else {
+                    dateEl.style.display = "none";
+                }
+            }
 
-            $("time").textContent =
-                now.toLocaleTimeString(
-                    "en-US",
-                    {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: true
+            const timeEl = $("time");
+            if (timeEl) {
+                const opts = {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: appSettings.clockFormat === "12"
+                };
+                if (appSettings.clockSeconds) {
+                    opts.second = "2-digit";
+                }
+                timeEl.textContent = now.toLocaleTimeString("en-US", opts);
+            }
+        }
+
+
+        /* ================= PRESET BUILDER ================= */
+
+        function buildPresetGrid() {
+            const grid = $("presetGrid");
+            if (!grid) return;
+            grid.innerHTML = Object.entries(THEME_PRESETS).map(([id, p]) => `
+                <button class="preset-card ${appSettings.preset === id ? "on" : ""}" data-preset="${id}" type="button">
+                    <div class="preset-top">
+                        <span class="preset-name">${p.name}</span>
+                        <span class="preset-badge mono">${p.badge}</span>
+                    </div>
+                    <div class="preset-swatches">
+                        <span class="preset-dot" style="background:${p.pri}" title="Primary"></span>
+                        <span class="preset-dot" style="background:${p.acc}" title="Accent"></span>
+                        <span class="preset-dot" style="background:${p.cy}" title="Highlight"></span>
+                        <span class="preset-dot" style="background:${p.bgGlow}" title="Glow"></span>
+                    </div>
+                </button>
+            `).join("");
+
+            grid.onclick = e => {
+                const card = e.target.closest(".preset-card");
+                if (!card) return;
+                const pId = card.dataset.preset;
+                const p = THEME_PRESETS[pId];
+                if (!p) return;
+                playClickSound();
+                applySettings({
+                    preset: pId,
+                    pri: p.pri,
+                    acc: p.acc,
+                    cy: p.cy,
+                    bg: p.bg,
+                    bgGlow: p.bgGlow
+                });
+                render();
+                showToast(`Applied ${p.name}!`);
+            };
+        }
+
+
+        /* ================= NOTIFICATIONS LIST ================= */
+
+        function populateNotifList() {
+            const list = $("notifList");
+            if (!list) return;
+            list.innerHTML = ACT.slice(0, 4).map(a => `
+                <div class="notif-item">
+                    <span class="notif-item-dot" style="background:${AI[a.type] || "var(--pri)"}"></span>
+                    <div>
+                        <b>${esc(a.user)} ${a.action}</b>
+                        <span>${esc(a.subject)} · ${a.time}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+
+        /* ================= SETTINGS DRAWER CONTROLLER ================= */
+
+        function initSettingsDrawer() {
+
+            const openDrawer = () => {
+                playClickSound();
+                $("settingsDrawer").classList.add("open");
+                $("settingsBackdrop").classList.add("open");
+                syncDrawerControls();
+            };
+
+            const closeDrawer = () => {
+                playClickSound();
+                $("settingsDrawer").classList.remove("open");
+                $("settingsBackdrop").classList.remove("open");
+            };
+
+            const openBtn = $("openSettings");
+            if (openBtn) openBtn.onclick = openDrawer;
+
+            const openUserBtn = $("openSettingsUser");
+            if (openUserBtn) openUserBtn.onclick = openDrawer;
+
+            const closeBtn = $("settingsCloseBtn");
+            if (closeBtn) closeBtn.onclick = closeDrawer;
+
+            const backdrop = $("settingsBackdrop");
+            if (backdrop) backdrop.onclick = closeDrawer;
+
+            const footSaveBtn = $("footerSaveBtn");
+            if (footSaveBtn) footSaveBtn.onclick = () => {
+                closeDrawer();
+                showToast("Preferences saved!");
+            };
+
+            // ESC key to close
+            window.addEventListener("keydown", e => {
+                if (e.key === "Escape") {
+                    if ($("settingsDrawer") && $("settingsDrawer").classList.contains("open")) {
+                        closeDrawer();
                     }
-                );
+                    const notifPop = $("notifPopover");
+                    if (notifPop && notifPop.classList.contains("open")) {
+                        notifPop.classList.remove("open");
+                    }
+                }
+            });
+
+            // Segmented tab switching inside drawer
+            document.querySelectorAll(".sd-tab").forEach(tab => {
+                tab.onclick = () => {
+                    playClickSound();
+                    document.querySelectorAll(".sd-tab").forEach(t => t.classList.remove("on"));
+                    tab.classList.add("on");
+                    const targetPane = tab.dataset.stab;
+                    document.querySelectorAll(".sd-pane").forEach(p => p.classList.remove("on"));
+                    if (targetPane === "colors") $("paneColors").classList.add("on");
+                    if (targetPane === "options") $("paneOptions").classList.add("on");
+                    if (targetPane === "backup") $("paneBackup").classList.add("on");
+                };
+            });
+
+            // Color inputs listeners
+            const bindColorInput = (colId, hexId, key) => {
+                const cEl = $(colId);
+                const hEl = $(hexId);
+                if (!cEl || !hEl) return;
+
+                const updateVal = val => {
+                    if (!val.startsWith("#")) val = "#" + val;
+                    if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
+                    cEl.value = val;
+                    hEl.value = val;
+                    const change = { preset: "custom" };
+                    change[key] = val;
+                    applySettings(change);
+                    render();
+                };
+
+                cEl.oninput = e => {
+                    hEl.value = e.target.value;
+                    const change = { preset: "custom" };
+                    change[key] = e.target.value;
+                    applySettings(change);
+                    render();
+                };
+
+                hEl.onchange = e => updateVal(e.target.value);
+            };
+
+            bindColorInput("colPri", "hexPri", "pri");
+            bindColorInput("colAcc", "hexAcc", "acc");
+            bindColorInput("colCy", "hexCy", "cy");
+            bindColorInput("colBgGlow", "hexBgGlow", "bgGlow");
+            bindColorInput("colBg", "hexBg", "bg");
+
+            // Segmented buttons listeners in Web Options
+            const bindGroup = (groupId, key) => {
+                const grp = $(groupId);
+                if (!grp) return;
+                grp.onclick = e => {
+                    const btn = e.target.closest(".btn-opt");
+                    if (!btn) return;
+                    playClickSound();
+                    const val = btn.dataset.val;
+                    const change = {};
+                    change[key] = val;
+                    applySettings(change);
+                    render();
+                    showToast(`Updated ${key} to ${val}`);
+                };
+            };
+
+            bindGroup("glowGroup", "glowMode");
+            bindGroup("blurGroup", "blurMode");
+            bindGroup("densityGroup", "density");
+            bindGroup("clockFormatGroup", "clockFormat");
+            bindGroup("startTabGroup", "startTab");
+
+            // Switches listeners
+            const bindSwitch = (id, key) => {
+                const el = $(id);
+                if (!el) return;
+                el.onchange = e => {
+                    playClickSound();
+                    const change = {};
+                    change[key] = e.target.checked;
+                    applySettings(change);
+                    render();
+                };
+            };
+
+            bindSwitch("toggleSeconds", "clockSeconds");
+            bindSwitch("toggleDate", "clockDate");
+            bindSwitch("toggleBellDot", "bellDot");
+            bindSwitch("toggleSound", "soundEffects");
+
+            // Test sound button
+            const testSoundBtn = $("testSoundBtn");
+            if (testSoundBtn) {
+                testSoundBtn.onclick = () => {
+                    const original = appSettings.soundEffects;
+                    appSettings.soundEffects = true;
+                    playClickSound();
+                    appSettings.soundEffects = original;
+                    showToast("Audio feedback sample played!");
+                };
+            }
+
+            // Reset buttons
+            const resetHandler = () => {
+                playClickSound();
+                applySettings(DEFAULT_SETTINGS);
+                render();
+                showToast("All settings reset to defaults!");
+            };
+            const footReset = $("footerResetBtn");
+            if (footReset) footReset.onclick = resetHandler;
+            const resetAllBtn = $("resetAllBtn");
+            if (resetAllBtn) resetAllBtn.onclick = resetHandler;
+
+            // Export to clipboard
+            const exportBtn = $("exportBtn");
+            if (exportBtn) {
+                exportBtn.onclick = async () => {
+                    playClickSound();
+                    const json = JSON.stringify(appSettings, null, 2);
+                    try {
+                        await navigator.clipboard.writeText(json);
+                        showToast("Settings copied to clipboard!");
+                    } catch (err) {
+                        const imp = $("importInput");
+                        if (imp) imp.value = json;
+                        showToast("Settings displayed in import box!");
+                    }
+                };
+            }
+
+            // Import configuration
+            const importBtn = $("importBtn");
+            if (importBtn) {
+                importBtn.onclick = () => {
+                    playClickSound();
+                    const imp = $("importInput");
+                    if (!imp || !imp.value.trim()) {
+                        showToast("Paste JSON configuration first!");
+                        return;
+                    }
+                    try {
+                        const parsed = JSON.parse(imp.value.trim());
+                        if (typeof parsed !== "object" || parsed === null) throw new Error("Invalid format");
+                        applySettings(parsed);
+                        render();
+                        imp.value = "";
+                        showToast("Configuration imported and applied!");
+                    } catch (err) {
+                        alert("Invalid JSON configuration. Please check the format.");
+                    }
+                };
+            }
+
+            // Notifications Bell toggle
+            const notifBtn = $("notifBell");
+            const notifPop = $("notifPopover");
+            if (notifBtn && notifPop) {
+                notifBtn.onclick = e => {
+                    e.stopPropagation();
+                    playClickSound();
+                    notifPop.classList.toggle("open");
+                };
+
+                document.addEventListener("click", e => {
+                    if (notifPop.classList.contains("open") && !notifPop.contains(e.target) && e.target !== notifBtn) {
+                        notifPop.classList.remove("open");
+                    }
+                });
+            }
+
+            const clearNotifBtn = $("clearNotifBtn");
+            if (clearNotifBtn) {
+                clearNotifBtn.onclick = () => {
+                    playClickSound();
+                    applySettings({ bellDot: false });
+                    const notifPop = $("notifPopover");
+                    if (notifPop) notifPop.classList.remove("open");
+                    showToast("Alerts marked as read");
+                };
+            }
         }
 
 
@@ -1527,47 +3230,14 @@
 
         $("main").onclick = e => {
 
-            const themeButton = e.target.closest("[data-theme]");
-            if (themeButton) {
-                applyTheme(themeButton.dataset.theme);
-                render();
-                return;
-            }
+            const b =
+                e.target.closest("[data-r]");
 
-            const categoryButton = e.target.closest("[data-registry-category]");
-            if (categoryButton) {
-                S.registryCategory = categoryButton.dataset.registryCategory;
-                render();
-                return;
-            }
-            const addRegistryButton = e.target.closest("[data-add-registry]");
-            if (addRegistryButton) {
-                const category = S.registryCategory;
-                const name = window.prompt(`Enter ${category.toLowerCase()} full name:`);
-                if (!name || !name.trim()) return;
-                const code = window.prompt(`${category} ID / reference number (optional):`) || "";
-                const detailLabel = category === "Student" ? "Course / year level" : category === "Staff" ? "Position / department" : "Visit purpose / host";
-                const detail = window.prompt(`${detailLabel} (optional):`) || "";
-                const all = getRegistryRecords();
-                all[category] = all[category] || [];
-                all[category].push({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: name.trim(), code: code.trim(), detail: detail.trim(), date: new Date().toLocaleDateString() });
-                localStorage.setItem("jrcsee_registry_records", JSON.stringify(all));
-                render();
-                return;
-            }
-            const deleteRegistryButton = e.target.closest("[data-delete-registry]");
-            if (deleteRegistryButton) {
-                const all = getRegistryRecords();
-                const category = S.registryCategory;
-                all[category] = (all[category] || []).filter(r => r.id !== deleteRegistryButton.dataset.deleteRegistry);
-                localStorage.setItem("jrcsee_registry_records", JSON.stringify(all));
-                render();
-                return;
-            }
-
-            const b = e.target.closest("[data-r]");
             if (b) {
-                S.range = +b.dataset.r;
+
+                S.range =
+                    +b.dataset.r;
+
                 render();
             }
         };
@@ -1595,7 +3265,12 @@
             $("side").classList.remove("open");
 
 
-        /* ================= CLOCK ================= */
+        /* ================= INITIALIZATION ================= */
+
+        buildPresetGrid();
+        populateNotifList();
+        initSettingsDrawer();
+        applySettings(appSettings, false);
 
         updateClock();
 
@@ -1604,121 +3279,165 @@
             1000
         );
 
-
-        /* ================= INITIAL RENDER ================= */
-
-        applyTheme(localStorage.getItem("jrcsee_theme") || "purple");
         render();
 
     </script>
 
 
     <!-- ================= SUPABASE AUTH ================= -->
-<script>
-    const supabaseClient = window.supabase.createClient(
-        "https://guhwlwhdssycjpobcmfk.supabase.co",
-        "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
-        {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true,
-                storage: window.localStorage
-            }
-        }
-    );
 
-    let isLoggingOut = false;
-    let authCheckComplete = false;
+    <script>
 
-    function displayUserInfo(user) {
-        if (!user) return;
-
-        const email = user.email || "admin@jrcsee.org";
-        const role = localStorage.getItem("jrcsee_role");
-        const roleTitle = role
-            ? role.charAt(0).toUpperCase() + role.slice(1) + " User"
-            : "Admin User";
-        const name = user.user_metadata?.full_name || user.user_metadata?.name || roleTitle;
-
-        const nameEl = document.getElementById("userName");
-        const emailEl = document.getElementById("userEmail");
-        const initialsEl = document.getElementById("userInitials");
-
-        if (nameEl) nameEl.textContent = name;
-        if (emailEl) emailEl.textContent = email;
-
-        const initials = name.split(" ").filter(Boolean).map(word => word[0]).join("").substring(0, 2).toUpperCase();
-        if (initialsEl) initialsEl.textContent = initials || "AD";
-    }
-
-    async function checkLogin() {
-        try {
-            const { data, error } = await supabaseClient.auth.getSession();
-            authCheckComplete = true;
-
-            if (isLoggingOut) return;
-
-            if (error || !data.session || !data.session.user) {
-                window.location.replace("./index.html");
-                return;
-            }
-
-            displayUserInfo(data.session.user);
-        } catch (error) {
-            console.error("Session check failed:", error);
-            authCheckComplete = true;
-            if (!isLoggingOut) window.location.replace("./index.html");
-        }
-    }
-
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_OUT") {
-            if (authCheckComplete && !isLoggingOut) {
-                window.location.replace("./index.html");
-            }
-            return;
-        }
-
-        if (session?.user) displayUserInfo(session.user);
-    });
-
-    const logoutBtn = document.getElementById("logout");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", async function (event) {
-            event.preventDefault();
-            if (isLoggingOut) return;
-
-            isLoggingOut = true;
-            logoutBtn.disabled = true;
-            logoutBtn.textContent = "Logging out...";
-
-            try {
-                const { error } = await supabaseClient.auth.signOut({ scope: "local" });
-                if (error) console.error("Supabase logout error:", error);
-            } catch (error) {
-                console.error("Logout request failed:", error);
-            } finally {
-                try {
-                    for (let i = localStorage.length - 1; i >= 0; i--) {
-                        const key = localStorage.key(i);
-                        if (key && (key.startsWith("sb-") || key.toLowerCase().includes("supabase"))) {
-                            localStorage.removeItem(key);
-                        }
+        const supabase =
+            window.supabase.createClient(
+                "https://guhwlwhdssycjpobcmfk.supabase.co",
+                "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
+                {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: true,
+                        storage: window.localStorage
                     }
-                    localStorage.removeItem("jrcsee_role");
-                    sessionStorage.clear();
-                } catch (error) {
-                    console.error("Storage cleanup failed:", error);
+                }
+            );
+
+
+        /* ================= DISPLAY USER INFO ================= */
+
+        function displayUserInfo(user) {
+            if (!user) return;
+
+            const email = user.email || "admin@jrcsee.org";
+            const role = localStorage.getItem("jrcsee_role");
+            const roleTitle = role ? (role.charAt(0).toUpperCase() + role.slice(1) + " User") : "Admin User";
+
+            const name =
+                user.user_metadata?.full_name ||
+                user.user_metadata?.name ||
+                roleTitle;
+
+            const nameEl = $("userName");
+            const emailEl = $("userEmail");
+            const initialsEl = $("userInitials");
+
+            if (nameEl) nameEl.textContent = name;
+            if (emailEl) emailEl.textContent = email;
+
+            const initials =
+                name
+                    .split(" ")
+                    .filter(Boolean)
+                    .map(word => word[0])
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase();
+
+            if (initialsEl) initialsEl.textContent = initials || "AD";
+        }
+
+
+        /* ================= CHECK LOGIN ================= */
+
+        let isLoggingOut = false;
+        let authCheckComplete = false;
+
+        async function checkLogin() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get("preview") === "1" || localStorage.getItem("jrcsee_preview") === "1") {
+                    authCheckComplete = true;
+                    displayUserInfo({ email: "admin@jrcsee.org", user_metadata: { full_name: "Admin User" } });
+                    return;
                 }
 
-                window.location.replace("./index.html?loggedout=1");
+                // Check locally cached session first to prevent premature redirect
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError || !session || !session.user) {
+                    authCheckComplete = true;
+                    if (!isLoggingOut) {
+                        window.location.replace("./index.html");
+                    }
+                    return;
+                }
+
+                authCheckComplete = true;
+                // User is authenticated - display information
+                displayUserInfo(session.user);
+
+                // Asynchronously verify user with Supabase in the background
+                supabase.auth.getUser().then(({ data, error }) => {
+                    if (data?.user && !error) {
+                        displayUserInfo(data.user);
+                    }
+                }).catch(err => {
+                    console.warn("Background user verification:", err);
+                });
+
+            } catch (err) {
+                console.error("Auth check error:", err);
+                authCheckComplete = true;
+                if (!isLoggingOut) {
+                    window.location.replace("./index.html");
+                }
+            }
+        }
+
+
+        /* ================= AUTH STATE LISTENER ================= */
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "SIGNED_OUT" || !session) {
+                if (authCheckComplete && !isLoggingOut) {
+                    window.location.replace("./index.html");
+                }
+            } else if (session?.user) {
+                displayUserInfo(session.user);
             }
         });
-    }
 
-    checkLogin();
-</script>
+
+        /* ================= LOGOUT ================= */
+
+        const logoutBtn = $("logout");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                if (isLoggingOut) return;
+
+                isLoggingOut = true;
+                logoutBtn.disabled = true;
+                logoutBtn.textContent = "Logging out...";
+
+                // Redirect even if the network request to sign out fails.
+                try {
+                    await supabase.auth.signOut({ scope: "local" });
+                } catch (error) {
+                    console.warn("Supabase sign-out request failed:", error);
+                } finally {
+                    try {
+                        for (let i = localStorage.length - 1; i >= 0; i--) {
+                            const key = localStorage.key(i);
+                            if (key && (key.startsWith("sb-") || key.toLowerCase().includes("supabase") || key.startsWith("jrcsee"))) {
+                                localStorage.removeItem(key);
+                            }
+                        }
+                        sessionStorage.clear();
+                    } catch (storageError) {
+                        console.warn("Could not clear session storage:", storageError);
+                    }
+
+                    window.location.replace("./index.html?loggedout=1");
+                }
+            });
+        }
+
+        /* ================= START AUTH CHECK ================= */
+
+        checkLogin();
+
+    </script>
 
 </body>
 
