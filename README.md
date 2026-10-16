@@ -13,7 +13,9 @@ JRCSEE is a web-based interface for an administrative dashboard. It supports Sup
 - **Remember me** checkbox in the login interface
 - **Dashboard overview** with student statistics and report activity
 - **Student and visitor records** managed by Admin and Personnel; Personnel can view and add only these categories
-- **Staff, projects, reports, entry logs, and alerts** managed by Admin
+- **Faculty, projects, reports, entry logs, and alerts** managed by Admin
+- **Members navigation** groups Students, Faculty, and Visitors in one expandable sidebar section
+- **Dashboard color themes** with palette presets that update the dashboard accents and surfaces together
 - **Visitor retention** with automatic deletion after 30 days and anonymized linked logs/alerts
 - **Search** for filtering the information shown on each page
 - **Responsive layout** with a collapsible sidebar on smaller screens
