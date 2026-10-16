@@ -1484,8 +1484,8 @@
 
     <section class="startup-state" id="startupState" role="status" aria-live="polite">
         <div class="startup-card">
-            <h1 class="disp" id="startupTitle">CONNECTING TO YOUR DASHBOARD</h1>
-            <p id="startupMessage">Checking your sign-in and loading your Supabase data. This may take a few seconds.</p>
+            <h1 class="disp" id="startupTitle">PLEASE WAIT</h1>
+            <p id="startupMessage">Please wait.</p>
             <div class="startup-actions" id="startupActions" hidden>
                 <button class="primary" type="button" onclick="window.location.reload()">Try again</button>
                 <a href="./index.html">Return to sign in</a>
@@ -1922,11 +1922,9 @@
 
         let GROWTH = [];
         let ACT = [];
-        let PROJ = [];
         let MEMBERS = [];
         let PEOPLE = [];
         let ENTRY_LOGS = [];
-        let ALERTS = [];
         let currentUser = null;
         let currentProfile = null;
 
@@ -1947,19 +1945,9 @@
                 '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'
             ],
             [
-                "projects",
-                "Projects",
-                '<path d="M3 7h18M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 12h8m-8 4h5"/>'
-            ],
-            [
                 "entry_logs",
                 "Entry Logs",
                 '<path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/><path d="M16 3h5v5m-9 4 9-9"/>'
-            ],
-            [
-                "alerts",
-                "Alerts",
-                '<path d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.5-1.4 6-2.7 7.3"/>'
             ],
             [
                 "reports",
@@ -2258,19 +2246,14 @@
             const ch =
                 (prev ? ((currentMonth - prev) / prev * 100) : 0).toFixed(1);
 
-            const act =
-                PROJ
-                    .filter(p => p.status === "Active")
-                    .reduce((n, p) => n + p.team_size, 0);
+            const visitorCount = PEOPLE.filter(person => person.person_type === "visitor").length;
 
             const stat =
                 (l, v, c, col, bg, ic) =>
                     `
                     <div class="card stat">
 
-                        <span class="chg mono">
-                            ▲ ${c}%
-                        </span>
+                        ${c === null ? "" : `<span class="chg mono">▲ ${c}%</span>`}
 
                         <div class="l mono">
                             ${l}
@@ -2280,11 +2263,7 @@
                             ${v}
                         </div>
 
-                        <div
-                            class="sub mono"
-                            style="margin:0">
-                            vs previous month
-                        </div>
+                        ${c === null ? "" : '<div class="sub mono" style="margin:0">vs previous month</div>'}
 
                         <div
                             class="ic"
@@ -2295,7 +2274,7 @@
                     </div>
                     `;
 
-            const u = NAV[1][2];
+            const u = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>';
 
             return `
                 <div class="grid g2">
@@ -2310,9 +2289,9 @@
             )}
 
                     ${stat(
-                "Project team assignments",
-                act.toLocaleString(),
-                "0.0",
+                "Registered visitors",
+                visitorCount.toLocaleString(),
+                null,
                 appSettings.cy,
                 `rgba(${hexToRgb(appSettings.cy)}, .18)`,
                 u
@@ -2573,38 +2552,6 @@
             `;
         }
 
-        function projects() {
-            const rows = PROJ
-                .filter(project => has(`${project.name} ${project.category} ${project.lead} ${project.status}`, S.q))
-                .map(project => `
-                    <div class="row">
-                        <span>${esc(project.name)}<br><small>${esc(project.category)}</small></span>
-                        <span>${esc(project.lead || "No lead")} · ${esc(project.status)} · ${project.progress}%</span>
-                        <span><button class="record-delete" type="button" data-edit-project="${esc(project.id)}">Edit</button><button class="record-delete" type="button" data-delete="projects" data-id="${esc(project.id)}">Delete</button></span>
-                    </div>
-                `).join("");
-            return `
-                <div class="card">
-                    <h3 class="disp" id="projectFormTitle">ADD PROJECT</h3>
-                    <form class="data-form" id="projectForm">
-                        <input type="hidden" name="id">
-                        <div><label for="projectName">Project name</label><input id="projectName" name="name" required maxlength="160"></div>
-                        <div><label for="projectCategory">Category</label><input id="projectCategory" name="category" maxlength="120"></div>
-                        <div><label for="projectLead">Project lead</label><input id="projectLead" name="lead" maxlength="120"></div>
-                        <div><label for="projectStatus">Status</label><select id="projectStatus" name="status"><option>Active</option><option>Pending</option><option>Completed</option><option>On Hold</option></select></div>
-                        <div><label for="projectProgress">Progress (%)</label><input id="projectProgress" name="progress" type="number" min="0" max="100" value="0" required></div>
-                        <div><label for="projectTeam">Team size</label><input id="projectTeam" name="team_size" type="number" min="0" value="0" required></div>
-                        <div><label for="projectDue">Due date</label><input id="projectDue" name="due_date" type="date"></div>
-                        <div class="data-form-actions"><span class="form-error" id="projectFormError" role="alert"></span><button type="button" data-cancel-project hidden>Cancel edit</button><button class="primary" type="submit">Save project</button></div>
-                    </form>
-                </div>
-                <div class="card list">
-                    <h3 class="disp" style="margin-bottom:12px">PROJECTS</h3>
-                    ${rows || `<div class="empty">${S.q ? "No projects match your search." : "No projects have been added yet."}</div>`}
-                </div>
-            `;
-        }
-
         function entryLogs() {
             const rows = ENTRY_LOGS
                 .filter(log => has(`${log.person_type} ${log.entry_point} ${log.status} ${log.people?.full_name || ""}`, S.q))
@@ -2617,20 +2564,6 @@
                 `).join("");
             return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">ENTRY LOGS</h3>${rows || `<div class="empty">No entry logs yet. Logs will appear here when a trusted access-control device or service writes them.</div>`}</div>`;
         }
-
-        function alerts() {
-            const rows = ALERTS
-                .filter(alert => has(`${alert.alert_type} ${alert.people?.full_name || ""} ${alert.resolved ? "resolved" : "open"}`, S.q))
-                .map(alert => `
-                    <div class="row">
-                        <span>${esc(alert.alert_type)}<br><small>${esc(alert.people?.full_name || "Anonymized / unlinked")}</small></span>
-                        <span>${esc(new Date(alert.occurred_at).toLocaleString())} · ${alert.resolved ? "Resolved" : "Open"}</span>
-                        <span><button class="record-delete" type="button" data-resolve="${esc(alert.id)}">${alert.resolved ? "Reopen" : "Resolve"}</button><button class="record-delete" type="button" data-delete="alerts" data-id="${esc(alert.id)}">Delete</button></span>
-                    </div>
-                `).join("");
-            return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">ALERTS</h3>${rows || `<div class="empty">No alerts have been recorded.</div>`}</div>`;
-        }
-
 
         function reports() {
             const isAdmin = currentProfile?.role === "admin";
@@ -2706,10 +2639,8 @@
                     dashboard: dash,
                     students,
                     visitors,
-                    projects,
                     staff,
                     entry_logs: entryLogs,
-                    alerts,
                     reports
                 }[S.tab]();
         }
@@ -2931,25 +2862,18 @@
             const editButton = e.target.closest("[data-edit]");
             if (editButton) beginPersonEdit(editButton.dataset.edit);
 
-            const editProjectButton = e.target.closest("[data-edit-project]");
-            if (editProjectButton) beginProjectEdit(editProjectButton.dataset.editProject);
-
             const editReportButton = e.target.closest("[data-edit-report]");
             if (editReportButton) beginReportEdit(editReportButton.dataset.editReport);
 
             const cancelButton = e.target.closest("[data-cancel-edit]");
             if (cancelButton) cancelPersonEdit(cancelButton.dataset.cancelEdit);
 
-            if (e.target.closest("[data-cancel-project]")) cancelProjectEdit();
             if (e.target.closest("[data-cancel-report]")) cancelReportEdit();
-
-            const resolveButton = e.target.closest("[data-resolve]");
-            if (resolveButton) updateAlertResolution(resolveButton);
         };
 
         $("main").onsubmit = async e => {
             const form = e.target;
-            if (!["studentForm", "visitorForm", "staffForm", "projectForm", "reportForm"].includes(form.id)) return;
+            if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(form.id)) return;
             e.preventDefault();
 
             const formData = new FormData(form);
@@ -2983,20 +2907,6 @@
                     result = id
                         ? await supabaseClient.from("people").update(person).eq("id", id)
                         : await supabaseClient.from("people").insert(person);
-                } else if (form.id === "projectForm") {
-                    const project = {
-                        name: String(formData.get("name")).trim(),
-                        category: String(formData.get("category") || "").trim(),
-                        lead: String(formData.get("lead") || "").trim(),
-                        status: String(formData.get("status")),
-                        progress: Number(formData.get("progress")),
-                        team_size: Number(formData.get("team_size")),
-                        due_date: String(formData.get("due_date") || "") || null
-                    };
-                    const id = String(formData.get("id") || "").trim();
-                    result = id
-                        ? await supabaseClient.from("projects").update(project).eq("id", id)
-                        : await supabaseClient.from("projects").insert(project);
                 } else {
                     const report = {
                         title: String(formData.get("title")).trim(),
@@ -3014,7 +2924,6 @@
                 recordSaved = true;
                 form.reset();
                 if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) cancelPersonEdit(form.id);
-                if (form.id === "projectForm") cancelProjectEdit();
                 if (form.id === "reportForm") cancelReportEdit();
                 await loadDashboardData();
                 populateNotifList();
@@ -3032,7 +2941,7 @@
         async function deleteRecord(button) {
             if (currentProfile?.role !== "admin") return;
             const table = button.dataset.delete;
-            if (!["people", "projects", "reports", "entry_logs", "alerts"].includes(table)) return;
+            if (!["people", "reports", "entry_logs"].includes(table)) return;
             if (!window.confirm("Delete this record? This cannot be undone.")) return;
 
             let deleted = false;
@@ -3092,29 +3001,6 @@
             form.querySelector("[data-cancel-edit]").hidden = true;
         }
 
-        function beginProjectEdit(id) {
-            if (currentProfile?.role !== "admin") return;
-            const project = PROJ.find(record => record.id === id);
-            const form = $("projectForm");
-            if (!project || !form) return;
-            for (const [key, value] of Object.entries(project)) {
-                if (form.elements[key]) form.elements[key].value = value ?? "";
-            }
-            $("projectFormTitle").textContent = "EDIT PROJECT";
-            form.querySelector('button[type="submit"]').textContent = "Save changes";
-            form.querySelector("[data-cancel-project]").hidden = false;
-            form.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-
-        function cancelProjectEdit() {
-            const form = $("projectForm");
-            if (!form) return;
-            form.reset();
-            $("projectFormTitle").textContent = "ADD PROJECT";
-            form.querySelector('button[type="submit"]').textContent = "Save project";
-            form.querySelector("[data-cancel-project]").hidden = true;
-        }
-
         function beginReportEdit(id) {
             if (currentProfile?.role !== "admin") return;
             const report = ACT.find(record => record.id === id);
@@ -3135,26 +3021,6 @@
             form.querySelector('button[type="submit"]').textContent = "Submit report";
             form.querySelector("[data-cancel-report]").hidden = true;
         }
-
-        async function updateAlertResolution(button) {
-            if (currentProfile?.role !== "admin") return;
-            const alert = ALERTS.find(record => record.id === button.dataset.resolve);
-            if (!alert) return;
-            try {
-                const { error } = await supabaseClient
-                    .from("alerts")
-                    .update({ resolved: !alert.resolved })
-                    .eq("id", alert.id);
-                if (error) throw error;
-                await loadDashboardData();
-                render();
-                showToast(alert.resolved ? "Alert reopened." : "Alert resolved.");
-            } catch (error) {
-                console.error("Could not update alert:", error);
-                showToast(error.message || "Could not update alert.");
-            }
-        }
-
 
         $("q").oninput = e => {
 
@@ -3237,39 +3103,29 @@
 
         async function loadDashboardData() {
             const isAdmin = currentProfile.role === "admin";
-            const projectsRequest = currentProfile.role === "admin"
-                ? supabaseClient.from("projects").select("id,name,category,lead,status,progress,team_size,due_date,created_at").order("name")
-                : Promise.resolve({ data: [], error: null });
             const adminRequests = isAdmin
                 ? [
                     supabaseClient.from("entry_logs").select("id,person_id,person_type,occurred_at,entry_point,status,people(full_name)").order("occurred_at", { ascending: false }),
-                    supabaseClient.from("alerts").select("id,person_id,alert_type,occurred_at,resolved,people(full_name)").order("occurred_at", { ascending: false }),
                     supabaseClient.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
                 ]
                 : [
                     Promise.resolve({ data: [], error: null }),
-                    Promise.resolve({ data: [], error: null }),
                     Promise.resolve({ data: [], error: null })
                 ];
-            const [peopleResult, projectsResult, logsResult, alertsResult, reportsResult] = await Promise.all([
+            const [peopleResult, logsResult, reportsResult] = await Promise.all([
                 supabaseClient.from("people")
                     .select("id,person_type,full_name,email,course,year_level,staff_role,department,purpose,contact_phone,host_name,host_department,registered_at,expires_at,created_at")
                     .order("full_name"),
-                projectsRequest,
                 ...adminRequests
             ]);
 
             if (peopleResult.error) throw new Error(`Could not load people: ${peopleResult.error.message}`);
-            if (projectsResult.error) throw new Error(`Could not load projects: ${projectsResult.error.message}`);
             if (logsResult.error) throw new Error(`Could not load entry logs: ${logsResult.error.message}`);
-            if (alertsResult.error) throw new Error(`Could not load alerts: ${alertsResult.error.message}`);
             if (reportsResult.error) throw new Error(`Could not load reports: ${reportsResult.error.message}`);
 
             PEOPLE = peopleResult.data || [];
             MEMBERS = PEOPLE.filter(person => person.person_type === "student");
-            PROJ = projectsResult.data || [];
             ENTRY_LOGS = logsResult.data || [];
-            ALERTS = alertsResult.data || [];
             ACT = (reportsResult.data || []).map(report => ({
                 ...report,
                 user: report.profiles?.full_name || "Personnel",

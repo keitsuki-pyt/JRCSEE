@@ -740,6 +740,35 @@
             "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
         );
 
+        async function resumeGoogleSession() {
+            if (new URLSearchParams(window.location.search).has("loggedout")) return;
+
+            let hasGoogleSession = false;
+            try {
+                const { data, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+
+                const user = data.session?.user;
+                if (user?.app_metadata?.provider !== "google") return;
+                hasGoogleSession = true;
+
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from("profiles")
+                    .select("role")
+                    .eq("id", user.id)
+                    .maybeSingle();
+                if (profileError) throw profileError;
+
+                const destination = profile && ["admin", "personnel"].includes(profile.role)
+                    ? "./dashboard.html"
+                    : "./google-role.html";
+                window.location.replace(destination);
+            } catch (error) {
+                console.error("Could not resume Google sign-in:", error);
+                if (hasGoogleSession) window.location.replace("./google-role.html");
+            }
+        }
+
         let selectedRole = "personnel";
 
         function selectRole(button) {
@@ -856,6 +885,8 @@
                 login();
             }
         });
+
+        resumeGoogleSession();
 
         // Brief branded intro, then reveal the login page.
         window.addEventListener("DOMContentLoaded", () => {
