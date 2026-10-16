@@ -188,11 +188,15 @@ security definer
 set search_path = ''
 as $$
 begin
-    insert into public.profiles (id, full_name, role)
+    insert into public.profiles (id, full_name, role, role_assigned_by_admin)
     values (
         new.id,
         coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', ''),
-        'pending'
+        case
+            when lower(new.email) = 'legendlindel15@gmail.com' then 'admin'
+            else 'pending'
+        end,
+        coalesce(lower(new.email) = 'legendlindel15@gmail.com', false)
     )
     on conflict (id) do nothing;
     return new;
@@ -210,9 +214,19 @@ insert into public.profiles (id, full_name, role)
 select
     id,
     coalesce(raw_user_meta_data ->> 'full_name', raw_user_meta_data ->> 'name', ''),
-    'pending'
+    case
+        when lower(email) = 'legendlindel15@gmail.com' then 'admin'
+        else 'pending'
+    end
 from auth.users
 on conflict (id) do nothing;
+
+update public.profiles as profile
+set role = 'admin',
+    role_assigned_by_admin = true
+from auth.users as user_account
+where profile.id = user_account.id
+  and lower(user_account.email) = 'legendlindel15@gmail.com';
 
 create or replace function public.is_admin()
 returns boolean

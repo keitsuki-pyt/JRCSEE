@@ -6,6 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JRCSEE</title>
 
+    <script>
+        function showStartupFailure(message) {
+            const state = document.getElementById("startupState");
+            if (!state) return;
+            document.body.classList.add("auth-checking");
+            state.hidden = false;
+            document.getElementById("startupTitle").textContent = "DASHBOARD COULD NOT START";
+            document.getElementById("startupMessage").textContent = message;
+            document.getElementById("startupActions").hidden = false;
+        }
+
+        window.addEventListener("error", event => {
+            if (event.message) showStartupFailure(`A page script failed: ${event.message}`);
+            else if (event.target instanceof HTMLScriptElement) {
+                showStartupFailure("A required script could not load. Check your internet connection and allow the Supabase JavaScript library, then reload.");
+            }
+        }, true);
+
+        window.addEventListener("unhandledrejection", event => {
+            const reason = event.reason;
+            showStartupFailure(reason?.message || "A required dashboard operation failed unexpectedly. Reload the page and try again.");
+        });
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" type="image/x-icon" href="JRCC.png">
 
@@ -42,6 +66,60 @@
 
         body.auth-checking .app {
             visibility: hidden;
+        }
+
+        .startup-state {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg) 75%);
+        }
+
+        .startup-state[hidden] {
+            display: none;
+        }
+
+        .startup-card {
+            width: min(100%, 480px);
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--card);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+        }
+
+        .startup-card h1 {
+            margin-bottom: 10px;
+            font-size: 25px;
+        }
+
+        .startup-card p {
+            color: var(--mut);
+            overflow-wrap: anywhere;
+        }
+
+        .startup-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .startup-actions a,
+        .startup-actions button {
+            padding: 9px 13px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--fg);
+            text-decoration: none;
+        }
+
+        .startup-actions .primary {
+            border-color: var(--pri);
+            background: var(--pri);
         }
 
         html,
@@ -1642,6 +1720,17 @@
 </head>
 
 <body class="auth-checking">
+
+    <section class="startup-state" id="startupState" role="status" aria-live="polite">
+        <div class="startup-card">
+            <h1 class="disp" id="startupTitle">CONNECTING TO YOUR DASHBOARD</h1>
+            <p id="startupMessage">Checking your sign-in and loading your Supabase data. This may take a few seconds.</p>
+            <div class="startup-actions" id="startupActions" hidden>
+                <button class="primary" type="button" onclick="window.location.reload()">Try again</button>
+                <a href="./index.html">Return to sign in</a>
+            </div>
+        </div>
+    </section>
 
     <div class="app">
 
@@ -3439,8 +3528,8 @@
                     const id = String(formData.get("id") || "").trim();
                     if (id && currentProfile.role !== "admin") throw new Error("Only Admin can edit people records.");
                     result = id
-                        ? await supabase.from("people").update(person).eq("id", id)
-                        : await supabase.from("people").insert(person);
+                        ? await supabaseClient.from("people").update(person).eq("id", id)
+                        : await supabaseClient.from("people").insert(person);
                 } else if (form.id === "projectForm") {
                     const project = {
                         name: String(formData.get("name")).trim(),
@@ -3453,8 +3542,8 @@
                     };
                     const id = String(formData.get("id") || "").trim();
                     result = id
-                        ? await supabase.from("projects").update(project).eq("id", id)
-                        : await supabase.from("projects").insert(project);
+                        ? await supabaseClient.from("projects").update(project).eq("id", id)
+                        : await supabaseClient.from("projects").insert(project);
                 } else {
                     const report = {
                         title: String(formData.get("title")).trim(),
@@ -3464,8 +3553,8 @@
                     const id = String(formData.get("id") || "").trim();
                     if (id) delete report.submitted_by;
                     result = id
-                        ? await supabase.from("reports").update(report).eq("id", id)
-                        : await supabase.from("reports").insert(report);
+                        ? await supabaseClient.from("reports").update(report).eq("id", id)
+                        : await supabaseClient.from("reports").insert(report);
                 }
 
                 if (result.error) throw result.error;
@@ -3495,7 +3584,7 @@
 
             let deleted = false;
             try {
-                const { error } = await supabase.from(table).delete().eq("id", button.dataset.id);
+                const { error } = await supabaseClient.from(table).delete().eq("id", button.dataset.id);
                 if (error) throw error;
                 deleted = true;
                 await loadDashboardData();
@@ -3598,7 +3687,7 @@
             const alert = ALERTS.find(record => record.id === button.dataset.resolve);
             if (!alert) return;
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from("alerts")
                     .update({ resolved: !alert.resolved })
                     .eq("id", alert.id);
@@ -3656,7 +3745,7 @@
 
     <script>
 
-        const supabase =
+        const supabaseClient =
             window.supabase.createClient(
                 "https://guhwlwhdssycjpobcmfk.supabase.co",
                 "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB",
@@ -3695,13 +3784,13 @@
         async function loadDashboardData() {
             const isAdmin = currentProfile.role === "admin";
             const projectsRequest = currentProfile.role === "admin"
-                ? supabase.from("projects").select("id,name,category,lead,status,progress,team_size,due_date,created_at").order("name")
+                ? supabaseClient.from("projects").select("id,name,category,lead,status,progress,team_size,due_date,created_at").order("name")
                 : Promise.resolve({ data: [], error: null });
             const adminRequests = isAdmin
                 ? [
-                    supabase.from("entry_logs").select("id,person_id,person_type,occurred_at,entry_point,status,people(full_name)").order("occurred_at", { ascending: false }),
-                    supabase.from("alerts").select("id,person_id,alert_type,occurred_at,resolved,people(full_name)").order("occurred_at", { ascending: false }),
-                    supabase.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
+                    supabaseClient.from("entry_logs").select("id,person_id,person_type,occurred_at,entry_point,status,people(full_name)").order("occurred_at", { ascending: false }),
+                    supabaseClient.from("alerts").select("id,person_id,alert_type,occurred_at,resolved,people(full_name)").order("occurred_at", { ascending: false }),
+                    supabaseClient.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
                 ]
                 : [
                     Promise.resolve({ data: [], error: null }),
@@ -3709,7 +3798,7 @@
                     Promise.resolve({ data: [], error: null })
                 ];
             const [peopleResult, projectsResult, logsResult, alertsResult, reportsResult] = await Promise.all([
-                supabase.from("people")
+                supabaseClient.from("people")
                     .select("id,person_type,full_name,email,course,year_level,staff_role,department,purpose,contact_phone,host_name,host_department,registered_at,expires_at,created_at")
                     .order("full_name"),
                 projectsRequest,
@@ -3739,11 +3828,25 @@
         }
 
         function showDashboardError(error) {
-            document.body.classList.remove("auth-checking");
-            const main = $("main");
-            if (!main) return;
-            $("openSettings").style.display = "none";
-            main.innerHTML = `<div class="card"><h3 class="disp">DASHBOARD COULD NOT LOAD</h3><p class="sub">${esc(error.message || "Unable to connect to Supabase.")}</p><p class="sub">Check the Supabase setup instructions in README.md and run supabase-setup.sql.</p><p class="sub"><a href="./index.html" style="color:var(--acc)">Return to sign in</a></p></div>`;
+            $("startupTitle").textContent = "DASHBOARD COULD NOT LOAD";
+            $("startupMessage").textContent = error.message || "Unable to connect to Supabase.";
+            $("startupActions").hidden = false;
+        }
+
+        async function withStartupTimeout(operation, label, timeoutMs = 15000) {
+            let timeoutId;
+            try {
+                return await Promise.race([
+                    operation,
+                    new Promise((_, reject) => {
+                        timeoutId = setTimeout(() => {
+                            reject(new Error(`${label} took too long. Check your internet connection and Supabase project settings, then try again.`));
+                        }, timeoutMs);
+                    })
+                ]);
+            } finally {
+                clearTimeout(timeoutId);
+            }
         }
 
         function initAccountDialog() {
@@ -3779,7 +3882,7 @@
 
                 try {
                     if (nameChanged) {
-                        const { data, error } = await supabase
+                        const { data, error } = await supabaseClient
                             .from("profiles")
                             .update({ full_name: name })
                             .eq("id", currentUser.id)
@@ -3792,7 +3895,7 @@
                     }
 
                     if (emailChanged) {
-                        const { error } = await supabase.auth.updateUser({ email });
+                        const { error } = await supabaseClient.auth.updateUser({ email });
                         if (error) throw error;
                     }
 
@@ -3822,7 +3925,10 @@
 
         async function checkLogin() {
             try {
-                const { data, error } = await supabase.auth.getSession();
+                const { data, error } = await withStartupTimeout(
+                    supabaseClient.auth.getSession(),
+                    "Checking your sign-in"
+                );
                 if (error) throw error;
                 if (!data.session?.user) {
                     authCheckComplete = true;
@@ -3831,11 +3937,14 @@
                 }
 
                 currentUser = data.session.user;
-                const { data: profile, error: profileError } = await supabase
-                    .from("profiles")
-                    .select("id,full_name,role")
-                    .eq("id", currentUser.id)
-                    .single();
+                const { data: profile, error: profileError } = await withStartupTimeout(
+                    supabaseClient
+                        .from("profiles")
+                        .select("id,full_name,role")
+                        .eq("id", currentUser.id)
+                        .single(),
+                    "Loading your account"
+                );
                 if (profileError) throw new Error(`Could not load your Supabase profile: ${profileError.message}`);
                 if (!profile || !["admin", "personnel"].includes(profile.role)) {
                     throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
@@ -3851,13 +3960,14 @@
                 currentProfile = profile;
                 S.tab = profile.role === "personnel" ? "students" : (appSettings.startTab || "dashboard");
                 $("openSettings").style.display = profile.role === "admin" ? "" : "none";
-                document.body.classList.remove("auth-checking");
                 displayUserInfo();
-                await loadDashboardData();
+                await withStartupTimeout(loadDashboardData(), "Loading dashboard data", 20000);
                 authCheckComplete = true;
                 populateNotifList();
                 render();
                 initAccountDialog();
+                document.body.classList.remove("auth-checking");
+                $("startupState").hidden = true;
             } catch (error) {
                 console.error("Dashboard initialization failed:", error);
                 authCheckComplete = true;
@@ -3865,7 +3975,7 @@
             }
         }
 
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (event === "SIGNED_OUT" || !session) {
                 if (authCheckComplete && !isLoggingOut) {
                     window.location.replace("./index.html");
@@ -3891,7 +4001,7 @@
 
                 // Redirect even if the network request to sign out fails.
                 try {
-                    await supabase.auth.signOut({ scope: "local" });
+                    await supabaseClient.auth.signOut({ scope: "local" });
                 } catch (error) {
                     console.warn("Supabase sign-out request failed:", error);
                 } finally {

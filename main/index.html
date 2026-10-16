@@ -798,7 +798,7 @@
             const button = document.getElementById("googleButton");
             button.disabled = true;
             button.textContent = "Connecting to Google...";
-            rememberRequestedRole();
+            sessionStorage.removeItem("jrcsee_requested_role");
 
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({
