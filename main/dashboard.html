@@ -3437,7 +3437,8 @@
             document.body.classList.remove("auth-checking");
             const main = $("main");
             if (!main) return;
-            main.innerHTML = `<div class="card"><h3 class="disp">DASHBOARD COULD NOT LOAD</h3><p class="sub">${esc(error.message || "Unable to connect to Supabase.")}</p><p class="sub">Check the Supabase setup instructions in README.md and run supabase-setup.sql.</p></div>`;
+            $("openSettings").style.display = "none";
+            main.innerHTML = `<div class="card"><h3 class="disp">DASHBOARD COULD NOT LOAD</h3><p class="sub">${esc(error.message || "Unable to connect to Supabase.")}</p><p class="sub">Check the Supabase setup instructions in README.md and run supabase-setup.sql.</p><p class="sub"><a href="./index.html" style="color:var(--acc)">Return to sign in</a></p></div>`;
         }
 
         function initAccountDialog() {
@@ -3534,6 +3535,13 @@
                 if (!profile || !["admin", "personnel"].includes(profile.role)) {
                     throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
                 }
+
+                const requestedRole = sessionStorage.getItem("jrcsee_requested_role");
+                if (requestedRole && requestedRole !== profile.role) {
+                    sessionStorage.removeItem("jrcsee_requested_role");
+                    throw new Error(`This account is assigned the ${profile.role} role in Supabase, not ${requestedRole}. Return to sign in and select the role assigned to your account.`);
+                }
+                sessionStorage.removeItem("jrcsee_requested_role");
 
                 currentProfile = profile;
                 S.tab = profile.role === "personnel" ? "members" : (appSettings.startTab || "dashboard");

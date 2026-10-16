@@ -223,11 +223,15 @@
 
         .role {
             height: 52px;
+            width: 100%;
             border: 2px solid #3b3b42;
             border-radius: 9px;
             display: flex;
             align-items: center;
             padding: 0 11px;
+            background: rgba(255, 255, 255, .03);
+            color: #fff;
+            text-align: left;
             cursor: pointer;
             transition: .25s;
         }
@@ -670,6 +674,20 @@
 
         <div class="login-card">
 
+            <div class="label">Sign in as</div>
+            <div class="roles" role="group" aria-label="Choose your account role">
+                <button class="role" type="button" data-role="admin" aria-pressed="false" onclick="selectRole(this)">
+                    <span class="role-icon" aria-hidden="true">♙</span>
+                    <span class="role-name">Admin</span>
+                    <span class="radio" aria-hidden="true"></span>
+                </button>
+                <button class="role active" type="button" data-role="personnel" aria-pressed="true" onclick="selectRole(this)">
+                    <span class="role-icon" aria-hidden="true">♙</span>
+                    <span class="role-name">Personnel</span>
+                    <span class="radio" aria-hidden="true"></span>
+                </button>
+            </div>
+
             <!-- EMAIL -->
             <div class="input-group">
                 <div class="label">Email</div>
@@ -714,6 +732,21 @@
             "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
         );
 
+        let selectedRole = "personnel";
+
+        function selectRole(button) {
+            selectedRole = button.dataset.role;
+            document.querySelectorAll(".role").forEach(option => {
+                const isSelected = option === button;
+                option.classList.toggle("active", isSelected);
+                option.setAttribute("aria-pressed", String(isSelected));
+            });
+        }
+
+        function rememberRequestedRole() {
+            sessionStorage.setItem("jrcsee_requested_role", selectedRole);
+        }
+
         /* ================= PASSWORD ================= */
 
         function togglePassword() {
@@ -739,6 +772,7 @@
             button.querySelector(".button-label").textContent = "SIGNING IN...";
             overlay.classList.add("show");
             overlay.setAttribute("aria-hidden", "false");
+            rememberRequestedRole();
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -764,6 +798,7 @@
             const button = document.getElementById("googleButton");
             button.disabled = true;
             button.textContent = "Connecting to Google...";
+            rememberRequestedRole();
 
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({

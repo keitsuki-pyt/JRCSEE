@@ -82,7 +82,7 @@ OAuth secrets belong in Supabase's provider settings only; do not paste them int
 
 #### Assign Admin and Personnel roles
 
-New accounts (including Google accounts) are assigned the **Personnel** role by default. The login page no longer lets users choose their own role. To promote an account to Admin, first have that person sign in, then run this in the Supabase SQL Editor, replacing the email:
+New accounts (including Google accounts) are assigned the **Personnel** role by default. The login page offers Admin and Personnel choices as a sign-in convenience; the choice is checked against the role already stored in Supabase and never grants permissions. A mismatch is rejected. To promote an account to Admin, first have that person sign in, then run this in the Supabase SQL Editor, replacing the email:
 
 ```sql
 update public.profiles
