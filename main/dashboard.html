@@ -1959,7 +1959,7 @@
                         </div>
                         <div class="btn-group" id="startTabGroup">
                             <button class="mono btn-opt on" data-val="dashboard" type="button">Dashboard</button>
-                            <button class="mono btn-opt" data-val="members" type="button">Members</button>
+                            <button class="mono btn-opt" data-val="students" type="button">Students</button>
                             <button class="mono btn-opt" data-val="reports" type="button">Reports</button>
                         </div>
                     </div>
@@ -2270,6 +2270,9 @@
         let ACT = [];
         let PROJ = [];
         let MEMBERS = [];
+        let PEOPLE = [];
+        let ENTRY_LOGS = [];
+        let ALERTS = [];
         let currentUser = null;
         let currentProfile = null;
 
@@ -2290,9 +2293,34 @@
                 '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>'
             ],
             [
-                "members",
-                "Members",
+                "students",
+                "Students",
                 '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'
+            ],
+            [
+                "visitors",
+                "Visitors",
+                '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/>'
+            ],
+            [
+                "projects",
+                "Projects",
+                '<path d="M3 7h18M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 12h8m-8 4h5"/>'
+            ],
+            [
+                "staff",
+                "Staff",
+                '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M16 11h6m-3-3v6"/>'
+            ],
+            [
+                "entry_logs",
+                "Entry Logs",
+                '<path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/><path d="M16 3h5v5m-9 4 9-9"/>'
+            ],
+            [
+                "alerts",
+                "Alerts",
+                '<path d="M10.3 21a2 2 0 0 0 3.4 0M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.5 18 8a6 6 0 0 0-12 0c0 4.5-1.4 6-2.7 7.3"/>'
             ],
             [
                 "reports",
@@ -2633,7 +2661,7 @@
                 <div class="grid g2">
 
                     ${stat(
-                "Total members",
+                "Total students",
                 tot.toLocaleString(),
                 ch,
                 appSettings.acc,
@@ -2642,7 +2670,7 @@
             )}
 
                     ${stat(
-                "Members on active projects",
+                "Project team assignments",
                 act.toLocaleString(),
                 "0.0",
                 appSettings.cy,
@@ -2692,7 +2720,7 @@
 
                         <span>
                             <i style="background:${appSettings.pri}"></i>
-                            Members
+                            Students
                         </span>
 
                         <span>
@@ -2798,66 +2826,169 @@
         }
 
 
-        function members() {
-            const isAdmin = currentProfile?.role === "admin";
-            const memberRows = MEMBERS
-                .filter(member => has(`${member.full_name} ${member.email || ""} ${member.department || ""}`, S.q))
-                .map(member => {
-                    const projects = PROJ
-                        .filter(project => project.lead.toLowerCase() === member.full_name.toLowerCase())
-                        .map(project => project.name);
-                    return `
-                        <div class="row">
-                            <span>${esc(member.full_name)}${member.email ? `<br><small>${esc(member.email)}</small>` : ""}</span>
-                            <span>${esc(member.department || "No department")} · ${esc(projects.join(", ") || "No projects")}</span>
-                            ${isAdmin ? `<button class="record-delete" type="button" data-delete="members" data-id="${esc(member.id)}">Delete</button>` : ""}
-                        </div>
-                    `;
-                }).join("");
-            const projectRows = PROJ
-                .filter(project => has(`${project.name} ${project.category} ${project.lead}`, S.q))
-                .map(project => `
+        function personActions(person) {
+            if (currentProfile?.role !== "admin") return "";
+            return `
+                <span>
+                    <button class="record-delete" type="button" data-edit="${esc(person.id)}">Edit</button>
+                    <button class="record-delete" type="button" data-delete="people" data-id="${esc(person.id)}">Delete</button>
+                </span>
+            `;
+        }
+
+        function students() {
+            const rows = PEOPLE
+                .filter(person => person.person_type === "student")
+                .filter(person => has(`${person.full_name} ${person.course} ${person.year_level} ${person.email}`, S.q))
+                .map(person => `
                     <div class="row">
-                        <span>${esc(project.name)}<br><small>${esc(project.category)}</small></span>
-                        <span>${esc(project.lead || "No lead")} · ${esc(project.status)} · ${project.progress}%</span>
-                        ${isAdmin ? `<button class="record-delete" type="button" data-delete="projects" data-id="${esc(project.id)}">Delete</button>` : ""}
+                        <span>${esc(person.full_name)}<br><small>${esc(person.email)}</small></span>
+                        <span>${esc(person.course)} · Year ${esc(person.year_level)}</span>
+                        ${personActions(person)}
+                    </div>
+                `).join("");
+            const canAdd = currentProfile?.role === "admin" || currentProfile?.role === "personnel";
+
+            return `
+                ${canAdd ? `
+                    <div class="card">
+                        <h3 class="disp" id="studentFormTitle">ADD STUDENT</h3>
+                        <form class="data-form" id="studentForm">
+                            <input type="hidden" name="id">
+                            <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
+                            <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
+                            <div><label for="studentCourse">Course</label><input id="studentCourse" name="course" required maxlength="160"></div>
+                            <div><label for="studentYear">Year level</label><input id="studentYear" name="year_level" required maxlength="40" placeholder="e.g. 1st Year"></div>
+                            <div class="data-form-actions"><span class="form-error" id="studentFormError" role="alert"></span><button type="button" data-cancel-edit="studentForm" hidden>Cancel edit</button><button class="primary" type="submit">Save student</button></div>
+                        </form>
+                    </div>` : ""}
+                <div class="card list">
+                    <h3 class="disp" style="margin-bottom:12px">STUDENTS</h3>
+                    ${rows || `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
+                </div>
+            `;
+        }
+
+        function visitors() {
+            const rows = PEOPLE
+                .filter(person => person.person_type === "visitor")
+                .filter(person => has(`${person.full_name} ${person.purpose} ${person.host_name} ${person.host_department} ${person.contact_phone || ""}`, S.q))
+                .map(person => `
+                    <div class="row">
+                        <span>${esc(person.full_name)}<br><small>${esc(person.purpose)}</small></span>
+                        <span>${esc(person.host_name)} · ${esc(person.host_department)}<br><small>${person.contact_phone ? esc(person.contact_phone) + " · " : ""}Expires ${esc(displayDate(person.expires_at))}</small></span>
+                        ${personActions(person)}
                     </div>
                 `).join("");
 
             return `
-                ${isAdmin ? `
-                    <div class="card">
-                        <h3 class="disp">ADD MEMBER</h3>
-                        <form class="data-form" id="memberForm">
-                            <div><label for="memberName">Full name</label><input id="memberName" name="full_name" required maxlength="120"></div>
-                            <div><label for="memberEmail">Email</label><input id="memberEmail" name="email" type="email"></div>
-                            <div><label for="memberDepartment">Department</label><input id="memberDepartment" name="department" maxlength="120"></div>
-                            <div class="data-form-actions"><span class="form-error" id="memberFormError" role="alert"></span><button class="primary" type="submit">Save member</button></div>
-                        </form>
-                    </div>
-                    <div class="card">
-                        <h3 class="disp">ADD PROJECT</h3>
-                        <form class="data-form" id="projectForm">
-                            <div><label for="projectName">Project name</label><input id="projectName" name="name" required maxlength="160"></div>
-                            <div><label for="projectCategory">Category</label><input id="projectCategory" name="category" maxlength="120"></div>
-                            <div><label for="projectLead">Project lead</label><input id="projectLead" name="lead" maxlength="120"></div>
-                            <div><label for="projectStatus">Status</label><select id="projectStatus" name="status"><option>Active</option><option>Pending</option><option>Completed</option><option>On Hold</option></select></div>
-                            <div><label for="projectProgress">Progress (%)</label><input id="projectProgress" name="progress" type="number" min="0" max="100" value="0" required></div>
-                            <div><label for="projectTeam">Team size</label><input id="projectTeam" name="team_size" type="number" min="0" value="0" required></div>
-                            <div><label for="projectDue">Due date</label><input id="projectDue" name="due_date" type="date"></div>
-                            <div class="data-form-actions"><span class="form-error" id="projectFormError" role="alert"></span><button class="primary" type="submit">Save project</button></div>
-                        </form>
-                    </div>
-                ` : ""}
-                <div class="card list">
-                    <h3 class="disp" style="margin-bottom:12px">MEMBERS</h3>
-                    ${memberRows || `<div class="empty">${S.q ? "No members match your search." : "No members have been added yet."}</div>`}
+                <div class="card">
+                    <h3 class="disp" id="visitorFormTitle">REGISTER VISITOR</h3>
+                    <p class="sub">Visitor records are automatically removed 30 days after registration. Entry logs and alerts remain anonymized.</p>
+                    <form class="data-form" id="visitorForm">
+                        <input type="hidden" name="id">
+                        <div><label for="visitorName">Full name</label><input id="visitorName" name="full_name" required maxlength="160"></div>
+                        <div><label for="visitorPhone">Contact phone</label><input id="visitorPhone" name="contact_phone" type="tel" required maxlength="40"></div>
+                        <div><label for="visitorPurpose">Purpose of visit</label><input id="visitorPurpose" name="purpose" required maxlength="240"></div>
+                        <div><label for="visitorHost">Host name</label><input id="visitorHost" name="host_name" required maxlength="160"></div>
+                        <div><label for="visitorDepartment">Host department</label><input id="visitorDepartment" name="host_department" required maxlength="160"></div>
+                        <div class="data-form-actions"><span class="form-error" id="visitorFormError" role="alert"></span><button type="button" data-cancel-edit="visitorForm" hidden>Cancel edit</button><button class="primary" type="submit">Register visitor</button></div>
+                    </form>
                 </div>
-                ${isAdmin ? `<div class="card list">
-                    <h3 class="disp" style="margin-bottom:12px">PROJECTS</h3>
-                    ${projectRows || `<div class="empty">${S.q ? "No projects match your search." : "No projects have been added yet."}</div>`}
-                </div>` : ""}
+                <div class="card list">
+                    <h3 class="disp" style="margin-bottom:12px">VISITORS</h3>
+                    ${rows || `<div class="empty">${S.q ? "No visitors match your search." : "No visitors have been registered."}</div>`}
+                </div>
             `;
+        }
+
+        function staff() {
+            const rows = PEOPLE
+                .filter(person => person.person_type === "staff")
+                .filter(person => has(`${person.full_name} ${person.staff_role} ${person.department} ${person.email}`, S.q))
+                .map(person => `
+                    <div class="row">
+                        <span>${esc(person.full_name)}<br><small>${esc(person.email)}</small></span>
+                        <span>${esc(person.staff_role)} · ${esc(person.department)}</span>
+                        ${personActions(person)}
+                    </div>
+                `).join("");
+            return `
+                <div class="card">
+                    <h3 class="disp" id="staffFormTitle">ADD STAFF RECORD</h3>
+                    <p class="sub">Role is the staff member's position or title. Portal access is assigned separately in the account profile.</p>
+                    <form class="data-form" id="staffForm">
+                        <input type="hidden" name="id">
+                        <div><label for="staffName">Full name</label><input id="staffName" name="full_name" required maxlength="160"></div>
+                        <div><label for="staffEmail">Email</label><input id="staffEmail" name="email" type="email" required maxlength="254"></div>
+                        <div><label for="staffRole">Role</label><input id="staffRole" name="staff_role" required maxlength="160" placeholder="e.g. Teacher"></div>
+                        <div><label for="staffDepartment">Department</label><input id="staffDepartment" name="department" required maxlength="160"></div>
+                        <div class="data-form-actions"><span class="form-error" id="staffFormError" role="alert"></span><button type="button" data-cancel-edit="staffForm" hidden>Cancel edit</button><button class="primary" type="submit">Save staff</button></div>
+                    </form>
+                </div>
+                <div class="card list">
+                    <h3 class="disp" style="margin-bottom:12px">STAFF</h3>
+                    ${rows || `<div class="empty">${S.q ? "No staff match your search." : "No staff records have been added."}</div>`}
+                </div>
+            `;
+        }
+
+        function projects() {
+            const rows = PROJ
+                .filter(project => has(`${project.name} ${project.category} ${project.lead} ${project.status}`, S.q))
+                .map(project => `
+                    <div class="row">
+                        <span>${esc(project.name)}<br><small>${esc(project.category)}</small></span>
+                        <span>${esc(project.lead || "No lead")} · ${esc(project.status)} · ${project.progress}%</span>
+                        <span><button class="record-delete" type="button" data-edit-project="${esc(project.id)}">Edit</button><button class="record-delete" type="button" data-delete="projects" data-id="${esc(project.id)}">Delete</button></span>
+                    </div>
+                `).join("");
+            return `
+                <div class="card">
+                    <h3 class="disp" id="projectFormTitle">ADD PROJECT</h3>
+                    <form class="data-form" id="projectForm">
+                        <input type="hidden" name="id">
+                        <div><label for="projectName">Project name</label><input id="projectName" name="name" required maxlength="160"></div>
+                        <div><label for="projectCategory">Category</label><input id="projectCategory" name="category" maxlength="120"></div>
+                        <div><label for="projectLead">Project lead</label><input id="projectLead" name="lead" maxlength="120"></div>
+                        <div><label for="projectStatus">Status</label><select id="projectStatus" name="status"><option>Active</option><option>Pending</option><option>Completed</option><option>On Hold</option></select></div>
+                        <div><label for="projectProgress">Progress (%)</label><input id="projectProgress" name="progress" type="number" min="0" max="100" value="0" required></div>
+                        <div><label for="projectTeam">Team size</label><input id="projectTeam" name="team_size" type="number" min="0" value="0" required></div>
+                        <div><label for="projectDue">Due date</label><input id="projectDue" name="due_date" type="date"></div>
+                        <div class="data-form-actions"><span class="form-error" id="projectFormError" role="alert"></span><button type="button" data-cancel-project hidden>Cancel edit</button><button class="primary" type="submit">Save project</button></div>
+                    </form>
+                </div>
+                <div class="card list">
+                    <h3 class="disp" style="margin-bottom:12px">PROJECTS</h3>
+                    ${rows || `<div class="empty">${S.q ? "No projects match your search." : "No projects have been added yet."}</div>`}
+                </div>
+            `;
+        }
+
+        function entryLogs() {
+            const rows = ENTRY_LOGS
+                .filter(log => has(`${log.person_type} ${log.entry_point} ${log.status} ${log.people?.full_name || ""}`, S.q))
+                .map(log => `
+                    <div class="row">
+                        <span>${esc(log.people?.full_name || "Anonymized / unlinked")}<br><small>${esc(log.person_type)}</small></span>
+                        <span>${esc(log.entry_point)} · ${esc(log.status)}<br><small>${esc(new Date(log.occurred_at).toLocaleString())}</small></span>
+                        <button class="record-delete" type="button" data-delete="entry_logs" data-id="${esc(log.id)}">Delete</button>
+                    </div>
+                `).join("");
+            return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">ENTRY LOGS</h3>${rows || `<div class="empty">No entry logs yet. Logs will appear here when a trusted access-control device or service writes them.</div>`}</div>`;
+        }
+
+        function alerts() {
+            const rows = ALERTS
+                .filter(alert => has(`${alert.alert_type} ${alert.people?.full_name || ""} ${alert.resolved ? "resolved" : "open"}`, S.q))
+                .map(alert => `
+                    <div class="row">
+                        <span>${esc(alert.alert_type)}<br><small>${esc(alert.people?.full_name || "Anonymized / unlinked")}</small></span>
+                        <span>${esc(new Date(alert.occurred_at).toLocaleString())} · ${alert.resolved ? "Resolved" : "Open"}</span>
+                        <span><button class="record-delete" type="button" data-resolve="${esc(alert.id)}">${alert.resolved ? "Reopen" : "Resolve"}</button><button class="record-delete" type="button" data-delete="alerts" data-id="${esc(alert.id)}">Delete</button></span>
+                    </div>
+                `).join("");
+            return `<div class="card list"><h3 class="disp" style="margin-bottom:12px">ALERTS</h3>${rows || `<div class="empty">No alerts have been recorded.</div>`}</div>`;
         }
 
 
@@ -2869,7 +3000,7 @@
                     <div class="row">
                         <span>${esc(report.title)}<br><small>${esc(report.body || "No details")}</small></span>
                         <span>${esc(report.profiles?.full_name || "Personnel")} · ${esc(displayDate(report.created_at))}</span>
-                        ${isAdmin ? `<button class="record-delete" type="button" data-delete="reports" data-id="${esc(report.id)}">Delete</button>` : ""}
+                        ${isAdmin ? `<span><button class="record-delete" type="button" data-edit-report="${esc(report.id)}">Edit</button><button class="record-delete" type="button" data-delete="reports" data-id="${esc(report.id)}">Delete</button></span>` : ""}
                     </div>
                 `).join("");
 
@@ -2877,9 +3008,10 @@
                 <div class="card">
                     <h3 class="disp">SUBMIT A REPORT</h3>
                     <form class="data-form" id="reportForm">
+                        <input type="hidden" name="id">
                         <div class="wide"><label for="reportTitle">Report title</label><input id="reportTitle" name="title" required maxlength="200"></div>
                         <div class="wide"><label for="reportBody">Details</label><textarea id="reportBody" name="body" rows="4" maxlength="10000"></textarea></div>
-                        <div class="data-form-actions"><span class="form-error" id="reportFormError" role="alert"></span><button class="primary" type="submit">Submit report</button></div>
+                        <div class="data-form-actions"><span class="form-error" id="reportFormError" role="alert"></span><button type="button" data-cancel-report hidden>Cancel edit</button><button class="primary" type="submit">Submit report</button></div>
                     </form>
                 </div>
                 <div class="card list">
@@ -2893,7 +3025,7 @@
         function render() {
 
             const visibleNav = currentProfile?.role === "personnel"
-                ? NAV.filter(([id]) => id === "members" || id === "reports")
+                ? NAV.filter(([id]) => id === "students" || id === "visitors")
                 : NAV;
             if (!visibleNav.some(([id]) => id === S.tab)) S.tab = visibleNav[0][0];
             $("title").textContent = visibleNav.find(n => n[0] === S.tab)[1].toUpperCase();
@@ -2917,7 +3049,12 @@
             $("main").innerHTML =
                 {
                     dashboard: dash,
-                    members,
+                    students,
+                    visitors,
+                    projects,
+                    staff,
+                    entry_logs: entryLogs,
+                    alerts,
                     reports
                 }[S.tab]();
         }
@@ -3248,11 +3385,29 @@
 
             const deleteButton = e.target.closest("[data-delete]");
             if (deleteButton) deleteRecord(deleteButton);
+
+            const editButton = e.target.closest("[data-edit]");
+            if (editButton) beginPersonEdit(editButton.dataset.edit);
+
+            const editProjectButton = e.target.closest("[data-edit-project]");
+            if (editProjectButton) beginProjectEdit(editProjectButton.dataset.editProject);
+
+            const editReportButton = e.target.closest("[data-edit-report]");
+            if (editReportButton) beginReportEdit(editReportButton.dataset.editReport);
+
+            const cancelButton = e.target.closest("[data-cancel-edit]");
+            if (cancelButton) cancelPersonEdit(cancelButton.dataset.cancelEdit);
+
+            if (e.target.closest("[data-cancel-project]")) cancelProjectEdit();
+            if (e.target.closest("[data-cancel-report]")) cancelReportEdit();
+
+            const resolveButton = e.target.closest("[data-resolve]");
+            if (resolveButton) updateAlertResolution(resolveButton);
         };
 
         $("main").onsubmit = async e => {
             const form = e.target;
-            if (!["memberForm", "projectForm", "reportForm"].includes(form.id)) return;
+            if (!["studentForm", "visitorForm", "staffForm", "projectForm", "reportForm"].includes(form.id)) return;
             e.preventDefault();
 
             const formData = new FormData(form);
@@ -3262,15 +3417,32 @@
 
             try {
                 let result;
-                if (form.id === "memberForm") {
-                    result = await supabase.from("members").insert({
+                if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) {
+                    const typeByForm = {
+                        studentForm: "student",
+                        visitorForm: "visitor",
+                        staffForm: "staff"
+                    };
+                    const person = {
+                        person_type: typeByForm[form.id],
                         full_name: String(formData.get("full_name")).trim(),
-                        email: String(formData.get("email") || "").trim() || null,
-                        department: String(formData.get("department") || "").trim() || null,
-                        created_by: currentUser.id
-                    });
+                        email: form.id === "visitorForm" ? null : String(formData.get("email") || "").trim(),
+                        course: form.id === "studentForm" ? String(formData.get("course")).trim() : null,
+                        year_level: form.id === "studentForm" ? String(formData.get("year_level")).trim() : null,
+                        staff_role: form.id === "staffForm" ? String(formData.get("staff_role")).trim() : null,
+                        department: form.id === "staffForm" ? String(formData.get("department")).trim() : null,
+                        purpose: form.id === "visitorForm" ? String(formData.get("purpose")).trim() : null,
+                        contact_phone: form.id === "visitorForm" ? String(formData.get("contact_phone") || "").trim() || null : null,
+                        host_name: form.id === "visitorForm" ? String(formData.get("host_name")).trim() : null,
+                        host_department: form.id === "visitorForm" ? String(formData.get("host_department")).trim() : null
+                    };
+                    const id = String(formData.get("id") || "").trim();
+                    if (id && currentProfile.role !== "admin") throw new Error("Only Admin can edit people records.");
+                    result = id
+                        ? await supabase.from("people").update(person).eq("id", id)
+                        : await supabase.from("people").insert(person);
                 } else if (form.id === "projectForm") {
-                    result = await supabase.from("projects").insert({
+                    const project = {
                         name: String(formData.get("name")).trim(),
                         category: String(formData.get("category") || "").trim(),
                         lead: String(formData.get("lead") || "").trim(),
@@ -3278,18 +3450,30 @@
                         progress: Number(formData.get("progress")),
                         team_size: Number(formData.get("team_size")),
                         due_date: String(formData.get("due_date") || "") || null
-                    });
+                    };
+                    const id = String(formData.get("id") || "").trim();
+                    result = id
+                        ? await supabase.from("projects").update(project).eq("id", id)
+                        : await supabase.from("projects").insert(project);
                 } else {
-                    result = await supabase.from("reports").insert({
+                    const report = {
                         title: String(formData.get("title")).trim(),
                         body: String(formData.get("body") || "").trim(),
                         submitted_by: currentUser.id
-                    });
+                    };
+                    const id = String(formData.get("id") || "").trim();
+                    if (id) delete report.submitted_by;
+                    result = id
+                        ? await supabase.from("reports").update(report).eq("id", id)
+                        : await supabase.from("reports").insert(report);
                 }
 
                 if (result.error) throw result.error;
                 recordSaved = true;
                 form.reset();
+                if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) cancelPersonEdit(form.id);
+                if (form.id === "projectForm") cancelProjectEdit();
+                if (form.id === "reportForm") cancelReportEdit();
                 await loadDashboardData();
                 populateNotifList();
                 render();
@@ -3306,7 +3490,7 @@
         async function deleteRecord(button) {
             if (currentProfile?.role !== "admin") return;
             const table = button.dataset.delete;
-            if (!["members", "projects", "reports"].includes(table)) return;
+            if (!["people", "projects", "reports", "entry_logs", "alerts"].includes(table)) return;
             if (!window.confirm("Delete this record? This cannot be undone.")) return;
 
             let deleted = false;
@@ -3323,6 +3507,108 @@
                 showToast(deleted
                     ? `Deleted, but the dashboard could not refresh: ${error.message || "Unknown error"}`
                     : (error.message || "Could not delete this record."));
+            }
+        }
+
+        function beginPersonEdit(id) {
+            if (currentProfile?.role !== "admin") return;
+            const person = PEOPLE.find(record => record.id === id);
+            if (!person) return;
+            const formIds = {
+                student: "studentForm",
+                visitor: "visitorForm",
+                staff: "staffForm"
+            };
+            const formId = formIds[person.person_type];
+            const form = $(formId);
+            if (!form) return;
+
+            for (const [key, value] of Object.entries(person)) {
+                if (form.elements[key]) form.elements[key].value = value ?? "";
+            }
+            $(formId.replace("Form", "FormTitle")).textContent = `EDIT ${person.person_type.toUpperCase()}`;
+            form.querySelector('button[type="submit"]').textContent = "Save changes";
+            form.querySelector("[data-cancel-edit]").hidden = false;
+            form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function cancelPersonEdit(formId) {
+            const form = $(formId);
+            if (!form) return;
+            form.reset();
+            $(formId.replace("Form", "FormTitle")).textContent = {
+                studentForm: "ADD STUDENT",
+                visitorForm: "REGISTER VISITOR",
+                staffForm: "ADD STAFF RECORD"
+            }[formId];
+            form.querySelector('button[type="submit"]').textContent = {
+                studentForm: "Save student",
+                visitorForm: "Register visitor",
+                staffForm: "Save staff"
+            }[formId];
+            form.querySelector("[data-cancel-edit]").hidden = true;
+        }
+
+        function beginProjectEdit(id) {
+            if (currentProfile?.role !== "admin") return;
+            const project = PROJ.find(record => record.id === id);
+            const form = $("projectForm");
+            if (!project || !form) return;
+            for (const [key, value] of Object.entries(project)) {
+                if (form.elements[key]) form.elements[key].value = value ?? "";
+            }
+            $("projectFormTitle").textContent = "EDIT PROJECT";
+            form.querySelector('button[type="submit"]').textContent = "Save changes";
+            form.querySelector("[data-cancel-project]").hidden = false;
+            form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function cancelProjectEdit() {
+            const form = $("projectForm");
+            if (!form) return;
+            form.reset();
+            $("projectFormTitle").textContent = "ADD PROJECT";
+            form.querySelector('button[type="submit"]').textContent = "Save project";
+            form.querySelector("[data-cancel-project]").hidden = true;
+        }
+
+        function beginReportEdit(id) {
+            if (currentProfile?.role !== "admin") return;
+            const report = ACT.find(record => record.id === id);
+            const form = $("reportForm");
+            if (!report || !form) return;
+            form.elements.id.value = report.id;
+            form.elements.title.value = report.title;
+            form.elements.body.value = report.body || "";
+            form.querySelector('button[type="submit"]').textContent = "Save changes";
+            form.querySelector("[data-cancel-report]").hidden = false;
+            form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function cancelReportEdit() {
+            const form = $("reportForm");
+            if (!form) return;
+            form.reset();
+            form.querySelector('button[type="submit"]').textContent = "Submit report";
+            form.querySelector("[data-cancel-report]").hidden = true;
+        }
+
+        async function updateAlertResolution(button) {
+            if (currentProfile?.role !== "admin") return;
+            const alert = ALERTS.find(record => record.id === button.dataset.resolve);
+            if (!alert) return;
+            try {
+                const { error } = await supabase
+                    .from("alerts")
+                    .update({ resolved: !alert.resolved })
+                    .eq("id", alert.id);
+                if (error) throw error;
+                await loadDashboardData();
+                render();
+                showToast(alert.resolved ? "Alert reopened." : "Alert resolved.");
+            } catch (error) {
+                console.error("Could not update alert:", error);
+                showToast(error.message || "Could not update alert.");
             }
         }
 
@@ -3407,21 +3693,40 @@
         }
 
         async function loadDashboardData() {
+            const isAdmin = currentProfile.role === "admin";
             const projectsRequest = currentProfile.role === "admin"
                 ? supabase.from("projects").select("id,name,category,lead,status,progress,team_size,due_date,created_at").order("name")
                 : Promise.resolve({ data: [], error: null });
-            const [membersResult, projectsResult, reportsResult] = await Promise.all([
-                supabase.from("members").select("id,full_name,email,department,created_at").order("full_name"),
+            const adminRequests = isAdmin
+                ? [
+                    supabase.from("entry_logs").select("id,person_id,person_type,occurred_at,entry_point,status,people(full_name)").order("occurred_at", { ascending: false }),
+                    supabase.from("alerts").select("id,person_id,alert_type,occurred_at,resolved,people(full_name)").order("occurred_at", { ascending: false }),
+                    supabase.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
+                ]
+                : [
+                    Promise.resolve({ data: [], error: null }),
+                    Promise.resolve({ data: [], error: null }),
+                    Promise.resolve({ data: [], error: null })
+                ];
+            const [peopleResult, projectsResult, logsResult, alertsResult, reportsResult] = await Promise.all([
+                supabase.from("people")
+                    .select("id,person_type,full_name,email,course,year_level,staff_role,department,purpose,contact_phone,host_name,host_department,registered_at,expires_at,created_at")
+                    .order("full_name"),
                 projectsRequest,
-                supabase.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
+                ...adminRequests
             ]);
 
-            if (membersResult.error) throw new Error(`Could not load members: ${membersResult.error.message}`);
+            if (peopleResult.error) throw new Error(`Could not load people: ${peopleResult.error.message}`);
             if (projectsResult.error) throw new Error(`Could not load projects: ${projectsResult.error.message}`);
+            if (logsResult.error) throw new Error(`Could not load entry logs: ${logsResult.error.message}`);
+            if (alertsResult.error) throw new Error(`Could not load alerts: ${alertsResult.error.message}`);
             if (reportsResult.error) throw new Error(`Could not load reports: ${reportsResult.error.message}`);
 
-            MEMBERS = membersResult.data || [];
+            PEOPLE = peopleResult.data || [];
+            MEMBERS = PEOPLE.filter(person => person.person_type === "student");
             PROJ = projectsResult.data || [];
+            ENTRY_LOGS = logsResult.data || [];
+            ALERTS = alertsResult.data || [];
             ACT = (reportsResult.data || []).map(report => ({
                 ...report,
                 user: report.profiles?.full_name || "Personnel",
@@ -3544,7 +3849,7 @@
                 sessionStorage.removeItem("jrcsee_requested_role");
 
                 currentProfile = profile;
-                S.tab = profile.role === "personnel" ? "members" : (appSettings.startTab || "dashboard");
+                S.tab = profile.role === "personnel" ? "students" : (appSettings.startTab || "dashboard");
                 $("openSettings").style.display = profile.role === "admin" ? "" : "none";
                 document.body.classList.remove("auth-checking");
                 displayUserInfo();
