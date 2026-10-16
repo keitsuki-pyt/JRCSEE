@@ -7,19 +7,23 @@ create table if not exists public.profiles (
 
 alter table public.profiles
     alter column role set default 'pending',
-    add column if not exists role_assigned_by_admin boolean not null default false;
+    add column if not exists role_assigned_by_admin boolean not null default false,
+    add column if not exists role_self_selected boolean not null default false;
 
 alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles
     add constraint profiles_role_check check (role in ('pending', 'admin', 'personnel'));
 
 update public.profiles
-set role_assigned_by_admin = true
+set role_assigned_by_admin = true,
+    role_self_selected = false
 where role = 'admin' and not role_assigned_by_admin;
 
 update public.profiles
 set role = 'pending'
-where role = 'personnel' and not role_assigned_by_admin;
+where role = 'personnel'
+  and not role_assigned_by_admin
+  and not role_self_selected;
 
 create table if not exists public.members (
     id uuid primary key default gen_random_uuid(),
@@ -193,10 +197,18 @@ begin
         new.id,
         coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', ''),
         case
-            when lower(new.email) = 'legendlindel15@gmail.com' then 'admin'
+            when lower(new.email) = 'legendlindel15@gmail.com'
+                and new.raw_app_meta_data ->> 'provider' = 'google'
+                and new.email_confirmed_at is not null
+                then 'admin'
             else 'pending'
         end,
-        coalesce(lower(new.email) = 'legendlindel15@gmail.com', false)
+        coalesce(
+            lower(new.email) = 'legendlindel15@gmail.com'
+            and new.raw_app_meta_data ->> 'provider' = 'google'
+            and new.email_confirmed_at is not null,
+            false
+        )
     )
     on conflict (id) do nothing;
     return new;
@@ -215,7 +227,10 @@ select
     id,
     coalesce(raw_user_meta_data ->> 'full_name', raw_user_meta_data ->> 'name', ''),
     case
-        when lower(email) = 'legendlindel15@gmail.com' then 'admin'
+        when lower(email) = 'legendlindel15@gmail.com'
+            and raw_app_meta_data ->> 'provider' = 'google'
+            and email_confirmed_at is not null
+            then 'admin'
         else 'pending'
     end
 from auth.users
@@ -223,10 +238,103 @@ on conflict (id) do nothing;
 
 update public.profiles as profile
 set role = 'admin',
-    role_assigned_by_admin = true
+    role_assigned_by_admin = true,
+    role_self_selected = false
 from auth.users as user_account
 where profile.id = user_account.id
-  and lower(user_account.email) = 'legendlindel15@gmail.com';
+  and lower(user_account.email) = 'legendlindel15@gmail.com'
+  and user_account.raw_app_meta_data ->> 'provider' = 'google'
+  and user_account.email_confirmed_at is not null;
+
+create or replace function public.assign_google_role(requested_role text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    current_user_id uuid := auth.uid();
+    current_email text;
+    current_provider text;
+    email_is_confirmed boolean;
+    current_role text;
+    current_role_admin_assigned boolean;
+begin
+    if current_user_id is null then
+        raise exception 'You must sign in with Google before choosing a role.';
+    end if;
+
+    if requested_role not in ('admin', 'personnel') then
+        raise exception 'Choose either Admin or Personnel.';
+    end if;
+
+    select lower(email), raw_app_meta_data ->> 'provider', email_confirmed_at is not null
+    into current_email, current_provider, email_is_confirmed
+    from auth.users
+    where id = current_user_id;
+
+    if current_provider is distinct from 'google' then
+        raise exception 'Role selection during sign-in is only available for Google accounts.';
+    end if;
+
+    if not coalesce(email_is_confirmed, false) then
+        raise exception 'Your Google account email must be verified before choosing a role.';
+    end if;
+
+    select role, role_assigned_by_admin
+    into current_role, current_role_admin_assigned
+    from public.profiles
+    where id = current_user_id;
+
+    if current_role is null then
+        raise exception 'Your account profile is missing. Ask an administrator to check Supabase setup.';
+    end if;
+
+    if requested_role = 'admin' then
+        if current_email = 'legendlindel15@gmail.com' then
+            update public.profiles
+            set role = 'admin',
+                role_assigned_by_admin = true,
+                role_self_selected = false
+            where id = current_user_id;
+
+            return 'admin';
+        end if;
+
+        if current_role = 'admin' and current_role_admin_assigned then
+            return 'admin';
+        end if;
+
+        raise exception 'Admin access is limited to an approved administrator account. Choose Personnel or ask an administrator for access.';
+    end if;
+
+    if current_email = 'legendlindel15@gmail.com' then
+        update public.profiles
+        set role = 'personnel',
+            role_assigned_by_admin = false,
+            role_self_selected = true
+        where id = current_user_id;
+
+        return 'personnel';
+    end if;
+
+    if current_role = 'pending' then
+        update public.profiles
+        set role = 'personnel',
+            role_assigned_by_admin = false,
+            role_self_selected = true
+        where id = current_user_id
+          and role = 'pending';
+
+        return 'personnel';
+    end if;
+
+    return current_role;
+end;
+$$;
+
+revoke all on function public.assign_google_role(text) from public, anon;
+grant execute on function public.assign_google_role(text) to authenticated;
 
 create or replace function public.is_admin()
 returns boolean

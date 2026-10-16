@@ -83,7 +83,9 @@ OAuth secrets belong in Supabase's provider settings only; do not paste them int
 
 #### Assign Admin and Personnel roles
 
-The Google account `legendlindel15@gmail.com` is explicitly assigned the **Admin** role by the database setup trigger. Existing accounts with that email are also promoted when the updated setup SQL is run. All other new accounts (including Google accounts) start as **pending** and cannot open the dashboard until an administrator assigns a role. Google sign-in always uses the role stored in Supabase; the Admin/Personnel choice on the login page applies only to email/password sign-in and never grants permissions. To assign another account after it has signed in once, run this in the Supabase SQL Editor and replace the email:
+When signing in with Google, choose Admin or Personnel on the login page. The selected role is applied through a Supabase RPC after OAuth returns; run the current [`supabase-setup.sql`](./supabase-setup.sql) before using this feature. Google users may self-select Personnel. Only the confirmed Google account `legendlindel15@gmail.com` may self-assign Admin; other Admin access must already have been granted by an administrator. Existing verified Google accounts with that email are promoted by the setup script. Email/password accounts still require an administrator to assign their role. Supabase RLS remains the authority for every database operation.
+
+To manually assign a role to another account after it has signed in once, run this in the Supabase SQL Editor and replace the email:
 
 ```sql
 update public.profiles

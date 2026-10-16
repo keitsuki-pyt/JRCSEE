@@ -221,6 +221,13 @@
             margin-bottom: 12px;
         }
 
+        .role-help {
+            margin: -4px 0 13px;
+            color: #b5a8cb;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
         .role {
             height: 52px;
             width: 100%;
@@ -687,6 +694,7 @@
                     <span class="radio" aria-hidden="true"></span>
                 </button>
             </div>
+            <p class="role-help">Google sign-in uses this selection. Admin access is limited to an approved Google account.</p>
 
             <!-- EMAIL -->
             <div class="input-group">
@@ -798,7 +806,8 @@
             const button = document.getElementById("googleButton");
             button.disabled = true;
             button.textContent = "Connecting to Google...";
-            sessionStorage.removeItem("jrcsee_requested_role");
+            rememberRequestedRole();
+            sessionStorage.setItem("jrcsee_google_role_selection", selectedRole);
 
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({
@@ -811,6 +820,8 @@
                 if (error) throw error;
             } catch (err) {
                 console.error("Google sign-in error:", err);
+                sessionStorage.removeItem("jrcsee_requested_role");
+                sessionStorage.removeItem("jrcsee_google_role_selection");
                 alert("Google sign-in failed: " + (err.message || "Unable to connect to Supabase."));
                 button.disabled = false;
                 button.textContent = "Continue with Google";

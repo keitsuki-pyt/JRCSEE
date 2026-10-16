@@ -3937,6 +3937,26 @@
                 }
 
                 currentUser = data.session.user;
+                const requestedRole = sessionStorage.getItem("jrcsee_requested_role");
+                const googleRoleSelection = sessionStorage.getItem("jrcsee_google_role_selection");
+                if (currentUser.app_metadata?.provider === "google" && googleRoleSelection) {
+                    if (!["admin", "personnel"].includes(googleRoleSelection)) {
+                        sessionStorage.removeItem("jrcsee_requested_role");
+                        sessionStorage.removeItem("jrcsee_google_role_selection");
+                        throw new Error("The selected role is invalid. Return to sign in and choose Admin or Personnel.");
+                    }
+
+                    try {
+                        const { error: assignmentError } = await withStartupTimeout(
+                            supabaseClient.rpc("assign_google_role", { requested_role: googleRoleSelection }),
+                            "Assigning your Google sign-in role"
+                        );
+                        if (assignmentError) throw assignmentError;
+                    } finally {
+                        sessionStorage.removeItem("jrcsee_google_role_selection");
+                    }
+                }
+
                 const { data: profile, error: profileError } = await withStartupTimeout(
                     supabaseClient
                         .from("profiles")
@@ -3950,7 +3970,6 @@
                     throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
                 }
 
-                const requestedRole = sessionStorage.getItem("jrcsee_requested_role");
                 if (requestedRole && requestedRole !== profile.role) {
                     sessionStorage.removeItem("jrcsee_requested_role");
                     throw new Error(`This account is assigned the ${profile.role} role in Supabase, not ${requestedRole}. Return to sign in and select the role assigned to your account.`);
