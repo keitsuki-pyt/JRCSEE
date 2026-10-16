@@ -192,7 +192,7 @@ security definer
 set search_path = ''
 as $$
 begin
-    insert into public.profiles (id, full_name, role, role_assigned_by_admin)
+    insert into public.profiles (id, full_name, role, role_assigned_by_admin, role_self_selected)
     values (
         new.id,
         coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', ''),
@@ -208,9 +208,17 @@ begin
             and new.raw_app_meta_data ->> 'provider' = 'google'
             and new.email_confirmed_at is not null,
             false
-        )
+        ),
+        false
     )
-    on conflict (id) do nothing;
+    on conflict (id) do update
+    set full_name = coalesce(excluded.full_name, public.profiles.full_name),
+        role = case
+            when public.profiles.role_assigned_by_admin then public.profiles.role
+            when lower(excluded.id::text) is not null then public.profiles.role
+            else public.profiles.role
+        end,
+        role_self_selected = public.profiles.role_self_selected;
     return new;
 end;
 $$;
@@ -222,7 +230,7 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
 
-insert into public.profiles (id, full_name, role)
+insert into public.profiles (id, full_name, role, role_assigned_by_admin, role_self_selected)
 select
     id,
     coalesce(raw_user_meta_data ->> 'full_name', raw_user_meta_data ->> 'name', ''),
@@ -232,7 +240,15 @@ select
             and email_confirmed_at is not null
             then 'admin'
         else 'pending'
-    end
+    end,
+    case
+        when lower(email) = 'legendlindel15@gmail.com'
+            and raw_app_meta_data ->> 'provider' = 'google'
+            and email_confirmed_at is not null
+            then true
+        else false
+    end,
+    false
 from auth.users
 on conflict (id) do nothing;
 
@@ -245,6 +261,24 @@ where profile.id = user_account.id
   and lower(user_account.email) = 'legendlindel15@gmail.com'
   and user_account.raw_app_meta_data ->> 'provider' = 'google'
   and user_account.email_confirmed_at is not null;
+
+create or replace function public.ensure_profile_for_user(user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    insert into public.profiles (id, full_name, role, role_assigned_by_admin, role_self_selected)
+    select
+        user_id,
+        coalesce((select raw_user_meta_data ->> 'full_name' from auth.users where id = user_id), ''),
+        'pending',
+        false,
+        false
+    on conflict (id) do nothing;
+end;
+$$;
 
 create or replace function public.assign_google_role(requested_role text)
 returns text
@@ -268,6 +302,8 @@ begin
         raise exception 'Choose either Admin or Personnel.';
     end if;
 
+    perform public.ensure_profile_for_user(current_user_id);
+
     select lower(email), raw_app_meta_data ->> 'provider', email_confirmed_at is not null
     into current_email, current_provider, email_is_confirmed
     from auth.users
@@ -285,6 +321,17 @@ begin
     into current_role, current_role_admin_assigned
     from public.profiles
     where id = current_user_id;
+
+    if current_role is null then
+        insert into public.profiles (id, full_name, role, role_assigned_by_admin, role_self_selected)
+        values (current_user_id, '', 'pending', false, false)
+        on conflict (id) do nothing;
+
+        select role, role_assigned_by_admin
+        into current_role, current_role_admin_assigned
+        from public.profiles
+        where id = current_user_id;
+    end if;
 
     if current_role is null then
         raise exception 'Your account profile is missing. Ask an administrator to check Supabase setup.';

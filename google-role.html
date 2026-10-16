@@ -166,12 +166,19 @@
         let roleSelectionReady = false;
 
         function showRoleSetupHelp(error) {
-            const details = String(error?.message || "");
-            if (/assign_google_role|schema cache|could not find the function|function .* does not exist/i.test(details)) {
+            const details = String(error?.details || error?.message || "");
+            const normalized = details.replace(/\s+/g, " ").trim();
+
+            if (/assign_google_role|schema cache|could not find the function|function .* does not exist/i.test(normalized)) {
                 setupHelp.style.display = "block";
-                return `${details} Apply the current Supabase setup SQL and try again.`;
+                return "Supabase is missing the Google role RPC or the latest schema update. Run the current supabase-setup.sql in the Supabase SQL Editor, then reload this page and try again.";
             }
-            return details || "Could not assign your account role. Please try again.";
+
+            if (/missing.*profile|account profile is missing|does not exist/i.test(normalized)) {
+                return "Your account profile is missing in Supabase. Run the current supabase-setup.sql in the SQL Editor and then retry the role selection.";
+            }
+
+            return normalized || "Could not assign your account role. Please try again.";
         }
 
         async function initializeRoleSelection() {
