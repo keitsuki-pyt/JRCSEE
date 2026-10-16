@@ -137,19 +137,14 @@
 
 <body>
     <main>
-        <h1>CHOOSE YOUR ACCOUNT ROLE</h1>
-        <p>Google sign-in is verified. Choose the role for this JRCSEE account.</p>
+        <h1 id="pageTitle">CHECKING YOUR ACCOUNT</h1>
+        <p id="pageDescription">Please wait while we check your account approval status.</p>
         <div id="accountEmail"></div>
-        <div class="roles">
-            <button type="button" data-role="admin">Continue as Admin</button>
-            <button type="button" data-role="personnel">Continue as Personnel</button>
-        </div>
-        <p>Admin access is granted only to an approved Google account. If you are not approved, choose Personnel or contact an administrator.</p>
         <div id="message" role="alert" aria-live="polite"></div>
         <div id="setupHelp">
-            Google role setup is missing in Supabase. Run the current
+            Supabase profile setup appears incomplete. Run the current
             <a href="./supabase-setup.sql" target="_blank" rel="noopener">supabase-setup.sql</a>
-            in the Supabase SQL Editor, then try again.
+            in the Supabase SQL Editor, then sign in again.
         </div>
         <a class="back-link" href="./index.html" id="returnLink">Return to sign in</a>
     </main>
@@ -160,28 +155,10 @@
             "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
         );
 
-        const buttons = [...document.querySelectorAll("[data-role]")];
         const message = document.getElementById("message");
         const setupHelp = document.getElementById("setupHelp");
-        let roleSelectionReady = false;
 
-        function showRoleSetupHelp(error) {
-            const details = String(error?.details || error?.message || "");
-            const normalized = details.replace(/\s+/g, " ").trim();
-
-            if (/assign_google_role|schema cache|could not find the function|function .* does not exist/i.test(normalized)) {
-                setupHelp.style.display = "block";
-                return "Supabase is missing the Google role RPC or the latest schema update. Run the current supabase-setup.sql in the Supabase SQL Editor, then reload this page and try again.";
-            }
-
-            if (/missing.*profile|account profile is missing|does not exist/i.test(normalized)) {
-                return "Your account profile is missing in Supabase. Run the current supabase-setup.sql in the SQL Editor and then retry the role selection.";
-            }
-
-            return normalized || "Could not assign your account role. Please try again.";
-        }
-
-        async function initializeRoleSelection() {
+        async function initializeApprovalStatus() {
             try {
                 const { data, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
@@ -196,38 +173,40 @@
                 }
 
                 document.getElementById("accountEmail").textContent = user.email || "";
-                roleSelectionReady = true;
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from("profiles")
+                    .select("role")
+                    .eq("id", user.id)
+                    .maybeSingle();
+                if (profileError) throw profileError;
+                if (!profile) {
+                    setupHelp.style.display = "block";
+                    throw new Error("Your account profile could not be found. Please contact an administrator.");
+                }
+
+                if (["admin", "personnel"].includes(profile.role)) {
+                    window.location.replace("./dashboard.html");
+                    return;
+                }
+                if (profile.role !== "pending") {
+                    throw new Error("Your account has an invalid role. Please contact an administrator.");
+                }
+
+                document.getElementById("pageTitle").textContent = "ACCOUNT PENDING APPROVAL";
+                document.getElementById("pageDescription").textContent =
+                    "Your Google account is verified, but dashboard access requires administrator approval.";
+                message.textContent =
+                    "An administrator must assign you the Personnel or Admin role in Supabase. Once approved, sign in again to access the dashboard.";
             } catch (error) {
-                console.error("Could not initialize Google role selection:", error);
-                message.textContent = error.message || "Could not verify your Google sign-in.";
-                buttons.forEach(button => button.disabled = true);
+                console.error("Could not check Google account approval:", error);
+                if (!message.textContent) {
+                    document.getElementById("pageTitle").textContent = "ACCOUNT STATUS UNAVAILABLE";
+                    document.getElementById("pageDescription").textContent =
+                        "We could not verify your approval status.";
+                    message.textContent = error.message || "Could not check your account. Please try again.";
+                }
             }
         }
-
-        async function assignRole(role) {
-            if (!roleSelectionReady) return;
-            buttons.forEach(button => button.disabled = true);
-            message.textContent = "Saving your role...";
-
-            try {
-                const { error } = await supabaseClient.rpc("assign_google_role", {
-                    requested_role: role
-                });
-                if (error) throw error;
-
-                sessionStorage.removeItem("jrcsee_google_role_selection");
-                sessionStorage.setItem("jrcsee_requested_role", role);
-                window.location.replace("./dashboard.html");
-            } catch (error) {
-                console.error("Could not assign Google account role:", error);
-                message.textContent = showRoleSetupHelp(error);
-                buttons.forEach(button => button.disabled = false);
-            }
-        }
-
-        buttons.forEach(button => {
-            button.addEventListener("click", () => assignRole(button.dataset.role));
-        });
 
         document.getElementById("returnLink").addEventListener("click", async event => {
             event.preventDefault();
@@ -243,7 +222,7 @@
             }
         });
 
-        initializeRoleSelection();
+        initializeApprovalStatus();
     </script>
 </body>
 

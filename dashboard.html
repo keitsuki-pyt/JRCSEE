@@ -3271,6 +3271,9 @@
                         window.location.replace("./google-role.html");
                         return;
                     }
+                    if (profile?.role === "pending") {
+                        throw new Error("Your account is awaiting administrator approval. Ask an administrator to assign you the Personnel or Admin role in Supabase.");
+                    }
                     throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
                 }
 
