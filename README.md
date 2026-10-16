@@ -35,13 +35,14 @@ Example file structure:
 ```text
 JRCSEE/
 ├── index.html       # Login page
+├── google-role.html # Google sign-in role selection
 ├── dashboard.html   # Dashboard page
 ├── JRCC.png         # JRCC logo used by the pages
 ├── supabase-setup.sql # Database tables, roles, and access policies
 └── README.md
 ```
 
-Make sure the filenames match the paths used in your HTML. The login page references `JRCC.png` and redirects successful sign-ins to `dashboard.html`.
+Make sure the filenames match the paths used in your HTML. The pages reference `JRCC.png`; email/password sign-ins continue to `dashboard.html`, while Google sign-ins go through `google-role.html` first.
 
 ## Getting Started
 
@@ -67,8 +68,8 @@ The HTML files use the Supabase JavaScript client and call `supabase.auth.signIn
 1. Open the JRCSEE project in [Supabase](https://supabase.com/).
 2. In **SQL Editor**, run [`supabase-setup.sql`](./supabase-setup.sql). It creates the people, entry-log, alert, and account tables/views, applies row-level security, and schedules expired visitor cleanup through `pg_cron`. The script is designed to be rerun; when upgrading an existing setup it keeps the old `members`, `projects`, and `reports` tables, but old member rows are not automatically converted into student/staff records.
 3. In **Authentication → Providers**, enable Email and, if desired, Google.
-4. In **Authentication → URL Configuration**, set the site's URL and add the dashboard URL used during local development and deployment to the allowed redirect URLs.
-5. Keep the Supabase project URL and **publishable** key in the two HTML files in sync with your project. Never put a `service_role` key in browser code.
+4. In **Authentication → URL Configuration**, set the site's URL and add the app's `google-role.html` and `dashboard.html` URLs used during local development and deployment to the allowed redirect URLs.
+5. Keep the Supabase project URL and **publishable** key in the HTML files in sync with your project. Never put a `service_role` key in browser code.
 
 #### Enable Google sign-in
 
@@ -83,7 +84,7 @@ OAuth secrets belong in Supabase's provider settings only; do not paste them int
 
 #### Assign Admin and Personnel roles
 
-When signing in with Google, choose Admin or Personnel on the login page. The selected role is applied through a Supabase RPC after OAuth returns; run the current [`supabase-setup.sql`](./supabase-setup.sql) before using this feature. Google users may self-select Personnel. Only the confirmed Google account `legendlindel15@gmail.com` may self-assign Admin; other Admin access must already have been granted by an administrator. Existing verified Google accounts with that email are promoted by the setup script. Email/password accounts still require an administrator to assign their role. Supabase RLS remains the authority for every database operation.
+After Google verifies the account, [`google-role.html`](./google-role.html) lets the user choose Admin or Personnel. The selection is applied through the `assign_google_role` Supabase RPC; run the current [`supabase-setup.sql`](./supabase-setup.sql) in the Supabase SQL Editor to create that function. Google users may self-select Personnel. Only the confirmed Google account `legendlindel15@gmail.com` may self-assign Admin; other Admin access must already have been granted by an administrator. Existing verified Google accounts with that email are promoted by the setup script. Email/password accounts still require an administrator to assign their role. Supabase RLS remains the authority for every database operation.
 
 To manually assign a role to another account after it has signed in once, run this in the Supabase SQL Editor and replace the email:
 

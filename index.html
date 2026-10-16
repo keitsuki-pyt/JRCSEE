@@ -694,7 +694,7 @@
                     <span class="radio" aria-hidden="true"></span>
                 </button>
             </div>
-            <p class="role-help">Google sign-in uses this selection. Admin access is limited to an approved Google account.</p>
+            <p class="role-help">Choose your role for email sign-in. Google users choose a role after verifying their account; Admin access is limited to an approved Google account.</p>
 
             <!-- EMAIL -->
             <div class="input-group">
@@ -806,14 +806,14 @@
             const button = document.getElementById("googleButton");
             button.disabled = true;
             button.textContent = "Connecting to Google...";
-            rememberRequestedRole();
-            sessionStorage.setItem("jrcsee_google_role_selection", selectedRole);
+            sessionStorage.removeItem("jrcsee_requested_role");
+            sessionStorage.removeItem("jrcsee_google_role_selection");
 
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: "google",
                     options: {
-                        redirectTo: new URL("./dashboard.html", window.location.href).href
+                        redirectTo: new URL("./google-role.html", window.location.href).href
                     }
                 });
 

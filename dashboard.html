@@ -3951,7 +3951,12 @@
                             supabaseClient.rpc("assign_google_role", { requested_role: googleRoleSelection }),
                             "Assigning your Google sign-in role"
                         );
-                        if (assignmentError) throw assignmentError;
+                        if (assignmentError) {
+                            if (/PGRST202|assign_google_role|schema cache/i.test(assignmentError.message || "")) {
+                                throw new Error("Google role assignment is not installed in Supabase. Run the current supabase-setup.sql in the Supabase SQL Editor, then try signing in again.");
+                            }
+                            throw assignmentError;
+                        }
                     } finally {
                         sessionStorage.removeItem("jrcsee_google_role_selection");
                     }

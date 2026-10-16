@@ -535,3 +535,5 @@ begin
     );
 end;
 $$;
+
+notify pgrst, 'reload schema';
