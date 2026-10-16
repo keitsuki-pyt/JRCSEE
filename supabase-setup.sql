@@ -481,6 +481,7 @@ on public.reports for select to authenticated
 using (public.is_admin());
 
 drop policy if exists "Users can submit their own reports" on public.reports;
+drop policy if exists "Admins can submit reports" on public.reports;
 create policy "Admins can submit reports" on public.reports
 for insert to authenticated
 with check (public.is_admin() and submitted_by = auth.uid());
