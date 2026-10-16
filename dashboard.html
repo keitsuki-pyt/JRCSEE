@@ -1108,39 +1108,6 @@
             transform: rotate(90deg);
         }
 
-        .sd-tabs {
-            display: flex;
-            padding: 8px 16px;
-            gap: 6px;
-            background: rgba(0, 0, 0, .3);
-            border-bottom: 1px solid var(--line);
-            flex-shrink: 0;
-        }
-
-        .sd-tab {
-            flex: 1;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--mut);
-            border: 1px solid transparent;
-            text-align: center;
-            transition: all .2s;
-        }
-
-        .sd-tab:hover {
-            color: var(--fg);
-            background: rgba(255, 255, 255, .04);
-        }
-
-        .sd-tab.on {
-            color: #ffffff;
-            background: linear-gradient(90deg, rgba(var(--pri-rgb), .3) 0%, rgba(var(--cy-rgb), .1) 100%);
-            border-color: rgba(var(--acc-rgb), .4);
-            box-shadow: 0 0 10px rgba(var(--pri-rgb), .15);
-        }
-
         .sd-body {
             flex: 1;
             overflow-y: auto;
@@ -1404,255 +1371,16 @@
             border-color: var(--pri);
         }
 
-        /* Option Groups & Segmented Buttons */
-        .opt-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .02);
-            border: 1px solid rgba(255, 255, 255, .06);
-        }
-
-        .opt-label-group {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .opt-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--fg);
-        }
-
-        .opt-sub {
-            font-size: 10px;
-            color: var(--mut);
-        }
-
-        .btn-group {
-            display: flex;
-            background: rgba(0, 0, 0, .4);
-            border-radius: 6px;
-            padding: 3px;
-            gap: 3px;
-            border: 1px solid rgba(255, 255, 255, .06);
-        }
-
-        .btn-opt {
-            flex: 1;
-            padding: 6px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--mut);
-            text-align: center;
-            transition: all .2s;
-        }
-
-        .btn-opt:hover {
-            color: var(--fg);
-            background: rgba(255, 255, 255, .05);
-        }
-
-        .btn-opt.on {
-            background: rgba(var(--pri-rgb), .35);
-            color: #ffffff;
-            border: 1px solid rgba(var(--acc-rgb), .4);
-            box-shadow: 0 0 8px rgba(var(--pri-rgb), .2);
-        }
-
-        /* Toggle Switches */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .02);
-            border: 1px solid rgba(255, 255, 255, .06);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 38px;
-            height: 22px;
-            flex-shrink: 0;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            inset: 0;
-            background: rgba(255, 255, 255, .1);
-            border: 1px solid rgba(255, 255, 255, .15);
-            transition: .25s ease;
-            border-radius: 22px;
-        }
-
-        .slider::before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background: #ffffff;
-            transition: .25s ease;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background: var(--pri);
-            border-color: var(--acc);
-            box-shadow: 0 0 10px rgba(var(--pri-rgb), .4);
-        }
-
-        input:checked + .slider::before {
-            transform: translateX(16px);
-            background: #ffffff;
-        }
-
-        .test-sound-btn {
-            font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, .06);
-            border: 1px solid rgba(255, 255, 255, .1);
-            color: var(--mut);
-            transition: all .2s;
-        }
-
-        .test-sound-btn:hover {
-            color: var(--fg);
-            border-color: var(--pri);
-        }
-
-        /* Backup Tab Actions */
-        .backup-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .sd-action-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid rgba(255, 255, 255, .1);
-            color: var(--fg);
-            font-size: 11px;
-            font-weight: 600;
-            transition: all .2s;
-        }
-
-        .sd-action-btn:hover {
-            border-color: var(--pri);
-            background: rgba(var(--pri-rgb), .12);
-        }
-
-        .sd-action-btn svg {
-            width: 14px;
-            height: 14px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .import-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .import-area {
-            width: 100%;
-            padding: 10px;
-            font-size: 11px;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, .4);
-            border: 1px solid rgba(255, 255, 255, .08);
-            color: var(--fg);
-            outline: none;
-            resize: vertical;
-        }
-
-        .import-area:focus {
-            border-color: var(--pri);
-        }
-
-        .danger-zone {
-            padding: 14px;
-            border-radius: 8px;
-            background: rgba(244, 63, 94, .08);
-            border: 1px solid rgba(244, 63, 94, .25);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .danger-title {
-            font-size: 10px;
-            font-weight: 700;
-            color: #fda4af;
-            letter-spacing: .1em;
-        }
-
-        .danger-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            background: rgba(244, 63, 94, .2);
-            color: #ffffff;
-            border: 1px solid rgba(244, 63, 94, .4);
-            transition: all .2s;
-            text-align: center;
-        }
-
-        .danger-btn:hover {
-            background: rgba(244, 63, 94, .35);
-            border-color: #f43f5e;
-        }
-
         /* Drawer Footer */
         .sd-foot {
             padding: 16px 24px;
             border-top: 1px solid var(--line);
             background: rgba(255, 255, 255, .02);
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             gap: 12px;
             flex-shrink: 0;
-        }
-
-        .sd-foot-reset {
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: var(--mut);
-            border: 1px solid rgba(255, 255, 255, .08);
-            transition: all .2s;
-        }
-
-        .sd-foot-reset:hover {
-            color: var(--fg);
-            border-color: rgba(255, 255, 255, .2);
         }
 
         .sd-foot-save {
@@ -1822,7 +1550,7 @@
                 </button>
 
                 <!-- SETTINGS BUTTON -->
-                <button class="settings-btn ic" id="openSettings" aria-label="Settings" title="Customize Theme &amp; Web Options">
+                <button class="settings-btn ic" id="openSettings" aria-label="Settings" title="Customize theme colors">
 
                     <svg viewBox="0 0 24 24">
 
@@ -1878,24 +1606,16 @@
         <div class="sd-head">
             <div class="sd-title-wrap">
                 <div class="sd-tag mono">CUSTOMIZATION</div>
-                <h2 class="disp">THEME &amp; WEB OPTIONS</h2>
+                <h2 class="disp">THEME COLORS</h2>
             </div>
             <button class="sd-close ic" id="settingsCloseBtn" aria-label="Close settings" type="button">
                 <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         </div>
 
-        <!-- Segmented Tab Switcher -->
-        <div class="sd-tabs">
-            <button class="sd-tab on mono" data-stab="colors" type="button">🎨 Theme Colors</button>
-            <button class="sd-tab mono" data-stab="options" type="button">🌐 Web Options</button>
-            <button class="sd-tab mono" data-stab="backup" type="button">⚡ Backup</button>
-        </div>
-
         <!-- Scrollable Drawer Body -->
         <div class="sd-body">
 
-            <!-- TAB 1: COLORS & THEMES -->
             <div class="sd-pane on" id="paneColors">
 
                 <!-- Live Preview Widget -->
@@ -1922,174 +1642,10 @@
 
             </div>
 
-            <!-- TAB 2: WEB & INTERFACE OPTIONS -->
-            <div class="sd-pane" id="paneOptions">
-
-                <!-- Visual Atmosphere -->
-                <div class="sd-sec">
-                    <div class="sd-sec-title disp">VISUAL ATMOSPHERE</div>
-
-                    <!-- Ambient Glow -->
-                    <div class="opt-group">
-                        <div class="opt-label-group">
-                            <span class="opt-title">Ambient Background Glow</span>
-                            <span class="opt-sub">Radial spotlight behind the dashboard</span>
-                        </div>
-                        <div class="btn-group" id="glowGroup">
-                            <button class="mono btn-opt on" data-val="vivid" type="button">Vivid</button>
-                            <button class="mono btn-opt" data-val="soft" type="button">Soft</button>
-                            <button class="mono btn-opt" data-val="off" type="button">Off</button>
-                        </div>
-                    </div>
-
-                    <!-- Glassmorphism Blur -->
-                    <div class="opt-group">
-                        <div class="opt-label-group">
-                            <span class="opt-title">Glassmorphism Blur</span>
-                            <span class="opt-sub">Backdrop blur filter on cards and header</span>
-                        </div>
-                        <div class="btn-group" id="blurGroup">
-                            <button class="mono btn-opt on" data-val="high" type="button">High (16px)</button>
-                            <button class="mono btn-opt" data-val="low" type="button">Low (6px)</button>
-                            <button class="mono btn-opt" data-val="off" type="button">Solid</button>
-                        </div>
-                    </div>
-
-                    <!-- Layout Density -->
-                    <div class="opt-group">
-                        <div class="opt-label-group">
-                            <span class="opt-title">Interface Density</span>
-                            <span class="opt-sub">Spacing and card padding mode</span>
-                        </div>
-                        <div class="btn-group" id="densityGroup">
-                            <button class="mono btn-opt on" data-val="standard" type="button">Standard</button>
-                            <button class="mono btn-opt" data-val="compact" type="button">Compact</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Clock & Header -->
-                <div class="sd-sec">
-                    <div class="sd-sec-title disp">CLOCK &amp; HEADER</div>
-
-                    <!-- Time Format -->
-                    <div class="opt-group">
-                        <div class="opt-label-group">
-                            <span class="opt-title">Clock Format</span>
-                            <span class="opt-sub">12-Hour AM/PM or 24-Hour Military format</span>
-                        </div>
-                        <div class="btn-group" id="clockFormatGroup">
-                            <button class="mono btn-opt on" data-val="12" type="button">12-Hour (AM/PM)</button>
-                            <button class="mono btn-opt" data-val="24" type="button">24-Hour</button>
-                        </div>
-                    </div>
-
-                    <!-- Show Seconds Toggle -->
-                    <div class="toggle-row">
-                        <div class="opt-label-group">
-                            <label class="opt-title" for="toggleSeconds">Display Seconds</label>
-                            <span class="opt-sub">Show live ticking seconds in clock</span>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggleSeconds" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- Show Date Toggle -->
-                    <div class="toggle-row">
-                        <div class="opt-label-group">
-                            <label class="opt-title" for="toggleDate">Display Calendar Date</label>
-                            <span class="opt-sub">Show full day, month and year</span>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggleDate" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Web Experience -->
-                <div class="sd-sec">
-                    <div class="sd-sec-title disp">WEB EXPERIENCE</div>
-
-                    <!-- Notification Dot -->
-                    <div class="toggle-row">
-                        <div class="opt-label-group">
-                            <label class="opt-title" for="toggleBellDot">Unread Notification Dot</label>
-                            <span class="opt-sub">Show glowing alert dot on header bell</span>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggleBellDot" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- Tactile Audio Feedback -->
-                    <div class="toggle-row">
-                        <div class="opt-label-group">
-                            <label class="opt-title" for="toggleSound">Interface Sound Feedback</label>
-                            <span class="opt-sub">Subtle synthesized click tone on interactions</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <button class="test-sound-btn mono" id="testSoundBtn" type="button" title="Test click sound">Test</button>
-                            <label class="switch">
-                                <input type="checkbox" id="toggleSound">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Default Starting Tab -->
-                    <div class="opt-group">
-                        <div class="opt-label-group">
-                            <span class="opt-title">Default Startup View</span>
-                            <span class="opt-sub">Landing view when loading the dashboard</span>
-                        </div>
-                        <div class="btn-group" id="startTabGroup">
-                            <button class="mono btn-opt on" data-val="dashboard" type="button">Dashboard</button>
-                            <button class="mono btn-opt" data-val="students" type="button">Students</button>
-                            <button class="mono btn-opt" data-val="reports" type="button">Reports</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- TAB 3: BACKUP & PRESETS -->
-            <div class="sd-pane" id="paneBackup">
-                <div class="sd-sec">
-                    <div class="sd-sec-title disp">CONFIGURATION BACKUP &amp; RESET</div>
-                    <p class="sd-sec-desc">Save your customizations, share them as JSON, or restore default settings.</p>
-
-                    <div class="backup-actions">
-                        <button class="sd-action-btn mono" id="exportBtn" type="button">
-                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                            Export Configuration to Clipboard
-                        </button>
-
-                        <div class="import-wrap">
-                            <textarea class="import-area mono" id="importInput" placeholder="Paste exported JSON settings here..." rows="3"></textarea>
-                            <button class="sd-action-btn mono" id="importBtn" type="button">
-                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                                Import &amp; Apply Configuration
-                            </button>
-                        </div>
-
-                        <div class="danger-zone">
-                            <div class="danger-title mono">FACTORY RESET</div>
-                            <p class="sd-sec-desc" style="margin-bottom:10px;">Reverts all theme colors and web options to default cosmic purple.</p>
-                            <button class="danger-btn mono" id="resetAllBtn" type="button">Reset All to Factory Defaults</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <!-- Drawer Footer -->
         <div class="sd-foot">
-            <button class="sd-foot-reset mono" id="footerResetBtn" type="button">Reset Defaults</button>
             <button class="sd-foot-save mono" id="footerSaveBtn" type="button">Done</button>
         </div>
     </aside>
@@ -2329,30 +1885,6 @@
                 el.classList.toggle("on", el.dataset.preset === appSettings.preset);
             });
 
-            // Option groups
-            const syncGroup = (groupId, currentVal) => {
-                const grp = $(groupId);
-                if (!grp) return;
-                grp.querySelectorAll(".btn-opt").forEach(btn => {
-                    btn.classList.toggle("on", btn.dataset.val === String(currentVal));
-                });
-            };
-
-            syncGroup("glowGroup", appSettings.glowMode);
-            syncGroup("blurGroup", appSettings.blurMode);
-            syncGroup("densityGroup", appSettings.density);
-            syncGroup("clockFormatGroup", appSettings.clockFormat);
-            syncGroup("startTabGroup", appSettings.startTab);
-
-            // Switches
-            const setCheck = (id, val) => {
-                const el = $(id);
-                if (el) el.checked = Boolean(val);
-            };
-            setCheck("toggleSeconds", appSettings.clockSeconds);
-            setCheck("toggleDate", appSettings.clockDate);
-            setCheck("toggleBellDot", appSettings.bellDot);
-            setCheck("toggleSound", appSettings.soundEffects);
         }
 
         let GROWTH = [];
@@ -3290,125 +2822,6 @@
                 }
             });
 
-            // Segmented tab switching inside drawer
-            document.querySelectorAll(".sd-tab").forEach(tab => {
-                tab.onclick = () => {
-                    playClickSound();
-                    document.querySelectorAll(".sd-tab").forEach(t => t.classList.remove("on"));
-                    tab.classList.add("on");
-                    const targetPane = tab.dataset.stab;
-                    document.querySelectorAll(".sd-pane").forEach(p => p.classList.remove("on"));
-                    if (targetPane === "colors") $("paneColors").classList.add("on");
-                    if (targetPane === "options") $("paneOptions").classList.add("on");
-                    if (targetPane === "backup") $("paneBackup").classList.add("on");
-                };
-            });
-
-            // Segmented buttons listeners in Web Options
-            const bindGroup = (groupId, key) => {
-                const grp = $(groupId);
-                if (!grp) return;
-                grp.onclick = e => {
-                    const btn = e.target.closest(".btn-opt");
-                    if (!btn) return;
-                    playClickSound();
-                    const val = btn.dataset.val;
-                    const change = {};
-                    change[key] = val;
-                    applySettings(change);
-                    render();
-                    showToast(`Updated ${key} to ${val}`);
-                };
-            };
-
-            bindGroup("glowGroup", "glowMode");
-            bindGroup("blurGroup", "blurMode");
-            bindGroup("densityGroup", "density");
-            bindGroup("clockFormatGroup", "clockFormat");
-            bindGroup("startTabGroup", "startTab");
-
-            // Switches listeners
-            const bindSwitch = (id, key) => {
-                const el = $(id);
-                if (!el) return;
-                el.onchange = e => {
-                    playClickSound();
-                    const change = {};
-                    change[key] = e.target.checked;
-                    applySettings(change);
-                    render();
-                };
-            };
-
-            bindSwitch("toggleSeconds", "clockSeconds");
-            bindSwitch("toggleDate", "clockDate");
-            bindSwitch("toggleBellDot", "bellDot");
-            bindSwitch("toggleSound", "soundEffects");
-
-            // Test sound button
-            const testSoundBtn = $("testSoundBtn");
-            if (testSoundBtn) {
-                testSoundBtn.onclick = () => {
-                    const original = appSettings.soundEffects;
-                    appSettings.soundEffects = true;
-                    playClickSound();
-                    appSettings.soundEffects = original;
-                    showToast("Audio feedback sample played!");
-                };
-            }
-
-            // Reset buttons
-            const resetHandler = () => {
-                playClickSound();
-                applySettings(DEFAULT_SETTINGS);
-                render();
-                showToast("All settings reset to defaults!");
-            };
-            const footReset = $("footerResetBtn");
-            if (footReset) footReset.onclick = resetHandler;
-            const resetAllBtn = $("resetAllBtn");
-            if (resetAllBtn) resetAllBtn.onclick = resetHandler;
-
-            // Export to clipboard
-            const exportBtn = $("exportBtn");
-            if (exportBtn) {
-                exportBtn.onclick = async () => {
-                    playClickSound();
-                    const json = JSON.stringify(appSettings, null, 2);
-                    try {
-                        await navigator.clipboard.writeText(json);
-                        showToast("Settings copied to clipboard!");
-                    } catch (err) {
-                        const imp = $("importInput");
-                        if (imp) imp.value = json;
-                        showToast("Settings displayed in import box!");
-                    }
-                };
-            }
-
-            // Import configuration
-            const importBtn = $("importBtn");
-            if (importBtn) {
-                importBtn.onclick = () => {
-                    playClickSound();
-                    const imp = $("importInput");
-                    if (!imp || !imp.value.trim()) {
-                        showToast("Paste JSON configuration first!");
-                        return;
-                    }
-                    try {
-                        const parsed = JSON.parse(imp.value.trim());
-                        if (typeof parsed !== "object" || parsed === null) throw new Error("Invalid format");
-                        applySettings(parsed);
-                        render();
-                        imp.value = "";
-                        showToast("Configuration imported and applied!");
-                    } catch (err) {
-                        alert("Invalid JSON configuration. Please check the format.");
-                    }
-                };
-            }
-
             // Notifications Bell toggle
             const notifBtn = $("notifBell");
             const notifPop = $("notifPopover");
@@ -3937,29 +3350,13 @@
                 }
 
                 currentUser = data.session.user;
-                const requestedRole = sessionStorage.getItem("jrcsee_requested_role");
+                let requestedRole = sessionStorage.getItem("jrcsee_requested_role");
                 const googleRoleSelection = sessionStorage.getItem("jrcsee_google_role_selection");
-                if (currentUser.app_metadata?.provider === "google" && googleRoleSelection) {
-                    if (!["admin", "personnel"].includes(googleRoleSelection)) {
-                        sessionStorage.removeItem("jrcsee_requested_role");
-                        sessionStorage.removeItem("jrcsee_google_role_selection");
-                        throw new Error("The selected role is invalid. Return to sign in and choose Admin or Personnel.");
-                    }
-
-                    try {
-                        const { error: assignmentError } = await withStartupTimeout(
-                            supabaseClient.rpc("assign_google_role", { requested_role: googleRoleSelection }),
-                            "Assigning your Google sign-in role"
-                        );
-                        if (assignmentError) {
-                            if (/PGRST202|assign_google_role|schema cache/i.test(assignmentError.message || "")) {
-                                throw new Error("Google role assignment is not installed in Supabase. Run the current supabase-setup.sql in the Supabase SQL Editor, then try signing in again.");
-                            }
-                            throw assignmentError;
-                        }
-                    } finally {
-                        sessionStorage.removeItem("jrcsee_google_role_selection");
-                    }
+                const isGoogleUser = currentUser.app_metadata?.provider === "google";
+                if (isGoogleUser && googleRoleSelection) {
+                    sessionStorage.removeItem("jrcsee_google_role_selection");
+                    sessionStorage.removeItem("jrcsee_requested_role");
+                    requestedRole = null;
                 }
 
                 const { data: profile, error: profileError } = await withStartupTimeout(
@@ -3972,6 +3369,11 @@
                 );
                 if (profileError) throw new Error(`Could not load your Supabase profile: ${profileError.message}`);
                 if (!profile || !["admin", "personnel"].includes(profile.role)) {
+                    if (isGoogleUser) {
+                        sessionStorage.removeItem("jrcsee_requested_role");
+                        window.location.replace("./google-role.html");
+                        return;
+                    }
                     throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
                 }
 
