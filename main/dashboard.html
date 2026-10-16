@@ -40,6 +40,10 @@
             padding: 0
         }
 
+        body.auth-checking .app {
+            visibility: hidden;
+        }
+
         html,
         body {
             height: 100%
@@ -434,6 +438,140 @@
             transform: rotate(25deg)
         }
 
+        .user-account {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            color: inherit;
+            text-align: left;
+        }
+
+        .user-account:hover .user-info b {
+            color: var(--acc);
+        }
+
+        .account-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, .72);
+            backdrop-filter: blur(6px);
+            z-index: 110;
+        }
+
+        .account-backdrop.open {
+            display: grid;
+        }
+
+        .account-dialog {
+            width: min(440px, 100%);
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #10091b;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, .55);
+        }
+
+        .account-dialog h2 {
+            margin-bottom: 6px;
+            font-size: 20px;
+        }
+
+        .account-dialog p {
+            margin-bottom: 18px;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .account-dialog label,
+        .data-form label {
+            display: block;
+            margin: 12px 0 6px;
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .account-dialog input,
+        .data-form input,
+        .data-form select,
+        .data-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .04);
+            outline: none;
+        }
+
+        .account-dialog input:focus,
+        .data-form input:focus,
+        .data-form select:focus,
+        .data-form textarea:focus {
+            border-color: var(--pri);
+        }
+
+        .account-actions,
+        .data-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .account-actions button,
+        .data-form button,
+        .record-delete {
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            color: var(--fg);
+        }
+
+        .account-actions .primary,
+        .data-form .primary {
+            background: rgba(var(--pri-rgb), .24);
+            border-color: var(--pri);
+        }
+
+        .data-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 12px;
+            margin: 14px 0 20px;
+        }
+
+        .data-form h4,
+        .data-form .wide,
+        .data-form-actions,
+        .form-error {
+            grid-column: 1 / -1;
+        }
+
+        .data-form h4 {
+            font-size: 13px;
+        }
+
+        .data-form select option {
+            background: #10091b;
+        }
+
+        .record-delete {
+            padding: 4px 8px;
+            color: #fda4af;
+            font-size: 10px;
+        }
+
+        .form-error {
+            color: #fda4af;
+            font-size: 11px;
+        }
+
         main {
             flex: 1;
             overflow-y: auto;
@@ -693,6 +831,17 @@
             .notif-popover {
                 right: 12px;
                 width: calc(100vw - 24px);
+            }
+
+            .data-form {
+                grid-template-columns: 1fr;
+            }
+
+            .data-form h4,
+            .data-form .wide,
+            .data-form-actions,
+            .form-error {
+                grid-column: auto;
             }
         }
 
@@ -1492,7 +1641,7 @@
     </style>
 </head>
 
-<body>
+<body class="auth-checking">
 
     <div class="app">
 
@@ -1509,22 +1658,13 @@
             <!-- USER -->
             <div class="user">
 
-                <div class="av mono" id="userInitials">
-                    AD
-                </div>
+                <button class="user-account" id="openAccount" title="Edit account" type="button" aria-label="Edit account">
+                    <div class="av mono" id="userInitials">AD</div>
 
-                <div class="user-info">
-                    <b id="userName">Admin User</b>
-                    <small class="mono" id="userEmail">
-                        admin@jrcsee.org
-                    </small>
-                </div>
-
-                <button class="settings-user-btn ic" id="openSettingsUser" title="Settings &amp; Customization" type="button" aria-label="Settings">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg>
+                    <div class="user-info">
+                        <b id="userName">Admin User</b>
+                        <small class="mono" id="userEmail">admin@jrcsee.org</small>
+                    </div>
                 </button>
 
                 <button class="logout mono" id="logout" title="Log out" type="button">
@@ -1617,6 +1757,24 @@
                 <div class="notif-list" id="notifList"></div>
             </div>
 
+            <div class="account-backdrop" id="accountBackdrop" aria-hidden="true">
+                <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+                    <h2 class="disp" id="accountTitle">ACCOUNT</h2>
+                    <p>Update your profile. Email changes require confirmation from your inbox.</p>
+                    <form id="accountForm">
+                        <label for="accountName">Display name</label>
+                        <input id="accountName" name="full_name" autocomplete="name" required maxlength="120">
+                        <label for="accountEmail">Email</label>
+                        <input id="accountEmail" name="email" type="email" autocomplete="email" required>
+                        <div class="form-error" id="accountError" role="alert"></div>
+                        <div class="account-actions">
+                            <button type="button" id="accountCancel">Cancel</button>
+                            <button class="primary" type="submit" id="accountSave">Save changes</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
             <main id="main"></main>
 
         </div>
@@ -1671,74 +1829,6 @@
                     <div class="sd-sec-title disp">COLOR PALETTE PRESETS</div>
                     <p class="sd-sec-desc">Choose from curated high-tech palettes or build your own below</p>
                     <div class="preset-grid" id="presetGrid"></div>
-                </div>
-
-                <!-- Custom Color Pickers -->
-                <div class="sd-sec">
-                    <div class="sd-sec-title disp">FINE-TUNE CUSTOM COLORS</div>
-                    <p class="sd-sec-desc">Customize specific hex codes in real-time across cards, charts &amp; accents</p>
-
-                    <div class="color-picker-list">
-                        <!-- Primary Accent -->
-                        <div class="cp-row">
-                            <div class="cp-info">
-                                <label class="cp-label" for="colPri">Primary Color</label>
-                                <span class="cp-hint">Key buttons, charts, highlights &amp; glows</span>
-                            </div>
-                            <div class="cp-controls">
-                                <input type="color" class="cp-input" id="colPri" value="#a855f7" aria-label="Primary Color">
-                                <input type="text" class="cp-hex mono" id="hexPri" value="#a855f7" maxlength="7" aria-label="Primary Hex">
-                            </div>
-                        </div>
-
-                        <!-- Secondary / Accent -->
-                        <div class="cp-row">
-                            <div class="cp-info">
-                                <label class="cp-label" for="colAcc">Secondary Accent</label>
-                                <span class="cp-hint">Gradients, stat pills &amp; card glow outlines</span>
-                            </div>
-                            <div class="cp-controls">
-                                <input type="color" class="cp-input" id="colAcc" value="#e9d5ff" aria-label="Secondary Accent">
-                                <input type="text" class="cp-hex mono" id="hexAcc" value="#e9d5ff" maxlength="7" aria-label="Secondary Hex">
-                            </div>
-                        </div>
-
-                        <!-- Highlight / Cyan -->
-                        <div class="cp-row">
-                            <div class="cp-info">
-                                <label class="cp-label" for="colCy">Tertiary Highlight</label>
-                                <span class="cp-hint">Clock time digits &amp; chart secondary line</span>
-                            </div>
-                            <div class="cp-controls">
-                                <input type="color" class="cp-input" id="colCy" value="#f3e8ff" aria-label="Tertiary Highlight">
-                                <input type="text" class="cp-hex mono" id="hexCy" value="#f3e8ff" maxlength="7" aria-label="Tertiary Hex">
-                            </div>
-                        </div>
-
-                        <!-- Radial Glow Tint -->
-                        <div class="cp-row">
-                            <div class="cp-info">
-                                <label class="cp-label" for="colBgGlow">Ambient Glow Tint</label>
-                                <span class="cp-hint">Top radial ambient background atmosphere</span>
-                            </div>
-                            <div class="cp-controls">
-                                <input type="color" class="cp-input" id="colBgGlow" value="#2e1052" aria-label="Ambient Glow Tint">
-                                <input type="text" class="cp-hex mono" id="hexBgGlow" value="#2e1052" maxlength="7" aria-label="Ambient Glow Hex">
-                            </div>
-                        </div>
-
-                        <!-- Background Deep Tone -->
-                        <div class="cp-row">
-                            <div class="cp-info">
-                                <label class="cp-label" for="colBg">Canvas Base Background</label>
-                                <span class="cp-hint">Base dark background canvas shade</span>
-                            </div>
-                            <div class="cp-controls">
-                                <input type="color" class="cp-input" id="colBg" value="#05030a" aria-label="Base Background">
-                                <input type="text" class="cp-hex mono" id="hexBg" value="#05030a" maxlength="7" aria-label="Base Background Hex">
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
             </div>
@@ -2145,21 +2235,6 @@
                 badgeEl.textContent = presetObj ? presetObj.name : "Custom Palette";
             }
 
-            // Color inputs & hex inputs
-            const colorMap = [
-                ["colPri", "hexPri", appSettings.pri],
-                ["colAcc", "hexAcc", appSettings.acc],
-                ["colCy", "hexCy", appSettings.cy],
-                ["colBgGlow", "hexBgGlow", appSettings.bgGlow],
-                ["colBg", "hexBg", appSettings.bg]
-            ];
-            colorMap.forEach(([colId, hexId, val]) => {
-                const cEl = $(colId);
-                const hEl = $(hexId);
-                if (cEl && val) cEl.value = val;
-                if (hEl && val) hEl.value = val;
-            });
-
             // Preset grid active state
             document.querySelectorAll(".preset-card").forEach(el => {
                 el.classList.toggle("on", el.dataset.preset === appSettings.preset);
@@ -2191,61 +2266,12 @@
             setCheck("toggleSound", appSettings.soundEffects);
         }
 
-        const GROWTH = [
-            ["Jan", 120, 45],
-            ["Feb", 134, 52],
-            ["Mar", 148, 61],
-            ["Apr", 165, 55],
-            ["May", 180, 78],
-            ["Jun", 192, 90],
-            ["Jul", 205, 83],
-            ["Aug", 218, 95],
-            ["Sep", 234, 102],
-            ["Oct", 251, 118],
-            ["Nov", 267, 125],
-            ["Dec", 284, 140]
-        ].map(([m, a, b]) => ({
-            m,
-            members: a,
-            subs: b
-        }));
-
-
-        const ACT = [
-            [1, "Dr. Elena Vasquez", "submitted report", "Quantum Computing Applications", "2m ago", "report"],
-            [2, "Prof. Marco Reyes", "joined project", "Neural Interface Lab", "18m ago", "member"],
-            [3, "System", "milestone reached", "Renewable Energy Grid Study", "1h ago", "milestone"],
-            [4, "Dr. Aisha Nakamura", "created event", "Q1 Engineering Summit", "2h ago", "event"],
-            [5, "James Okonkwo", "status updated", "Biomedical Sensor Array", "3h ago", "update"],
-            [6, "Dr. Sofia Brennan", "submitted report", "Climate Modeling Framework", "5h ago", "report"],
-            [7, "Prof. Liang Wei", "joined project", "Advanced Materials Lab", "Yesterday", "member"]
-        ].map(([id, user, action, subject, time, type]) => ({
-            id,
-            user,
-            action,
-            subject,
-            time,
-            type
-        }));
-
-
-        const PROJ = [
-            ["Quantum Computing Applications", "Engineering", "Dr. E. Vasquez", "Active", 72, 8, "Mar 2027"],
-            ["Neural Interface Lab", "Sciences", "Prof. M. Reyes", "Active", 45, 5, "Jun 2027"],
-            ["Renewable Energy Grid Study", "Engineering", "Dr. K. Obi", "Active", 88, 12, "Feb 2027"],
-            ["Biomedical Sensor Array", "Sciences", "J. Okonkwo", "Pending", 21, 4, "Sep 2027"],
-            ["Climate Modeling Framework", "Research", "Dr. S. Brennan", "Active", 61, 7, "Apr 2027"],
-            ["Advanced Materials Lab", "Engineering", "Prof. L. Wei", "Completed", 100, 9, "Dec 2026"],
-            ["Educational AI Platform", "Education", "Dr. A. Nakamura", "On Hold", 34, 3, "Aug 2027"]
-        ].map(([name, cat, lead, status, prog, team, due]) => ({
-            name,
-            cat,
-            lead,
-            status,
-            prog,
-            team,
-            due
-        }));
+        let GROWTH = [];
+        let ACT = [];
+        let PROJ = [];
+        let MEMBERS = [];
+        let currentUser = null;
+        let currentProfile = null;
 
 
         const AI = {
@@ -2306,6 +2332,34 @@
         const icon = p =>
             `<svg viewBox="0 0 24 24">${p}</svg>`;
 
+        function buildMonthlyActivity() {
+            const now = new Date();
+            const months = Array.from({ length: 12 }, (_, index) => {
+                const date = new Date(now.getFullYear(), now.getMonth() - 11 + index, 1);
+                return {
+                    key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
+                    m: date.toLocaleString("en-US", { month: "short" }),
+                    members: 0,
+                    subs: 0
+                };
+            });
+            const byMonth = new Map(months.map(month => [month.key, month]));
+            const addRecord = (record, field) => {
+                const date = new Date(record.created_at);
+                const month = byMonth.get(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`);
+                if (month) month[field]++;
+            };
+
+            MEMBERS.forEach(member => addRecord(member, "members"));
+            ACT.forEach(report => addRecord(report, "subs"));
+            return months;
+        }
+
+        function displayDate(value) {
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+        }
+
 
         function area(d) {
 
@@ -2317,14 +2371,14 @@
                 R = 6,
                 iw = W - L - R,
                 ih = H - T - B,
-                max = Math.ceil(
+                max = Math.max(50, Math.ceil(
                     Math.max(
                         ...d.flatMap(x => [
                             x.members,
                             x.subs
                         ])
                     ) / 50
-                ) * 50;
+                ) * 50);
 
             const X = i =>
                 L +
@@ -2431,9 +2485,9 @@
                 B = 22,
                 T = 8,
                 ih = H - T - B,
-                max = Math.ceil(
+                max = Math.max(50, Math.ceil(
                     Math.max(...d.map(x => x.v)) / 50
-                ) * 50,
+                ) * 50),
                 bw = (W - L) / d.length;
 
             let s = "";
@@ -2528,19 +2582,18 @@
 
             const g = GROWTH.slice(-S.range);
 
-            const tot =
-                GROWTH.at(-1).members;
+            const tot = MEMBERS.length;
 
-            const prev =
-                GROWTH.at(-4).members;
+            const currentMonth = GROWTH.at(-1)?.members || 0;
+            const prev = GROWTH.at(-2)?.members || 0;
 
             const ch =
-                ((tot - prev) / prev * 100).toFixed(1);
+                (prev ? ((currentMonth - prev) / prev * 100) : 0).toFixed(1);
 
             const act =
                 PROJ
                     .filter(p => p.status === "Active")
-                    .reduce((n, p) => n + p.team, 0);
+                    .reduce((n, p) => n + p.team_size, 0);
 
             const stat =
                 (l, v, c, col, bg, ic) =>
@@ -2562,7 +2615,7 @@
                         <div
                             class="sub mono"
                             style="margin:0">
-                            vs last quarter
+                            vs previous month
                         </div>
 
                         <div
@@ -2591,7 +2644,7 @@
                     ${stat(
                 "Members on active projects",
                 act.toLocaleString(),
-                "6.1",
+                "0.0",
                 appSettings.cy,
                 `rgba(${hexToRgb(appSettings.cy)}, .18)`,
                 u
@@ -2727,7 +2780,7 @@
                                             </p>
 
                                             <small class="mono">
-                                                ${a.time}
+                                                ${esc(a.time)}
                                             </small>
 
                                         </div>
@@ -2746,104 +2799,92 @@
 
 
         function members() {
-
-            const m = {};
-
-            PROJ.forEach(
-                p =>
-                    (m[p.lead] = m[p.lead] || [])
-                        .push(p.name)
-            );
-
-            const r =
-                Object.entries(m)
-                    .filter(([n]) => has(n, S.q));
+            const isAdmin = currentProfile?.role === "admin";
+            const memberRows = MEMBERS
+                .filter(member => has(`${member.full_name} ${member.email || ""} ${member.department || ""}`, S.q))
+                .map(member => {
+                    const projects = PROJ
+                        .filter(project => project.lead.toLowerCase() === member.full_name.toLowerCase())
+                        .map(project => project.name);
+                    return `
+                        <div class="row">
+                            <span>${esc(member.full_name)}${member.email ? `<br><small>${esc(member.email)}</small>` : ""}</span>
+                            <span>${esc(member.department || "No department")} · ${esc(projects.join(", ") || "No projects")}</span>
+                            ${isAdmin ? `<button class="record-delete" type="button" data-delete="members" data-id="${esc(member.id)}">Delete</button>` : ""}
+                        </div>
+                    `;
+                }).join("");
+            const projectRows = PROJ
+                .filter(project => has(`${project.name} ${project.category} ${project.lead}`, S.q))
+                .map(project => `
+                    <div class="row">
+                        <span>${esc(project.name)}<br><small>${esc(project.category)}</small></span>
+                        <span>${esc(project.lead || "No lead")} · ${esc(project.status)} · ${project.progress}%</span>
+                        ${isAdmin ? `<button class="record-delete" type="button" data-delete="projects" data-id="${esc(project.id)}">Delete</button>` : ""}
+                    </div>
+                `).join("");
 
             return `
+                ${isAdmin ? `
+                    <div class="card">
+                        <h3 class="disp">ADD MEMBER</h3>
+                        <form class="data-form" id="memberForm">
+                            <div><label for="memberName">Full name</label><input id="memberName" name="full_name" required maxlength="120"></div>
+                            <div><label for="memberEmail">Email</label><input id="memberEmail" name="email" type="email"></div>
+                            <div><label for="memberDepartment">Department</label><input id="memberDepartment" name="department" maxlength="120"></div>
+                            <div class="data-form-actions"><span class="form-error" id="memberFormError" role="alert"></span><button class="primary" type="submit">Save member</button></div>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <h3 class="disp">ADD PROJECT</h3>
+                        <form class="data-form" id="projectForm">
+                            <div><label for="projectName">Project name</label><input id="projectName" name="name" required maxlength="160"></div>
+                            <div><label for="projectCategory">Category</label><input id="projectCategory" name="category" maxlength="120"></div>
+                            <div><label for="projectLead">Project lead</label><input id="projectLead" name="lead" maxlength="120"></div>
+                            <div><label for="projectStatus">Status</label><select id="projectStatus" name="status"><option>Active</option><option>Pending</option><option>Completed</option><option>On Hold</option></select></div>
+                            <div><label for="projectProgress">Progress (%)</label><input id="projectProgress" name="progress" type="number" min="0" max="100" value="0" required></div>
+                            <div><label for="projectTeam">Team size</label><input id="projectTeam" name="team_size" type="number" min="0" value="0" required></div>
+                            <div><label for="projectDue">Due date</label><input id="projectDue" name="due_date" type="date"></div>
+                            <div class="data-form-actions"><span class="form-error" id="projectFormError" role="alert"></span><button class="primary" type="submit">Save project</button></div>
+                        </form>
+                    </div>
+                ` : ""}
                 <div class="card list">
-
-                    <h3
-                        class="disp"
-                        style="margin-bottom:12px">
-                        PROJECT LEADS
-                    </h3>
-
-                    ${r.length
-                    ? r.map(
-                        ([n, l]) =>
-                            `
-                                    <div class="row">
-
-                                        <span>
-                                            ${esc(n)}
-                                        </span>
-
-                                        <span>
-                                            ${esc(l.join(", "))}
-                                        </span>
-
-                                    </div>
-                                    `
-                    ).join("")
-
-                    : `
-                                <div class="empty">
-                                    No members match your search.
-                                </div>
-                            `
-                }
-
+                    <h3 class="disp" style="margin-bottom:12px">MEMBERS</h3>
+                    ${memberRows || `<div class="empty">${S.q ? "No members match your search." : "No members have been added yet."}</div>`}
                 </div>
+                ${isAdmin ? `<div class="card list">
+                    <h3 class="disp" style="margin-bottom:12px">PROJECTS</h3>
+                    ${projectRows || `<div class="empty">${S.q ? "No projects match your search." : "No projects have been added yet."}</div>`}
+                </div>` : ""}
             `;
         }
 
 
         function reports() {
-
-            const r =
-                ACT.filter(
-                    a =>
-                        a.type === "report" &&
-                        has(
-                            a.user + " " + a.subject,
-                            S.q
-                        )
-                );
+            const isAdmin = currentProfile?.role === "admin";
+            const reportRows = ACT
+                .filter(report => has(`${report.title} ${report.body} ${report.profiles?.full_name || ""}`, S.q))
+                .map(report => `
+                    <div class="row">
+                        <span>${esc(report.title)}<br><small>${esc(report.body || "No details")}</small></span>
+                        <span>${esc(report.profiles?.full_name || "Personnel")} · ${esc(displayDate(report.created_at))}</span>
+                        ${isAdmin ? `<button class="record-delete" type="button" data-delete="reports" data-id="${esc(report.id)}">Delete</button>` : ""}
+                    </div>
+                `).join("");
 
             return `
+                <div class="card">
+                    <h3 class="disp">SUBMIT A REPORT</h3>
+                    <form class="data-form" id="reportForm">
+                        <div class="wide"><label for="reportTitle">Report title</label><input id="reportTitle" name="title" required maxlength="200"></div>
+                        <div class="wide"><label for="reportBody">Details</label><textarea id="reportBody" name="body" rows="4" maxlength="10000"></textarea></div>
+                        <div class="data-form-actions"><span class="form-error" id="reportFormError" role="alert"></span><button class="primary" type="submit">Submit report</button></div>
+                    </form>
+                </div>
                 <div class="card list">
-
-                    <h3
-                        class="disp"
-                        style="margin-bottom:12px">
-                        SUBMITTED REPORTS
-                    </h3>
-
-                    ${r.length
-                    ? r.map(
-                        a =>
-                            `
-                                    <div class="row">
-
-                                        <span>
-                                            ${esc(a.subject)}
-                                        </span>
-
-                                        <span>
-                                            ${esc(a.user)} · ${a.time}
-                                        </span>
-
-                                    </div>
-                                    `
-                    ).join("")
-
-                    : `
-                                <div class="empty">
-                                    No reports match your search.
-                                </div>
-                            `
-                }
-
+                    <h3 class="disp" style="margin-bottom:12px">SUBMITTED REPORTS</h3>
+                    ${reportRows || `<div class="empty">${S.q ? "No reports match your search." : "No reports have been submitted yet."}</div>`}
                 </div>
             `;
         }
@@ -2851,13 +2892,14 @@
 
         function render() {
 
-            $("title").textContent =
-                NAV.find(
-                    n => n[0] === S.tab
-                )[1].toUpperCase();
+            const visibleNav = currentProfile?.role === "personnel"
+                ? NAV.filter(([id]) => id === "members" || id === "reports")
+                : NAV;
+            if (!visibleNav.some(([id]) => id === S.tab)) S.tab = visibleNav[0][0];
+            $("title").textContent = visibleNav.find(n => n[0] === S.tab)[1].toUpperCase();
 
             $("nav").innerHTML =
-                NAV.map(
+                visibleNav.map(
                     ([id, l, p]) =>
                         `
                         <button
@@ -2970,7 +3012,7 @@
                     <span class="notif-item-dot" style="background:${AI[a.type] || "var(--pri)"}"></span>
                     <div>
                         <b>${esc(a.user)} ${a.action}</b>
-                        <span>${esc(a.subject)} · ${a.time}</span>
+                        <span>${esc(a.subject)} · ${esc(a.time)}</span>
                     </div>
                 </div>
             `).join("");
@@ -2996,9 +3038,6 @@
 
             const openBtn = $("openSettings");
             if (openBtn) openBtn.onclick = openDrawer;
-
-            const openUserBtn = $("openSettingsUser");
-            if (openUserBtn) openUserBtn.onclick = openDrawer;
 
             const closeBtn = $("settingsCloseBtn");
             if (closeBtn) closeBtn.onclick = closeDrawer;
@@ -3038,40 +3077,6 @@
                     if (targetPane === "backup") $("paneBackup").classList.add("on");
                 };
             });
-
-            // Color inputs listeners
-            const bindColorInput = (colId, hexId, key) => {
-                const cEl = $(colId);
-                const hEl = $(hexId);
-                if (!cEl || !hEl) return;
-
-                const updateVal = val => {
-                    if (!val.startsWith("#")) val = "#" + val;
-                    if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
-                    cEl.value = val;
-                    hEl.value = val;
-                    const change = { preset: "custom" };
-                    change[key] = val;
-                    applySettings(change);
-                    render();
-                };
-
-                cEl.oninput = e => {
-                    hEl.value = e.target.value;
-                    const change = { preset: "custom" };
-                    change[key] = e.target.value;
-                    applySettings(change);
-                    render();
-                };
-
-                hEl.onchange = e => updateVal(e.target.value);
-            };
-
-            bindColorInput("colPri", "hexPri", "pri");
-            bindColorInput("colAcc", "hexAcc", "acc");
-            bindColorInput("colCy", "hexCy", "cy");
-            bindColorInput("colBgGlow", "hexBgGlow", "bgGlow");
-            bindColorInput("colBg", "hexBg", "bg");
 
             // Segmented buttons listeners in Web Options
             const bindGroup = (groupId, key) => {
@@ -3240,7 +3245,86 @@
 
                 render();
             }
+
+            const deleteButton = e.target.closest("[data-delete]");
+            if (deleteButton) deleteRecord(deleteButton);
         };
+
+        $("main").onsubmit = async e => {
+            const form = e.target;
+            if (!["memberForm", "projectForm", "reportForm"].includes(form.id)) return;
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const errorEl = $(form.id.replace("Form", "FormError"));
+            if (errorEl) errorEl.textContent = "";
+            let recordSaved = false;
+
+            try {
+                let result;
+                if (form.id === "memberForm") {
+                    result = await supabase.from("members").insert({
+                        full_name: String(formData.get("full_name")).trim(),
+                        email: String(formData.get("email") || "").trim() || null,
+                        department: String(formData.get("department") || "").trim() || null,
+                        created_by: currentUser.id
+                    });
+                } else if (form.id === "projectForm") {
+                    result = await supabase.from("projects").insert({
+                        name: String(formData.get("name")).trim(),
+                        category: String(formData.get("category") || "").trim(),
+                        lead: String(formData.get("lead") || "").trim(),
+                        status: String(formData.get("status")),
+                        progress: Number(formData.get("progress")),
+                        team_size: Number(formData.get("team_size")),
+                        due_date: String(formData.get("due_date") || "") || null
+                    });
+                } else {
+                    result = await supabase.from("reports").insert({
+                        title: String(formData.get("title")).trim(),
+                        body: String(formData.get("body") || "").trim(),
+                        submitted_by: currentUser.id
+                    });
+                }
+
+                if (result.error) throw result.error;
+                recordSaved = true;
+                form.reset();
+                await loadDashboardData();
+                populateNotifList();
+                render();
+                showToast("Saved to Supabase.");
+            } catch (error) {
+                console.error("Could not save dashboard record:", error);
+                const message = recordSaved
+                    ? `Saved, but the dashboard could not refresh: ${error.message || "Unknown error"}`
+                    : (error.message || "Could not save this record.");
+                if (errorEl) errorEl.textContent = message;
+            }
+        };
+
+        async function deleteRecord(button) {
+            if (currentProfile?.role !== "admin") return;
+            const table = button.dataset.delete;
+            if (!["members", "projects", "reports"].includes(table)) return;
+            if (!window.confirm("Delete this record? This cannot be undone.")) return;
+
+            let deleted = false;
+            try {
+                const { error } = await supabase.from(table).delete().eq("id", button.dataset.id);
+                if (error) throw error;
+                deleted = true;
+                await loadDashboardData();
+                populateNotifList();
+                render();
+                showToast("Record deleted.");
+            } catch (error) {
+                console.error("Could not delete dashboard record:", error);
+                showToast(deleted
+                    ? `Deleted, but the dashboard could not refresh: ${error.message || "Unknown error"}`
+                    : (error.message || "Could not delete this record."));
+            }
+        }
 
 
         $("q").oninput = e => {
@@ -3279,8 +3363,6 @@
             1000
         );
 
-        render();
-
     </script>
 
 
@@ -3303,89 +3385,172 @@
             );
 
 
-        /* ================= DISPLAY USER INFO ================= */
+        function displayUserInfo() {
+            if (!currentUser || !currentProfile) return;
 
-        function displayUserInfo(user) {
-            if (!user) return;
-
-            const email = user.email || "admin@jrcsee.org";
-            const role = localStorage.getItem("jrcsee_role");
-            const roleTitle = role ? (role.charAt(0).toUpperCase() + role.slice(1) + " User") : "Admin User";
-
-            const name =
-                user.user_metadata?.full_name ||
-                user.user_metadata?.name ||
-                roleTitle;
-
+            const name = currentProfile.full_name || currentUser.email || "Account";
             const nameEl = $("userName");
             const emailEl = $("userEmail");
             const initialsEl = $("userInitials");
 
             if (nameEl) nameEl.textContent = name;
-            if (emailEl) emailEl.textContent = email;
-
-            const initials =
-                name
-                    .split(" ")
+            if (emailEl) emailEl.textContent = currentUser.email || "";
+            if (initialsEl) {
+                initialsEl.textContent = name
+                    .split(/\s+/)
                     .filter(Boolean)
                     .map(word => word[0])
                     .join("")
                     .substring(0, 2)
-                    .toUpperCase();
-
-            if (initialsEl) initialsEl.textContent = initials || "AD";
+                    .toUpperCase() || "U";
+            }
         }
 
+        async function loadDashboardData() {
+            const projectsRequest = currentProfile.role === "admin"
+                ? supabase.from("projects").select("id,name,category,lead,status,progress,team_size,due_date,created_at").order("name")
+                : Promise.resolve({ data: [], error: null });
+            const [membersResult, projectsResult, reportsResult] = await Promise.all([
+                supabase.from("members").select("id,full_name,email,department,created_at").order("full_name"),
+                projectsRequest,
+                supabase.from("reports").select("id,title,body,submitted_by,created_at,profiles!reports_submitted_by_fkey(full_name)").order("created_at", { ascending: false })
+            ]);
 
-        /* ================= CHECK LOGIN ================= */
+            if (membersResult.error) throw new Error(`Could not load members: ${membersResult.error.message}`);
+            if (projectsResult.error) throw new Error(`Could not load projects: ${projectsResult.error.message}`);
+            if (reportsResult.error) throw new Error(`Could not load reports: ${reportsResult.error.message}`);
+
+            MEMBERS = membersResult.data || [];
+            PROJ = projectsResult.data || [];
+            ACT = (reportsResult.data || []).map(report => ({
+                ...report,
+                user: report.profiles?.full_name || "Personnel",
+                action: "submitted report",
+                subject: report.title,
+                time: new Date(report.created_at).toLocaleString(),
+                type: "report"
+            }));
+            GROWTH = buildMonthlyActivity();
+        }
+
+        function showDashboardError(error) {
+            document.body.classList.remove("auth-checking");
+            const main = $("main");
+            if (!main) return;
+            main.innerHTML = `<div class="card"><h3 class="disp">DASHBOARD COULD NOT LOAD</h3><p class="sub">${esc(error.message || "Unable to connect to Supabase.")}</p><p class="sub">Check the Supabase setup instructions in README.md and run supabase-setup.sql.</p></div>`;
+        }
+
+        function initAccountDialog() {
+            const backdrop = $("accountBackdrop");
+            const form = $("accountForm");
+            const close = () => {
+                backdrop.classList.remove("open");
+                backdrop.setAttribute("aria-hidden", "true");
+            };
+
+            $("openAccount").onclick = () => {
+                $("accountName").value = currentProfile.full_name || "";
+                $("accountEmail").value = currentUser.email || "";
+                $("accountError").textContent = "";
+                backdrop.classList.add("open");
+                backdrop.setAttribute("aria-hidden", "false");
+                $("accountName").focus();
+            };
+            $("accountCancel").onclick = close;
+            backdrop.onclick = event => {
+                if (event.target === backdrop) close();
+            };
+            form.onsubmit = async event => {
+                event.preventDefault();
+                const saveButton = $("accountSave");
+                const name = $("accountName").value.trim();
+                const email = $("accountEmail").value.trim();
+                const nameChanged = name !== (currentProfile.full_name || "");
+                const emailChanged = email !== (currentUser.email || "");
+                $("accountError").textContent = "";
+                saveButton.disabled = true;
+                let nameSaved = false;
+
+                try {
+                    if (nameChanged) {
+                        const { data, error } = await supabase
+                            .from("profiles")
+                            .update({ full_name: name })
+                            .eq("id", currentUser.id)
+                            .select("id,full_name,role")
+                            .single();
+                        if (error) throw error;
+                        currentProfile = data;
+                        nameSaved = true;
+                        displayUserInfo();
+                    }
+
+                    if (emailChanged) {
+                        const { error } = await supabase.auth.updateUser({ email });
+                        if (error) throw error;
+                    }
+
+                    displayUserInfo();
+                    close();
+                    showToast(emailChanged
+                        ? "Profile saved. Confirm the email change from your inbox."
+                        : "Profile saved to Supabase.");
+                } catch (error) {
+                    console.error("Could not update account:", error);
+                    const message = error.message || "Could not save your account changes.";
+                    $("accountError").textContent = nameSaved
+                        ? `Display name saved, but the email change failed: ${message}`
+                        : message;
+                } finally {
+                    saveButton.disabled = false;
+                }
+            };
+
+            window.addEventListener("keydown", event => {
+                if (event.key === "Escape" && backdrop.classList.contains("open")) close();
+            });
+        }
 
         let isLoggingOut = false;
         let authCheckComplete = false;
 
         async function checkLogin() {
             try {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get("preview") === "1" || localStorage.getItem("jrcsee_preview") === "1") {
+                const { data, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                if (!data.session?.user) {
                     authCheckComplete = true;
-                    displayUserInfo({ email: "admin@jrcsee.org", user_metadata: { full_name: "Admin User" } });
-                    return;
-                }
-
-                // Check locally cached session first to prevent premature redirect
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError || !session || !session.user) {
-                    authCheckComplete = true;
-                    if (!isLoggingOut) {
-                        window.location.replace("./index.html");
-                    }
-                    return;
-                }
-
-                authCheckComplete = true;
-                // User is authenticated - display information
-                displayUserInfo(session.user);
-
-                // Asynchronously verify user with Supabase in the background
-                supabase.auth.getUser().then(({ data, error }) => {
-                    if (data?.user && !error) {
-                        displayUserInfo(data.user);
-                    }
-                }).catch(err => {
-                    console.warn("Background user verification:", err);
-                });
-
-            } catch (err) {
-                console.error("Auth check error:", err);
-                authCheckComplete = true;
-                if (!isLoggingOut) {
                     window.location.replace("./index.html");
+                    return;
                 }
+
+                currentUser = data.session.user;
+                const { data: profile, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("id,full_name,role")
+                    .eq("id", currentUser.id)
+                    .single();
+                if (profileError) throw new Error(`Could not load your Supabase profile: ${profileError.message}`);
+                if (!profile || !["admin", "personnel"].includes(profile.role)) {
+                    throw new Error("Your account does not have an assigned dashboard role. Ask an administrator to assign one in Supabase.");
+                }
+
+                currentProfile = profile;
+                S.tab = profile.role === "personnel" ? "members" : (appSettings.startTab || "dashboard");
+                $("openSettings").style.display = profile.role === "admin" ? "" : "none";
+                document.body.classList.remove("auth-checking");
+                displayUserInfo();
+                await loadDashboardData();
+                authCheckComplete = true;
+                populateNotifList();
+                render();
+                initAccountDialog();
+            } catch (error) {
+                console.error("Dashboard initialization failed:", error);
+                authCheckComplete = true;
+                showDashboardError(error);
             }
         }
-
-
-        /* ================= AUTH STATE LISTENER ================= */
 
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === "SIGNED_OUT" || !session) {
@@ -3393,7 +3558,8 @@
                     window.location.replace("./index.html");
                 }
             } else if (session?.user) {
-                displayUserInfo(session.user);
+                currentUser = session.user;
+                displayUserInfo();
             }
         });
 

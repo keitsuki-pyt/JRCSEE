@@ -438,6 +438,43 @@
         .login-btn.loading .button-spinner { display: inline-block; }
         .login-btn.loading .button-label { letter-spacing: .03em; }
 
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 14px 0;
+            color: #a69bbd;
+            font-size: 11px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: rgba(255, 255, 255, .15);
+        }
+
+        .google-btn {
+            width: 100%;
+            height: 46px;
+            border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .06);
+            color: #fff;
+            font: 600 14px "Poppins", sans-serif;
+            cursor: pointer;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .google-btn:disabled {
+            opacity: .65;
+            cursor: wait;
+        }
+
         /* ================= INTRO + LOADING ================= */
         .intro-screen {
             position: fixed;
@@ -633,22 +670,6 @@
 
         <div class="login-card">
 
-            <div class="label">Role</div>
-
-            <div class="roles">
-                <div class="role active" onclick="selectRole(this)">
-                    <div class="role-icon">♙</div>
-                    <div class="role-name">Admin</div>
-                    <div class="radio"></div>
-                </div>
-
-                <div class="role" onclick="selectRole(this)">
-                    <div class="role-icon">♙</div>
-                    <div class="role-name">Personnel</div>
-                    <div class="radio"></div>
-                </div>
-            </div>
-
             <!-- EMAIL -->
             <div class="input-group">
                 <div class="label">Email</div>
@@ -679,6 +700,8 @@
             </div>
 
             <button class="login-btn" id="loginButton" onclick="login()"><span class="button-label">LOGIN</span><span class="button-spinner" aria-hidden="true"></span></button>
+            <div class="auth-divider">OR</div>
+            <button class="google-btn" id="googleButton" type="button" onclick="signInWithGoogle()">Continue with Google</button>
 
         </div>
     </div>
@@ -690,23 +713,6 @@
             "https://guhwlwhdssycjpobcmfk.supabase.co",
             "sb_publishable_7pWS_7AO3bfuqLhh5Gp_AA_Wn0cuUyB"
         );
-
-        /* ================= ROLE ================= */
-
-        let selectedRole = "admin";
-
-        function selectRole(element) {
-            document.querySelectorAll(".role").forEach(role => {
-                role.classList.remove("active");
-            });
-
-            element.classList.add("active");
-
-            selectedRole = element
-                .querySelector(".role-name")
-                .textContent.trim()
-                .toLowerCase();
-        }
 
         /* ================= PASSWORD ================= */
 
@@ -742,8 +748,6 @@
 
                 if (error) throw error;
 
-                // Store the selected role for the dashboard profile label.
-                localStorage.setItem("jrcsee_role", selectedRole);
                 window.location.replace("./dashboard.html");
             } catch (err) {
                 console.error("Login error:", err);
@@ -753,6 +757,28 @@
                 button.disabled = false;
                 button.classList.remove("loading");
                 button.querySelector(".button-label").textContent = "LOGIN";
+            }
+        }
+
+        async function signInWithGoogle() {
+            const button = document.getElementById("googleButton");
+            button.disabled = true;
+            button.textContent = "Connecting to Google...";
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                        redirectTo: new URL("./dashboard.html", window.location.href).href
+                    }
+                });
+
+                if (error) throw error;
+            } catch (err) {
+                console.error("Google sign-in error:", err);
+                alert("Google sign-in failed: " + (err.message || "Unable to connect to Supabase."));
+                button.disabled = false;
+                button.textContent = "Continue with Google";
             }
         }
 
