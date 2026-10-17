@@ -900,18 +900,24 @@
         }
 
         .student-course-group {
-            margin-top: 14px;
-            padding: 14px 16px;
+            width: 100%;
+            padding: 16px 18px;
             border: 1px solid var(--line);
             border-left: 3px solid var(--pri);
             border-radius: 10px;
             background: color-mix(in srgb, var(--pri) 7%, transparent);
         }
 
+        .student-course-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
         .student-course-group h4 {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: var(--acc);
-            font-size: 14px;
+            font-size: 17px;
             letter-spacing: .04em;
         }
 
@@ -2333,9 +2339,6 @@
 
 
         function dash() {
-
-            const g = GROWTH.slice(-S.range);
-
             const tot = MEMBERS.length;
 
             const currentMonth = GROWTH.at(-1)?.members || 0;
@@ -2399,146 +2402,28 @@
 
 
                 <div class="card">
+                    <h3 class="disp">RECENT ACTIVITY</h3>
+                    <div class="sub mono">Latest updates</div>
+                    ${ACTIVITY_LOAD_ERROR ? `<div class="form-error">${esc(ACTIVITY_LOAD_ERROR)}</div>` : ""}
+                    <div class="act">
 
-                    <div class="top">
-
-                        <div>
-
-                            <h3 class="disp">
-                                ACTIVITY OVERVIEW
-                            </h3>
-
-                            <div class="sub mono">
-                                Member growth &amp; report submissions
-                            </div>
-
-                        </div>
-
-                        <div class="rng">
-
-                            ${[
-                    ["3M", 3],
-                    ["6M", 6],
-                    ["1Y", 12]
-                ].map(
-                    ([l, n]) =>
-                        `<button
-                                        class="mono ${S.range === n ? "on" : ""}"
-                                        data-r="${n}">
-                                        ${l}
-                                    </button>`
-                ).join("")}
-
-                        </div>
-
-                    </div>
-
-                    <div class="leg mono">
-
-                        <span>
-                            <i style="background:${appSettings.pri}"></i>
-                            Students
-                        </span>
-
-                        <span>
-                            <i style="background:${appSettings.cy}"></i>
-                            Submissions
-                        </span>
-
-                    </div>
-
-                    ${area(g)}
-
-                </div>
-
-
-                <div class="grid g2">
-
-                    <div class="card">
-
-                        <h3 class="disp">
-                            MONTHLY REPORTS
-                        </h3>
-
-                        <div class="sub mono">
-                            Last 6 months
-                        </div>
-
-                        ${bars(
-                    GROWTH
-                        .slice(-6)
-                        .map(x => ({
-                            m: x.m,
-                            v: x.subs
-                        }))
-                )}
-
-                    </div>
-
-
-                    <div class="card">
-
-                        <h3 class="disp">
-                            RECENT ACTIVITY
-                        </h3>
-
-                        <div class="sub mono">
-                            Latest updates
-                        </div>
-
-                        ${ACTIVITY_LOAD_ERROR ? `<div class="form-error">${esc(ACTIVITY_LOAD_ERROR)}</div>` : ""}
-                        <div class="act">
-
-                            ${RECENT_ACTIVITY.map(
+                        ${RECENT_ACTIVITY.map(
                     a =>
                         `
-                                    <div class="a">
-
-                                        <div
-                                            class="ic"
-                                            style="
-                                                background:${AI[a.type]}22;
-                                                color:${AI[a.type]}
-                                            ">
-
-                                            ${icon(
+                                <div class="a">
+                                    <div class="ic" style="background:rgba(var(--pri-rgb), .2);color:var(--pri)">
+                                        ${icon(
                             '<circle cx="12" cy="12" r="4"/>'
                         )}
-
-                                        </div>
-
-                                        <div>
-
-                                            <p>
-
-                                                <b>
-                                                    ${esc(a.user)}
-                                                </b>
-
-                                                <span>
-                                                    ${a.action}
-                                                </span>
-
-                                                <em>
-                                                    ${esc(a.subject)}
-                                                </em>
-
-                                            </p>
-
-                                            <small class="mono">
-                                                ${esc(a.time)}
-                                            </small>
-
-                                        </div>
-
                                     </div>
-                                    `
-                ).join("")}
-
-                        </div>
-
+                                    <div>
+                                        <p><b>${esc(a.user)}</b> <span>${esc(a.action)}</span> <em>${esc(a.subject)}</em></p>
+                                        <small class="mono">${esc(a.time)}</small>
+                                    </div>
+                                </div>
+                            `
+                ).join("") || `<div class="empty">No recent activity yet.</div>`}
                     </div>
-
                 </div>
             `;
         }
@@ -2603,7 +2488,9 @@
                     </div>` : ""}
                 <div class="card list">
                     <h3 class="disp" style="margin-bottom:12px">STUDENTS</h3>
-                    ${courseGroups || `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
+                    ${courseGroups
+                        ? `<div class="student-course-list">${courseGroups}</div>`
+                        : `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
                 </div>
             `;
         }
