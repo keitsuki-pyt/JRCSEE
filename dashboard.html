@@ -2546,7 +2546,7 @@
                     <div class="card">
                         <h3 class="disp" id="studentFormTitle">ADD STUDENT</h3>
                         <p class="sub">Add students who are officially enrolled at the campus.</p>
-                        <form class="data-form" id="studentForm" onsubmit="return false;">
+                        <form class="data-form" id="studentForm">
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
                             <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
@@ -2579,7 +2579,7 @@
                 ${canAdd ? `<div class="card">
                     <h3 class="disp" id="visitorFormTitle">REGISTER VISITOR</h3>
                     <p class="sub">Register temporary visitors. Records are automatically removed 30 days after registration; entry logs and alerts remain anonymized.</p>
-                    <form class="data-form" id="visitorForm" onsubmit="return false;">
+                    <form class="data-form" id="visitorForm">
                         <input type="hidden" name="id">
                         <div><label for="visitorName">Full name</label><input id="visitorName" name="full_name" required maxlength="160"></div>
                         <div><label for="visitorPhone">Contact phone</label><input id="visitorPhone" name="contact_phone" type="tel" required maxlength="40"></div>
@@ -2612,7 +2612,7 @@
                 ${canAdd ? `<div class="card">
                     <h3 class="disp" id="staffFormTitle">ADD FACULTY RECORD</h3>
                     <p class="sub">Add faculty currently working on campus. Role is their position or title; portal access is assigned separately in the account profile.</p>
-                    <form class="data-form" id="staffForm" onsubmit="return false;">
+                    <form class="data-form" id="staffForm">
                         <input type="hidden" name="id">
                         <div><label for="staffName">Full name</label><input id="staffName" name="full_name" required maxlength="160"></div>
                         <div><label for="staffEmail">Email</label><input id="staffEmail" name="email" type="email" required maxlength="254"></div>
@@ -2656,7 +2656,7 @@
             return `
                 <div class="card">
                     <h3 class="disp">SUBMIT A REPORT</h3>
-                    <form class="data-form" id="reportForm" onsubmit="return false;">
+                    <form class="data-form" id="reportForm">
                         <input type="hidden" name="id">
                         <div class="wide"><label for="reportTitle">Report title</label><input id="reportTitle" name="title" required maxlength="200"></div>
                         <div class="wide"><label for="reportBody">Details</label><textarea id="reportBody" name="body" rows="4" maxlength="10000"></textarea></div>
@@ -2946,6 +2946,12 @@
 
             if (e.target.closest("[data-cancel-report]")) cancelReportEdit();
         };
+
+        $("main").addEventListener("submit", e => {
+            if (["studentForm", "visitorForm", "staffForm", "reportForm"].includes(e.target.id)) {
+                e.preventDefault();
+            }
+        }, true);
 
         $("main").onsubmit = async e => {
             const form = e.target;
