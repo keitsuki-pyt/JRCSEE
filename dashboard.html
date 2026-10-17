@@ -7,6 +7,21 @@
     <title>JRCSEE</title>
 
     <script>
+        const submittedFormFields = [
+            "id", "full_name", "email", "course", "year_level", "staff_role",
+            "department", "purpose", "contact_phone", "host_name",
+            "host_department", "title", "body"
+        ];
+        const currentUrl = new URL(window.location.href);
+        if (["full_name", "course", "year_level"].some(field => currentUrl.searchParams.has(field))) {
+            submittedFormFields.forEach(field => currentUrl.searchParams.delete(field));
+            window.history.replaceState(
+                window.history.state,
+                "",
+                `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`
+            );
+        }
+
         function showStartupFailure(message) {
             const state = document.getElementById("startupState");
             if (!state) return;
@@ -2531,7 +2546,7 @@
                     <div class="card">
                         <h3 class="disp" id="studentFormTitle">ADD STUDENT</h3>
                         <p class="sub">Add students who are officially enrolled at the campus.</p>
-                        <form class="data-form" id="studentForm">
+                        <form class="data-form" id="studentForm" method="post">
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
                             <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
@@ -2564,7 +2579,7 @@
                 ${canAdd ? `<div class="card">
                     <h3 class="disp" id="visitorFormTitle">REGISTER VISITOR</h3>
                     <p class="sub">Register temporary visitors. Records are automatically removed 30 days after registration; entry logs and alerts remain anonymized.</p>
-                    <form class="data-form" id="visitorForm">
+                    <form class="data-form" id="visitorForm" method="post">
                         <input type="hidden" name="id">
                         <div><label for="visitorName">Full name</label><input id="visitorName" name="full_name" required maxlength="160"></div>
                         <div><label for="visitorPhone">Contact phone</label><input id="visitorPhone" name="contact_phone" type="tel" required maxlength="40"></div>
@@ -2597,7 +2612,7 @@
                 ${canAdd ? `<div class="card">
                     <h3 class="disp" id="staffFormTitle">ADD FACULTY RECORD</h3>
                     <p class="sub">Add faculty currently working on campus. Role is their position or title; portal access is assigned separately in the account profile.</p>
-                    <form class="data-form" id="staffForm">
+                    <form class="data-form" id="staffForm" method="post">
                         <input type="hidden" name="id">
                         <div><label for="staffName">Full name</label><input id="staffName" name="full_name" required maxlength="160"></div>
                         <div><label for="staffEmail">Email</label><input id="staffEmail" name="email" type="email" required maxlength="254"></div>
@@ -2641,7 +2656,7 @@
             return `
                 <div class="card">
                     <h3 class="disp">SUBMIT A REPORT</h3>
-                    <form class="data-form" id="reportForm">
+                    <form class="data-form" id="reportForm" method="post">
                         <input type="hidden" name="id">
                         <div class="wide"><label for="reportTitle">Report title</label><input id="reportTitle" name="title" required maxlength="200"></div>
                         <div class="wide"><label for="reportBody">Details</label><textarea id="reportBody" name="body" rows="4" maxlength="10000"></textarea></div>
