@@ -983,15 +983,105 @@
             font-size: 11px;
         }
 
+        .camera-entry-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr);
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .camera-entry-grid > .card { min-width: 0; }
+
         .camera-preview {
             display: block;
             width: 100%;
-            max-height: 480px;
-            aspect-ratio: 16 / 9;
+            max-height: 360px;
+            aspect-ratio: 4 / 3;
             border: 1px solid var(--line);
             border-radius: 10px;
             background: #08070d;
             object-fit: cover;
+        }
+
+        .entry-activity-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .entry-activity-content {
+            flex: 1;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 14px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .entry-type {
+            align-self: flex-start;
+            padding: 4px 10px;
+            border: 1px solid rgba(var(--acc-rgb), .3);
+            border-radius: 99px;
+            background: rgba(var(--pri-rgb), .16);
+            color: var(--acc);
+            font: 11px 'DM Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .entry-person-name {
+            font-size: clamp(20px, 2vw, 27px);
+            font-weight: 700;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .entry-fields {
+            display: grid;
+            gap: 10px;
+        }
+
+        .entry-field {
+            padding-bottom: 9px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .entry-field:last-child { border-bottom: 0; padding-bottom: 0; }
+
+        .entry-field small {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--mut);
+            font: 10px 'DM Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .entry-field b { font-size: 13px; overflow-wrap: anywhere; }
+
+        .visitor-register-message {
+            color: var(--acc);
+            font-size: clamp(17px, 1.8vw, 22px);
+            font-weight: 800;
+            line-height: 1.35;
+            text-align: center;
+            letter-spacing: .04em;
+        }
+
+        .entry-muted {
+            color: var(--mut);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media(max-width:900px) {
+            .camera-entry-grid { grid-template-columns: 1fr; }
+            .camera-preview { max-height: 420px; }
+            .entry-activity-content { min-height: 190px; }
         }
 
         .camera-status {
@@ -2494,15 +2584,23 @@
 
                 </div>
 
-                <div class="card">
-                    <h3 class="disp">LIVE WEBCAM</h3>
-                    <p class="sub">Temporary camera preview for testing. Video is not recorded, uploaded, or used to identify anyone.</p>
-                    <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
-                    <p class="camera-status" id="dashboardCameraStatus" role="status" aria-live="polite">Camera is off. Select Start camera and allow browser access.</p>
-                    <div class="camera-actions">
-                        <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
-                        <button id="stopDashboardCamera" type="button" disabled>Stop camera</button>
-                    </div>
+                <div class="camera-entry-grid">
+                    <section class="card">
+                        <h3 class="disp">LIVE WEBCAM</h3>
+                        <p class="sub">Camera preview</p>
+                        <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
+                        <p class="camera-status" id="dashboardCameraStatus" role="status" aria-live="polite">Camera is off. Select Start camera and allow browser access.</p>
+                        <div class="camera-actions">
+                            <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
+                            <button id="stopDashboardCamera" type="button" disabled>Stop camera</button>
+                        </div>
+                    </section>
+
+                    <section class="card entry-activity-card">
+                        <h3 class="disp">ENTRY ACTIVITY</h3>
+                        <p class="sub mono">Latest entry record</p>
+                        ${renderEntryActivity()}
+                    </section>
                 </div>
 
                 <div class="card">
@@ -2532,6 +2630,56 @@
             `;
         }
 
+
+        function renderEntryActivity() {
+            const latestLog = ENTRY_LOGS[0];
+
+            if (!latestLog) {
+                return `<div class="entry-activity-content">
+                    <span class="entry-type">Awaiting entry</span>
+                    <p class="entry-muted">No entry record yet. The panel will show details when an entry is recorded in the system.</p>
+                </div>`;
+            }
+
+            const person = PEOPLE.find(item => String(item.id) === String(latestLog.person_id))
+                || PEOPLE.find(item => String(item.full_name || "").toLowerCase() === String(latestLog.people?.full_name || "").toLowerCase());
+            const type = String(latestLog.person_type || person?.person_type || "").toLowerCase();
+            const displayName = person?.full_name || latestLog.people?.full_name || "";
+
+            if (type === "visitor") {
+                return `<div class="entry-activity-content">
+                    <span class="entry-type">Visitor</span>
+                    <p class="visitor-register-message">PLEASE REGISTER TO THE ADMISSION</p>
+                </div>`;
+            }
+
+            if (type === "student") {
+                return `<div class="entry-activity-content">
+                    <span class="entry-type">Student</span>
+                    <div class="entry-person-name">${esc(displayName || "Student")}</div>
+                    <div class="entry-fields">
+                        <div class="entry-field"><small>Course</small><b>${esc(person?.course || "Not available")}</b></div>
+                        <div class="entry-field"><small>Year</small><b>${esc(person?.year_level || "Not available")}</b></div>
+                    </div>
+                </div>`;
+            }
+
+            if (type === "staff" || type === "faculty") {
+                return `<div class="entry-activity-content">
+                    <span class="entry-type">Faculty</span>
+                    <div class="entry-person-name">${esc(displayName || "Faculty member")}</div>
+                    <div class="entry-fields">
+                        <div class="entry-field"><small>Role</small><b>${esc(person?.staff_role || "Not available")}</b></div>
+                        <div class="entry-field"><small>Department</small><b>${esc(person?.department || "Not available")}</b></div>
+                    </div>
+                </div>`;
+            }
+
+            return `<div class="entry-activity-content">
+                <span class="entry-type">Entry activity</span>
+                <p class="entry-muted">The latest entry record does not have a recognized person type.</p>
+            </div>`;
+        }
 
         function canManagePeople() {
             return ["admin", "personnel"].includes(currentProfile?.role);
