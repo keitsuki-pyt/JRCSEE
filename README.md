@@ -16,7 +16,7 @@ JRCSEE is a web-based interface for an administrative dashboard. It supports Sup
 - **Reports and entry logs** managed by Admin
 - **Members navigation** groups Students, Faculty, and Visitors in one expandable sidebar section
 - **Dashboard color themes** with palette presets that update the dashboard accents and surfaces together
-- **Optional live webcam preview** on the dashboard for testing, with a clearly labeled demo scan that shows fictional visitor details in the Entry Activity panel; starts only after permission is granted and does not record, upload, or identify people
+- **Optional webcam face tracker** on the dashboard, with an on-device box around visible faces and a clearly labeled demo scan that shows fictional visitor details in the Entry Activity panel; starts only after permission is granted and does not record or upload camera frames
 - **Visitor retention** with automatic deletion after 30 days and anonymized linked logs/alerts
 - **Search** for filtering the information shown on each page
 - **Responsive layout** with a collapsible sidebar on smaller screens
@@ -125,7 +125,7 @@ Admins have full read/write access to operational data tables under Supabase RLS
 - Expired visitor records are deleted by an hourly `pg_cron` job. The linked `person_id` in entry logs and alerts is set to `NULL` on deletion, leaving those records anonymized.
 - The `students`, `staff`, and `visitors` views are filtered views over `people`; authenticated users can read, insert, and update through them subject to the same row-level security policies. The dashboard writes through `people` with an explicit person type.
 - If a dashboard save fails, read the message below the form. A row-level-security or permission error usually means the current account is not approved as Admin/Personnel or the latest policies from `supabase-setup.sql` have not been applied. Student records must be saved as `person_type = 'student'` in `public.people` (or inserted through the `public.students` view with its required fields); older records in `public.members` are not shown as students.
-- Face photos, biometric templates, and face recognition are not included. Entry logs and alerts will remain empty until an authorized access-control device/service writes to them.
+- Face photos, biometric templates, and identity recognition are not included. The webcam tracker detects visible faces locally in the browser and draws a box around them; it does not identify people. The face-detection library and model are downloaded from public CDNs when the camera starts, but camera frames are processed locally and are not uploaded. Entry logs and alerts will remain empty until an authorized access-control device/service writes to them.
 
 The dashboard database starts empty. The names and reports previously shown in the dashboard were sample data and are not copied into your project.
 
@@ -148,7 +148,7 @@ After successful authentication, the login page redirects to `dashboard.html`.
 - The **Remember me** checkbox is present in the interface, but persistent-login behavior is not implemented by that checkbox.
 - The account email update requires confirmation from the email inbox.
 - The supplied dashboard checks whether a Supabase user is signed in and uses Supabase Row Level Security (RLS) to protect database operations.
-- The dashboard's webcam is only a local live preview and requires HTTPS or localhost plus browser camera permission. The "Simulate face scan" button shows fictional visitor details in Entry Activity for demonstration only; it does not analyze the video, detect faces, match identities, record video, or provide face-based attendance/identity verification.
+- The dashboard's webcam requires HTTPS or localhost plus browser camera permission. The on-device face tracker draws boxes around visible faces but does not recognize identities. The "Simulate face scan" button shows fictional visitor details in Entry Activity for demonstration only; it does not match identities, record video, or provide face-based attendance/identity verification.
 
 ## Suggested Improvements
 

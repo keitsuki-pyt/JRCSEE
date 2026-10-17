@@ -1003,6 +1003,61 @@
             object-fit: cover;
         }
 
+        .camera-tracker {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #08070d;
+        }
+
+        .camera-tracker .camera-preview {
+            border-radius: 10px;
+        }
+
+        .camera-face-overlay {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .camera-face-box {
+            position: absolute;
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 0 18px rgba(74,222,128,.28);
+        }
+
+        .camera-face-box-label {
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            padding: 3px 7px;
+            border-radius: 5px 0 5px 0;
+            background: #166534;
+            color: #fff;
+            font: 10px 'DM Mono', monospace;
+            letter-spacing: .04em;
+            white-space: nowrap;
+        }
+
+        .camera-face-status {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            left: 10px;
+            width: fit-content;
+            max-width: calc(100% - 20px);
+            padding: 5px 9px;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 99px;
+            background: rgba(8,7,13,.78);
+            color: #f4f4f6;
+            font-size: 11px;
+            pointer-events: none;
+        }
+
         .entry-activity-card {
             display: flex;
             flex-direction: column;
@@ -2214,6 +2269,8 @@
         let dashboardCameraRequest = 0;
         let dashboardCameraStarting = false;
         let dashboardDemoFaceScan = false;
+        let dashboardFaceDetector = null;
+        let dashboardFaceLibraryPromise = null;
 
 
         const AI = {
@@ -2589,7 +2646,11 @@
                     <section class="card">
                         <h3 class="disp">LIVE WEBCAM</h3>
                         <p class="sub">Camera preview</p>
-                        <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
+                        <div class="camera-tracker" id="dashboardCameraTracker">
+                            <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
+                            <div class="camera-face-overlay" id="dashboardCameraFaceOverlay" aria-hidden="true"></div>
+                            <div class="camera-face-status" id="dashboardCameraFaceStatus" role="status" aria-live="polite">Camera is off.</div>
+                        </div>
                         <p class="camera-status" id="dashboardCameraStatus" role="status" aria-live="polite">Camera is off. Select Start camera and allow browser access.</p>
                         <div class="camera-actions">
                             <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
@@ -2939,7 +3000,7 @@
             if (S.tab === "dashboard" && dashboardCameraStream) {
                 const video = $("dashboardCamera");
                 if (video) video.srcObject = dashboardCameraStream;
-                updateDashboardCameraControls("Camera is live. Preview only; nothing is being saved.");
+                updateDashboardCameraControls("Camera is live. Face tracking runs on this device; video is not saved or uploaded.");
             }
         }
 
@@ -2952,6 +3013,146 @@
             if (startButton) startButton.disabled = Boolean(dashboardCameraStream) || dashboardCameraStarting;
             if (stopButton) stopButton.disabled = !dashboardCameraStream;
             if (scanButton) scanButton.disabled = !dashboardCameraStream || dashboardCameraStarting;
+        }
+
+        function updateDashboardFaceTrackerStatus(message) {
+            const status = $("dashboardCameraFaceStatus");
+            if (status && status.textContent !== message) status.textContent = message;
+        }
+
+        function loadDashboardFaceDetectionLibrary() {
+            if (window.FaceDetection) return Promise.resolve();
+            if (dashboardFaceLibraryPromise) return dashboardFaceLibraryPromise;
+
+            dashboardFaceLibraryPromise = new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/face_detection.js";
+                script.async = true;
+                script.onload = () => {
+                    if (window.FaceDetection) {
+                        resolve();
+                    } else {
+                        dashboardFaceLibraryPromise = null;
+                        reject(new Error("The face detection library loaded without its expected API."));
+                    }
+                };
+                script.onerror = () => {
+                    dashboardFaceLibraryPromise = null;
+                    reject(new Error("Could not load the face detection library from jsDelivr."));
+                };
+                document.head.appendChild(script);
+            });
+            return dashboardFaceLibraryPromise;
+        }
+
+        function drawDashboardFaceDetections(results, request, stream) {
+            if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
+
+            const overlay = $("dashboardCameraFaceOverlay");
+            const video = $("dashboardCamera");
+            const tracker = $("dashboardCameraTracker");
+            if (!overlay || !video || !tracker) return;
+
+            const detections = results.detections || [];
+            overlay.replaceChildren();
+            if (detections.length === 0) {
+                updateDashboardFaceTrackerStatus("Looking for a face · no identity matching");
+                return;
+            }
+
+            const bounds = tracker.getBoundingClientRect();
+            const scale = Math.max(bounds.width / video.videoWidth, bounds.height / video.videoHeight);
+            const cropX = (video.videoWidth * scale - bounds.width) / 2;
+            const cropY = (video.videoHeight * scale - bounds.height) / 2;
+
+            detections.forEach(detection => {
+                const face = detection.boundingBox;
+                if (!face) return;
+
+                const left = Math.max(0, (face.xCenter - face.width / 2) * video.videoWidth * scale - cropX);
+                const top = Math.max(0, (face.yCenter - face.height / 2) * video.videoHeight * scale - cropY);
+                const right = Math.min(bounds.width, (face.xCenter + face.width / 2) * video.videoWidth * scale - cropX);
+                const bottom = Math.min(bounds.height, (face.yCenter + face.height / 2) * video.videoHeight * scale - cropY);
+                if (right <= left || bottom <= top) return;
+
+                const box = document.createElement("div");
+                box.className = "camera-face-box";
+                box.style.left = `${left}px`;
+                box.style.top = `${top}px`;
+                box.style.width = `${right - left}px`;
+                box.style.height = `${bottom - top}px`;
+
+                const label = document.createElement("span");
+                label.className = "camera-face-box-label";
+                label.textContent = "Face visible";
+                box.appendChild(label);
+                overlay.appendChild(box);
+            });
+
+            const faceCount = overlay.childElementCount;
+            updateDashboardFaceTrackerStatus(faceCount
+                ? `${faceCount} face${faceCount === 1 ? "" : "s"} detected · no identity matching`
+                : "Looking for a face · no identity matching");
+        }
+
+        async function startDashboardFaceTracking(video, stream, request) {
+            let detector = null;
+            try {
+                updateDashboardFaceTrackerStatus("Loading on-device face tracker…");
+                await loadDashboardFaceDetectionLibrary();
+                if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
+
+                detector = new window.FaceDetection({
+                    locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/${file}`
+                });
+                detector.setOptions({ model: "short", minDetectionConfidence: 0.6 });
+                detector.onResults(results => drawDashboardFaceDetections(results, request, stream));
+                await detector.initialize();
+                if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) {
+                    closeDashboardFaceDetector(detector);
+                    return;
+                }
+
+                dashboardFaceDetector = detector;
+                updateDashboardFaceTrackerStatus("Looking for a face · no identity matching");
+
+                const detectNextFrame = async () => {
+                    if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
+                    const currentVideo = $("dashboardCamera");
+                    if (!currentVideo || currentVideo.readyState < 2 || !currentVideo.videoWidth) {
+                        window.setTimeout(detectNextFrame, 150);
+                        return;
+                    }
+
+                    try {
+                        await detector.send({ image: currentVideo });
+                    } catch (error) {
+                        if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
+                        if (dashboardFaceDetector === detector) dashboardFaceDetector = null;
+                        closeDashboardFaceDetector(detector);
+                        const message = error?.message || "Unknown detection error.";
+                        updateDashboardFaceTrackerStatus("Face tracker stopped.");
+                        const overlay = $("dashboardCameraFaceOverlay");
+                        if (overlay) overlay.replaceChildren();
+                        updateDashboardCameraControls(`Camera is live, but face tracking failed: ${message}`);
+                        return;
+                    }
+
+                    window.setTimeout(detectNextFrame, 150);
+                };
+
+                detectNextFrame();
+            } catch (error) {
+                if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
+                if (detector && dashboardFaceDetector !== detector) closeDashboardFaceDetector(detector);
+                const message = error?.message || "Unknown face tracker error.";
+                updateDashboardFaceTrackerStatus("Face tracker unavailable.");
+                updateDashboardCameraControls(`Camera is live, but face tracking could not start: ${message}`);
+            }
+        }
+
+        function closeDashboardFaceDetector(detector) {
+            detector.close().catch(error => console.error("Could not close the face detector:", error));
         }
 
         function showDashboardDemoFaceScan() {
@@ -2967,6 +3168,10 @@
         function stopDashboardCamera() {
             dashboardCameraRequest += 1;
             dashboardCameraStarting = false;
+            if (dashboardFaceDetector) {
+                closeDashboardFaceDetector(dashboardFaceDetector);
+                dashboardFaceDetector = null;
+            }
             if (dashboardCameraStream) {
                 dashboardCameraStream.getTracks().forEach(track => track.stop());
                 dashboardCameraStream = null;
@@ -2974,6 +3179,9 @@
             dashboardDemoFaceScan = false;
             const video = $("dashboardCamera");
             if (video) video.srcObject = null;
+            const overlay = $("dashboardCameraFaceOverlay");
+            if (overlay) overlay.replaceChildren();
+            updateDashboardFaceTrackerStatus("Camera is off.");
             updateDashboardCameraControls("Camera is off.");
         }
 
@@ -3010,14 +3218,23 @@
                 }
                 video.srcObject = stream;
                 dashboardDemoFaceScan = false;
+                updateDashboardFaceTrackerStatus("Loading on-device face tracker…");
                 stream.getVideoTracks().forEach(track => track.addEventListener("ended", () => {
                     if (dashboardCameraStream !== stream) return;
                     dashboardCameraStream = null;
                     dashboardDemoFaceScan = false;
+                    if (dashboardFaceDetector) {
+                        closeDashboardFaceDetector(dashboardFaceDetector);
+                        dashboardFaceDetector = null;
+                    }
                     video.srcObject = null;
+                    const overlay = $("dashboardCameraFaceOverlay");
+                    if (overlay) overlay.replaceChildren();
+                    updateDashboardFaceTrackerStatus("Camera is off.");
                     updateDashboardCameraControls("The camera stopped or was disconnected.");
                 }, { once: true }));
-                updateDashboardCameraControls("Camera is live. Preview only; nothing is being saved.");
+                updateDashboardCameraControls("Camera is live. Face tracking runs on this device; video is not saved or uploaded.");
+                startDashboardFaceTracking(video, stream, request);
             } catch (error) {
                 if (request !== dashboardCameraRequest) return;
                 dashboardCameraStarting = false;
