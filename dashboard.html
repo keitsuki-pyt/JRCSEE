@@ -963,6 +963,12 @@
             cursor: pointer;
         }
 
+        .student-filter-tools select option,
+        .course-picker select option {
+            color: #f4f4f6;
+            background: #100f1b;
+        }
+
         .student-filter-tools input:focus,
         .student-filter-tools select:focus,
         .course-picker select:focus,
@@ -2549,7 +2555,7 @@
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
                             <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
-                            <div><label for="studentCourse">Course</label><div class="course-picker"><select id="studentCourse" name="course" required><option value="">Choose a course</option><option value="BSIT">BSIT</option><option value="BSBA">BSBA</option><option value="PSYCHOLOGY">Psychology</option><option value="EDUC">Education (EDUC)</option><option value="__other">Other course…</option></select></div><input id="studentCustomCourse" name="course_custom" maxlength="160" placeholder="Enter course name" hidden></div>
+                            <div><label for="studentCourse">Course</label><div class="course-picker"><select id="studentCourse" name="course" required><option value="" disabled selected hidden>Choose a course</option><option value="BSIT">BSIT</option><option value="BSBA">BSBA</option><option value="PSYCHOLOGY">Psychology</option><option value="EDUC">Education (EDUC)</option><option value="__other">Other course…</option></select></div><input id="studentCustomCourse" name="course_custom" maxlength="160" placeholder="Enter course name" hidden></div>
                             <div><label for="studentYear">Year level</label><input id="studentYear" name="year_level" required maxlength="40" placeholder="e.g. 1st Year"></div>
                             <div class="data-form-actions"><span class="form-error" id="studentFormError" role="alert"></span><button type="button" data-cancel-edit="studentForm" hidden>Cancel edit</button><button class="primary" type="button" data-save-form="studentForm">Save student</button></div>
                         </form>
@@ -2560,7 +2566,9 @@
                         <input id="studentSearch" type="search" value="${esc(S.studentQ)}" placeholder="Search name, email, course, or year…" aria-label="Search students">
                         <select id="studentCourseFilter" aria-label="Filter by course">
                             <option value="">All courses</option>
-                            ${courses.map(course => `<option value="${esc(course)}" ${S.studentCourse.toLocaleLowerCase() === course.toLocaleLowerCase() ? "selected" : ""}>${esc(course)}</option>`).join("")}
+                            ${[...new Map(["BSIT", "BSBA", "PSYCHOLOGY", "EDUC", ...courses]
+                                .map(course => [course.toLocaleLowerCase(), course])).values()]
+                                .map(course => `<option value="${esc(course)}" ${S.studentCourse.toLocaleLowerCase() === course.toLocaleLowerCase() ? "selected" : ""}>${esc(course === "PSYCHOLOGY" ? "Psychology" : course === "EDUC" ? "Education (EDUC)" : course)}</option>`).join("")}
                         </select>
                     </div>
                     <p class="student-filter-count">${studentsByCourse.size ? `${[...studentsByCourse.values()].reduce((count, group) => count + group.students.length, 0)} students · ${studentsByCourse.size} courses` : ""}</p>
