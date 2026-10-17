@@ -16,6 +16,7 @@ JRCSEE is a web-based interface for an administrative dashboard. It supports Sup
 - **Reports and entry logs** managed by Admin
 - **Members navigation** groups Students, Faculty, and Visitors in one expandable sidebar section
 - **Dashboard color themes** with palette presets that update the dashboard accents and surfaces together
+- **Optional live webcam preview** on the dashboard for testing; starts only after permission is granted and does not record, upload, or identify people
 - **Visitor retention** with automatic deletion after 30 days and anonymized linked logs/alerts
 - **Search** for filtering the information shown on each page
 - **Responsive layout** with a collapsible sidebar on smaller screens
@@ -147,7 +148,7 @@ After successful authentication, the login page redirects to `dashboard.html`.
 - The **Remember me** checkbox is present in the interface, but persistent-login behavior is not implemented by that checkbox.
 - The account email update requires confirmation from the email inbox.
 - The supplied dashboard checks whether a Supabase user is signed in and uses Supabase Row Level Security (RLS) to protect database operations.
-- Although the project is labeled “Face Recognition Web,” the supplied files do not implement camera access, face detection, face matching, or face-based attendance/identity verification.
+- The dashboard's webcam is only a local live preview and requires HTTPS or localhost plus browser camera permission. It does not implement face detection, face matching, recording, or face-based attendance/identity verification.
 
 ## Suggested Improvements
 

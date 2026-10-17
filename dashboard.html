@@ -983,6 +983,30 @@
             font-size: 11px;
         }
 
+        .camera-preview {
+            display: block;
+            width: 100%;
+            max-height: 480px;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #08070d;
+            object-fit: cover;
+        }
+
+        .camera-status {
+            min-height: 1.4em;
+            margin: 10px 0;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .camera-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
         .course-picker {
             position: relative;
         }
@@ -2096,6 +2120,9 @@
         let ENTRY_LOGS = [];
         let currentUser = null;
         let currentProfile = null;
+        let dashboardCameraStream = null;
+        let dashboardCameraRequest = 0;
+        let dashboardCameraStarting = false;
 
 
         const AI = {
@@ -2467,6 +2494,16 @@
 
                 </div>
 
+                <div class="card">
+                    <h3 class="disp">LIVE WEBCAM</h3>
+                    <p class="sub">Temporary camera preview for testing. Video is not recorded, uploaded, or used to identify anyone.</p>
+                    <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
+                    <p class="camera-status" id="dashboardCameraStatus" role="status" aria-live="polite">Camera is off. Select Start camera and allow browser access.</p>
+                    <div class="camera-actions">
+                        <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
+                        <button id="stopDashboardCamera" type="button" disabled>Stop camera</button>
+                    </div>
+                </div>
 
                 <div class="card">
                     <h3 class="disp">RECENT ACTIVITY</h3>
@@ -2687,6 +2724,7 @@
 
 
         function render() {
+            if (S.tab !== "dashboard") stopDashboardCamera();
 
             const isPersonnel = currentProfile?.role === "personnel";
             const memberNav = [
@@ -2734,7 +2772,89 @@
                     entry_logs: entryLogs,
                     reports
                 }[S.tab]();
+
+            if (S.tab === "dashboard" && dashboardCameraStream) {
+                const video = $("dashboardCamera");
+                if (video) video.srcObject = dashboardCameraStream;
+                updateDashboardCameraControls("Camera is live. Preview only; nothing is being saved.");
+            }
         }
+
+        function updateDashboardCameraControls(message) {
+            const status = $("dashboardCameraStatus");
+            const startButton = $("startDashboardCamera");
+            const stopButton = $("stopDashboardCamera");
+            if (status) status.textContent = message;
+            if (startButton) startButton.disabled = Boolean(dashboardCameraStream) || dashboardCameraStarting;
+            if (stopButton) stopButton.disabled = !dashboardCameraStream;
+        }
+
+        function stopDashboardCamera() {
+            dashboardCameraRequest += 1;
+            dashboardCameraStarting = false;
+            if (dashboardCameraStream) {
+                dashboardCameraStream.getTracks().forEach(track => track.stop());
+                dashboardCameraStream = null;
+            }
+            const video = $("dashboardCamera");
+            if (video) video.srcObject = null;
+            updateDashboardCameraControls("Camera is off.");
+        }
+
+        async function startDashboardCamera() {
+            if (!window.isSecureContext) {
+                updateDashboardCameraControls("Camera access requires HTTPS or localhost.");
+                return;
+            }
+            if (!navigator.mediaDevices?.getUserMedia) {
+                updateDashboardCameraControls("This browser does not support webcam access.");
+                return;
+            }
+
+            const request = ++dashboardCameraRequest;
+            dashboardCameraStarting = true;
+            updateDashboardCameraControls("Waiting for camera permission…");
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: "user" }
+                });
+                if (request !== dashboardCameraRequest || S.tab !== "dashboard") {
+                    stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
+                dashboardCameraStarting = false;
+                dashboardCameraStream = stream;
+                const video = $("dashboardCamera");
+                if (!video) {
+                    stopDashboardCamera();
+                    return;
+                }
+                video.srcObject = stream;
+                stream.getVideoTracks().forEach(track => track.addEventListener("ended", () => {
+                    if (dashboardCameraStream !== stream) return;
+                    dashboardCameraStream = null;
+                    video.srcObject = null;
+                    updateDashboardCameraControls("The camera stopped or was disconnected.");
+                }, { once: true }));
+                updateDashboardCameraControls("Camera is live. Preview only; nothing is being saved.");
+            } catch (error) {
+                if (request !== dashboardCameraRequest) return;
+                dashboardCameraStarting = false;
+                const message = error.name === "NotAllowedError"
+                    ? "Camera permission was denied. Allow camera access in your browser settings and try again."
+                    : error.name === "NotFoundError"
+                        ? "No camera was found. Connect a webcam and try again."
+                        : error.name === "NotReadableError"
+                            ? "The camera is unavailable or in use by another app."
+                            : `Could not start camera (${error.name || "error"}): ${error.message || "Unknown camera error."}`;
+                updateDashboardCameraControls(message);
+            }
+        }
+
+        window.addEventListener("pagehide", stopDashboardCamera);
 
 
         function updateClock() {
@@ -2935,6 +3055,14 @@
 
 
         $("main").onclick = e => {
+            if (e.target.closest("#startDashboardCamera")) {
+                startDashboardCamera();
+                return;
+            }
+            if (e.target.closest("#stopDashboardCamera")) {
+                stopDashboardCamera();
+                return;
+            }
 
             const saveButton = e.target.closest("[data-save-form]");
             if (saveButton) {
