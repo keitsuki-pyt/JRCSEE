@@ -3037,9 +3037,12 @@
                 showToast("Saved to Supabase.");
             } catch (error) {
                 console.error("Could not save dashboard record:", error);
-                let message = recordSaved
-                    ? `${error.message || "The record was saved"}, but it was not confirmed in the dashboard. Check public.people and the Admin/Personnel SELECT policy; the student form has been left filled in.`
-                    : (error.message || "Could not save this record.");
+                const confirmedInDashboard = savedPersonId && PEOPLE.some(person => person.id === savedPersonId);
+                let message = confirmedInDashboard
+                    ? `Saved and confirmed in the dashboard, but a follow-up display update failed: ${error.message || "Unknown error"}`
+                    : recordSaved
+                        ? `${error.message || "The record was saved"}, but it was not confirmed in the dashboard. Check public.people and the Admin/Personnel SELECT policy; the student form has been left filled in.`
+                        : (error.message || "Could not save this record.");
                 if (!recordSaved && (error.code === "42501" || /row-level security|permission denied/i.test(message))) {
                     message += " Verify your Admin or Personnel role and run the latest people policies from supabase-setup.sql.";
                 }
@@ -3090,7 +3093,7 @@
             }
             const personLabel = person.person_type === "staff" ? "FACULTY" : person.person_type.toUpperCase();
             $(formId.replace("Form", "FormTitle")).textContent = `EDIT ${personLabel}`;
-            form.querySelector('button[type="submit"]').textContent = "Save changes";
+            (form.querySelector("[data-save-form]") || form.querySelector('button[type="submit"]')).textContent = "Save changes";
             form.querySelector("[data-cancel-edit]").hidden = false;
             form.scrollIntoView({ behavior: "smooth", block: "start" });
         }
@@ -3104,7 +3107,7 @@
                 visitorForm: "REGISTER VISITOR",
                 staffForm: "ADD FACULTY RECORD"
             }[formId];
-            form.querySelector('button[type="submit"]').textContent = {
+            (form.querySelector("[data-save-form]") || form.querySelector('button[type="submit"]')).textContent = {
                 studentForm: "Save student",
                 visitorForm: "Register visitor",
                 staffForm: "Save faculty"
