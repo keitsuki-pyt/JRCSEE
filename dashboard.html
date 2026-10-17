@@ -2529,15 +2529,31 @@
         }
 
         function students() {
-            const rows = PEOPLE
+            const studentsByCourse = new Map();
+            PEOPLE
                 .filter(person => person.person_type === "student")
                 .filter(person => has(`${person.full_name} ${person.course} ${person.year_level} ${person.email}`, S.q))
-                .map(person => `
-                    <div class="row">
-                        <span>${esc(person.full_name)}<br><small>${esc(person.email)}</small></span>
-                        <span>${esc(person.course)} · Year ${esc(person.year_level)}</span>
-                        ${personActions(person)}
-                    </div>
+                .forEach(person => {
+                    const course = String(person.course || "").trim() || "Unspecified course";
+                    const key = course.toLocaleLowerCase();
+                    if (!studentsByCourse.has(key)) studentsByCourse.set(key, { course, students: [] });
+                    studentsByCourse.get(key).students.push(person);
+                });
+            const courseGroups = [...studentsByCourse.values()]
+                .sort((a, b) => a.course.localeCompare(b.course, undefined, { sensitivity: "base" }))
+                .map(group => `
+                    <section class="student-course-group">
+                        <h4 class="disp">${esc(group.course)}</h4>
+                        ${group.students
+                            .sort((a, b) => a.full_name.localeCompare(b.full_name, undefined, { sensitivity: "base" }))
+                            .map(person => `
+                                <div class="row">
+                                    <span>${esc(person.full_name)}<br><small>${esc(person.email)}</small></span>
+                                    <span>Year ${esc(person.year_level)}</span>
+                                    ${personActions(person)}
+                                </div>
+                            `).join("")}
+                    </section>
                 `).join("");
             const canAdd = canManagePeople();
 
@@ -2550,14 +2566,14 @@
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
                             <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
-                            <div><label for="studentCourse">Course</label><input id="studentCourse" name="course" required maxlength="160"></div>
+                            <div><label for="studentCourse">Course</label><input id="studentCourse" name="course" list="studentCourseOptions" required maxlength="160"><datalist id="studentCourseOptions"><option value="BSIT"><option value="BSBA"><option value="PSYCHOLOGY"><option value="EDUC"></datalist></div>
                             <div><label for="studentYear">Year level</label><input id="studentYear" name="year_level" required maxlength="40" placeholder="e.g. 1st Year"></div>
                             <div class="data-form-actions"><span class="form-error" id="studentFormError" role="alert"></span><button type="button" data-cancel-edit="studentForm" hidden>Cancel edit</button><button class="primary" type="button" data-save-form="studentForm">Save student</button></div>
                         </form>
                     </div>` : ""}
                 <div class="card list">
                     <h3 class="disp" style="margin-bottom:12px">STUDENTS</h3>
-                    ${rows || `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
+                    ${courseGroups || `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
                 </div>
             `;
         }
@@ -2566,11 +2582,11 @@
             const canAdd = canManagePeople();
             const rows = PEOPLE
                 .filter(person => person.person_type === "visitor")
-                .filter(person => has(`${person.full_name} ${person.purpose} ${person.host_name} ${person.host_department} ${person.contact_phone || ""}`, S.q))
+                .filter(person => has(`${person.full_name} ${person.purpose} ${person.contact_phone || ""}`, S.q))
                 .map(person => `
                     <div class="row">
                         <span>${esc(person.full_name)}<br><small>${esc(person.purpose)}</small></span>
-                        <span>${esc(person.host_name)} · ${esc(person.host_department)}<br><small>${person.contact_phone ? esc(person.contact_phone) + " · " : ""}Expires ${esc(displayDate(person.expires_at))}</small></span>
+                        <span>${person.contact_phone ? esc(person.contact_phone) + " · " : ""}Expires ${esc(displayDate(person.expires_at))}</span>
                         ${personActions(person)}
                     </div>
                 `).join("");
@@ -2584,8 +2600,6 @@
                         <div><label for="visitorName">Full name</label><input id="visitorName" name="full_name" required maxlength="160"></div>
                         <div><label for="visitorPhone">Contact phone</label><input id="visitorPhone" name="contact_phone" type="tel" required maxlength="40"></div>
                         <div><label for="visitorPurpose">Purpose of visit</label><input id="visitorPurpose" name="purpose" required maxlength="240"></div>
-                        <div><label for="visitorHost">Host name</label><input id="visitorHost" name="host_name" required maxlength="160"></div>
-                        <div><label for="visitorDepartment">Host department</label><input id="visitorDepartment" name="host_department" required maxlength="160"></div>
                         <div class="data-form-actions"><span class="form-error" id="visitorFormError" role="alert"></span><button type="button" data-cancel-edit="visitorForm" hidden>Cancel edit</button><button class="primary" type="button" data-save-form="visitorForm">Register visitor</button></div>
                     </form>
                 </div>` : ""}
@@ -2997,8 +3011,8 @@
                         department: formId === "staffForm" ? String(formData.get("department")).trim() : null,
                         purpose: formId === "visitorForm" ? String(formData.get("purpose")).trim() : null,
                         contact_phone: formId === "visitorForm" ? String(formData.get("contact_phone") || "").trim() || null : null,
-                        host_name: formId === "visitorForm" ? String(formData.get("host_name")).trim() : null,
-                        host_department: formId === "visitorForm" ? String(formData.get("host_department")).trim() : null
+                        host_name: null,
+                        host_department: null
                     };
                     const id = String(formData.get("id") || "").trim();
                     if (id && !canManagePeople()) throw new Error("You do not have permission to edit people records.");
