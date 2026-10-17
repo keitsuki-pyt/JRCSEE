@@ -428,7 +428,7 @@ grant select, insert, update, delete on public.people to authenticated;
 grant select, insert, update, delete on public.entry_logs, public.alerts to authenticated;
 
 revoke all on public.students, public.staff, public.visitors from anon, authenticated;
-grant select on public.students, public.staff, public.visitors to authenticated;
+grant select, insert, update on public.students, public.staff, public.visitors to authenticated;
 
 create extension if not exists pg_cron;
 

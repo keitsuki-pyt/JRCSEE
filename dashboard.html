@@ -2940,6 +2940,8 @@
             const formData = new FormData(form);
             const errorEl = $(form.id.replace("Form", "FormError"));
             if (errorEl) errorEl.textContent = "";
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
             let recordSaved = false;
 
             try {
@@ -2966,8 +2968,8 @@
                     const id = String(formData.get("id") || "").trim();
                     if (id && !canManagePeople()) throw new Error("You do not have permission to edit people records.");
                     result = id
-                        ? await supabaseClient.from("people").update(person).eq("id", id)
-                        : await supabaseClient.from("people").insert(person);
+                        ? await supabaseClient.from("people").update(person).eq("id", id).select("id").maybeSingle()
+                        : await supabaseClient.from("people").insert(person).select("id").single();
                 } else {
                     const report = {
                         title: String(formData.get("title")).trim(),
@@ -2982,6 +2984,9 @@
                 }
 
                 if (result.error) throw result.error;
+                if (["studentForm", "visitorForm", "staffForm"].includes(form.id) && !result.data?.id) {
+                    throw new Error("Supabase did not confirm that this people record was saved. Check your account permissions and database setup.");
+                }
                 recordSaved = true;
                 form.reset();
                 if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) cancelPersonEdit(form.id);
@@ -2992,10 +2997,15 @@
                 showToast("Saved to Supabase.");
             } catch (error) {
                 console.error("Could not save dashboard record:", error);
-                const message = recordSaved
+                let message = recordSaved
                     ? `Saved, but the dashboard could not refresh: ${error.message || "Unknown error"}`
                     : (error.message || "Could not save this record.");
+                if (!recordSaved && (error.code === "42501" || /row-level security|permission denied/i.test(message))) {
+                    message += " Verify your Admin or Personnel role and run the latest people policies from supabase-setup.sql.";
+                }
                 if (errorEl) errorEl.textContent = message;
+            } finally {
+                if (submitButton) submitButton.disabled = false;
             }
         };
 
