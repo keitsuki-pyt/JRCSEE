@@ -898,6 +898,7 @@
             aside {
                 position: fixed;
                 inset: 0 auto 0 0;
+                width: min(240px, calc(100vw - 48px));
                 transform: translateX(-100%);
                 transition: transform .2s
             }
@@ -918,12 +919,46 @@
                 display: none
             }
 
+            header {
+                gap: 10px;
+                padding: 12px 14px;
+            }
+
+            header h2 {
+                font-size: 18px;
+            }
+
+            header .datetime {
+                flex-wrap: wrap;
+                gap: 4px 7px;
+                font-size: 12px;
+                line-height: 1.3;
+            }
+
+            header .datetime span {
+                white-space: nowrap;
+            }
+
             .g2 {
                 grid-template-columns: 1fr
             }
 
             main {
-                padding: 20px
+                padding: 16px;
+                gap: 18px;
+            }
+
+            .top,
+            .leg {
+                flex-wrap: wrap;
+            }
+
+            .top {
+                gap: 10px;
+            }
+
+            .leg {
+                gap: 8px 16px;
             }
 
             .user {
@@ -953,6 +988,25 @@
             .data-form-actions,
             .form-error {
                 grid-column: auto;
+            }
+        }
+
+        @media(max-width:380px) {
+            header {
+                gap: 8px;
+                padding: 10px;
+            }
+
+            header h2 {
+                font-size: 16px;
+            }
+
+            header .datetime {
+                font-size: 11px;
+            }
+
+            main {
+                padding: 14px;
             }
         }
 
