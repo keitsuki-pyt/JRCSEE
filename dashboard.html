@@ -899,6 +899,32 @@
             font-weight: 500
         }
 
+        .student-course-group {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--pri);
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--pri) 7%, transparent);
+        }
+
+        .student-course-group h4 {
+            margin-bottom: 8px;
+            color: var(--acc);
+            font-size: 14px;
+            letter-spacing: .04em;
+        }
+
+        .student-course-group .row {
+            padding: 9px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .student-course-group .row:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
         .veil {
             display: none;
             position: fixed;
@@ -1991,6 +2017,9 @@
 
         let GROWTH = [];
         let ACT = [];
+        let RECENT_ACTIVITY = [];
+        let PEOPLE_ACTIVITY = [];
+        let ACTIVITY_LOAD_ERROR = "";
         let MEMBERS = [];
         let PEOPLE = [];
         let ENTRY_LOGS = [];
@@ -2457,9 +2486,10 @@
                             Latest updates
                         </div>
 
+                        ${ACTIVITY_LOAD_ERROR ? `<div class="form-error">${esc(ACTIVITY_LOAD_ERROR)}</div>` : ""}
                         <div class="act">
 
-                            ${ACT.map(
+                            ${RECENT_ACTIVITY.map(
                     a =>
                         `
                                     <div class="a">
@@ -2820,7 +2850,7 @@
         function populateNotifList() {
             const list = $("notifList");
             if (!list) return;
-            list.innerHTML = ACT.slice(0, 4).map(a => `
+            list.innerHTML = RECENT_ACTIVITY.slice(0, 4).map(a => `
                 <div class="notif-item">
                     <span class="notif-item-dot" style="background:${AI[a.type] || "var(--pri)"}"></span>
                     <div>
@@ -2995,6 +3025,7 @@
 
             try {
                 let result;
+                let savedPerson = null;
                 if (["studentForm", "visitorForm", "staffForm"].includes(formId)) {
                     const typeByForm = {
                         studentForm: "student",
@@ -3014,6 +3045,7 @@
                         host_name: null,
                         host_department: null
                     };
+                    savedPerson = person;
                     const id = String(formData.get("id") || "").trim();
                     if (id && !canManagePeople()) throw new Error("You do not have permission to edit people records.");
                     result = id
@@ -3039,6 +3071,19 @@
                     if (result.error) throw result.error;
                 }
 
+                let activityWarning = "";
+                if (savedPerson && savedPersonId) {
+                    try {
+                        await logPeopleActivity(
+                            String(formData.get("id") || "").trim() ? "updated" : "added",
+                            savedPerson.person_type,
+                            savedPerson.full_name
+                        );
+                    } catch (activityError) {
+                        console.error("Could not record people activity:", activityError);
+                        activityWarning = ` The person was saved, but the activity could not be recorded: ${activityError.message || "Unknown error"}`;
+                    }
+                }
                 await loadDashboardData();
                 if (savedPersonId && !PEOPLE.some(person => person.id === savedPersonId)) {
                     throw new Error(`Supabase accepted the save (record ${savedPersonId}), but the dashboard cannot read it back from public.people. Check that you are viewing the same Supabase project and that the Admin/Personnel SELECT policy is applied.`);
@@ -3048,7 +3093,9 @@
                 if (formId === "reportForm") cancelReportEdit();
                 populateNotifList();
                 render();
-                showToast("Saved to Supabase.");
+                showToast(activityWarning
+                    ? `Saved to Supabase.${activityWarning}`
+                    : "Saved to Supabase.");
             } catch (error) {
                 console.error("Could not save dashboard record:", error);
                 const confirmedInDashboard = savedPersonId && PEOPLE.some(person => person.id === savedPersonId);
@@ -3072,15 +3119,27 @@
             if (!["people", "reports", "entry_logs"].includes(table)) return;
             if (!window.confirm("Delete this record? This cannot be undone.")) return;
 
+            const deletedPerson = table === "people"
+                ? PEOPLE.find(person => person.id === button.dataset.id)
+                : null;
             let deleted = false;
             try {
                 const { error } = await supabaseClient.from(table).delete().eq("id", button.dataset.id);
                 if (error) throw error;
                 deleted = true;
+                let activityWarning = "";
+                if (deletedPerson) {
+                    try {
+                        await logPeopleActivity("deleted", deletedPerson.person_type, deletedPerson.full_name);
+                    } catch (activityError) {
+                        console.error("Could not record people activity:", activityError);
+                        activityWarning = ` Deleted, but activity could not be recorded: ${activityError.message || "Unknown error"}`;
+                    }
+                }
                 await loadDashboardData();
                 populateNotifList();
                 render();
-                showToast("Record deleted.");
+                showToast(activityWarning || "Record deleted.");
             } catch (error) {
                 console.error("Could not delete dashboard record:", error);
                 showToast(deleted
@@ -3240,11 +3299,15 @@
                     Promise.resolve({ data: [], error: null }),
                     Promise.resolve({ data: [], error: null })
                 ];
-            const [peopleResult, logsResult, reportsResult] = await Promise.all([
+            const [peopleResult, logsResult, reportsResult, activityResult] = await Promise.all([
                 supabaseClient.from("people")
                     .select("id,person_type,full_name,email,course,year_level,staff_role,department,purpose,contact_phone,host_name,host_department,registered_at,expires_at,created_at")
                     .order("full_name"),
-                ...adminRequests
+                ...adminRequests,
+                supabaseClient.from("activity_logs")
+                    .select("id,actor_name,action,person_type,person_name,created_at")
+                    .order("created_at", { ascending: false })
+                    .limit(50)
             ]);
 
             if (peopleResult.error) throw new Error(`Could not load people: ${peopleResult.error.message}`);
@@ -3262,7 +3325,36 @@
                 time: new Date(report.created_at).toLocaleString(),
                 type: "report"
             }));
+            if (activityResult.error) {
+                console.error("Could not load people activity:", activityResult.error);
+                PEOPLE_ACTIVITY = [];
+                ACTIVITY_LOAD_ERROR = `People activity could not load: ${activityResult.error.message}. Run supabase-activity-fix.sql in Supabase.`;
+            } else {
+                ACTIVITY_LOAD_ERROR = "";
+                PEOPLE_ACTIVITY = (activityResult.data || []).map(activity => ({
+                    id: activity.id,
+                    user: activity.actor_name,
+                    action: `${activity.action} a ${activity.person_type}`,
+                    subject: activity.person_name,
+                    created_at: activity.created_at,
+                    time: new Date(activity.created_at).toLocaleString(),
+                    type: "member"
+                }));
+            }
+            RECENT_ACTIVITY = [...ACT, ...PEOPLE_ACTIVITY]
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
             GROWTH = buildMonthlyActivity();
+        }
+
+        async function logPeopleActivity(action, personType, personName) {
+            const { error } = await supabaseClient.from("activity_logs").insert({
+                actor_id: currentUser.id,
+                actor_name: currentProfile.full_name || currentUser.email || "User",
+                action,
+                person_type: personType,
+                person_name: personName
+            });
+            if (error) throw error;
         }
 
         function showDashboardError(error) {

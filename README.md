@@ -71,6 +71,7 @@ The HTML files use the Supabase JavaScript client and call `supabase.auth.signIn
 2. In **SQL Editor**, run [`supabase-setup.sql`](./supabase-setup.sql). It creates the people, entry-log, alert, and account tables/views, applies row-level security, and schedules expired visitor cleanup through `pg_cron`. The script is designed to be rerun; when upgrading an existing setup it keeps the old `members`, `projects`, and `reports` tables, but old member rows are not automatically converted into student/staff records.
    - For an existing project where the tables already exist, run [`supabase-people-fix.sql`](./supabase-people-fix.sql) to refresh people-table and category-view permissions without changing account roles. It assumes the setup script has already created the tables, views, and `is_admin()` function.
    - To remove the visitor host requirements from an existing database, run [`supabase-visitor-fields-fix.sql`](./supabase-visitor-fields-fix.sql) after the setup script. Existing host values are preserved but the updated form no longer collects or displays them.
+   - To enable Recent Activity entries for student, faculty, and visitor additions, edits, and deletions in an existing database, run [`supabase-activity-fix.sql`](./supabase-activity-fix.sql).
 3. In **Authentication → Providers**, enable Email and, if desired, Google.
 4. In **Authentication → URL Configuration**, set the site's URL and add the app's `google-role.html` and `dashboard.html` URLs used during local development and deployment to the allowed redirect URLs.
 5. Keep the Supabase project URL and **publishable** key in the HTML files in sync with your project. Never put a `service_role` key in browser code.
@@ -117,6 +118,7 @@ Admins have full read/write access to operational data tables under Supabase RLS
 #### People and visitor retention
 
 - Student records contain full name, course, year level, and email. Students are grouped by course alphabetically in the dashboard; course values remain editable. No student ID is required.
+- Recent Activity includes report submissions and people-record additions, edits, and deletions.
 - Staff records contain full name, email, job role/title, and department.
 - Visitor records contain full name, purpose, and contact phone. Host name and host department are no longer collected. The database sets the 30-day expiration timestamp on registration.
 - Expired visitor records are deleted by an hourly `pg_cron` job. The linked `person_id` in entry logs and alerts is set to `NULL` on deletion, leaving those records anonymized.
