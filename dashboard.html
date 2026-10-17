@@ -1078,6 +1078,19 @@
             text-align: center;
         }
 
+        .face-scan-result {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 14px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .face-scan-result .entry-muted { text-align: left; }
+
         @media(max-width:900px) {
             .camera-entry-grid { grid-template-columns: 1fr; }
             .camera-preview { max-height: 420px; }
@@ -2593,6 +2606,11 @@
                         <div class="camera-actions">
                             <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
                             <button id="stopDashboardCamera" type="button" disabled>Stop camera</button>
+                            <button id="simulateDashboardFaceScan" type="button" disabled>Simulate face scan</button>
+                        </div>
+                        <div class="face-scan-result" id="dashboardFaceScanResult" role="status" aria-live="polite">
+                            <span class="entry-type">Demo only</span>
+                            <p class="entry-muted">Start the camera, then select “Simulate face scan” to preview fictional visitor details. The video is not analyzed.</p>
                         </div>
                     </section>
 
@@ -2932,9 +2950,40 @@
             const status = $("dashboardCameraStatus");
             const startButton = $("startDashboardCamera");
             const stopButton = $("stopDashboardCamera");
+            const scanButton = $("simulateDashboardFaceScan");
             if (status) status.textContent = message;
             if (startButton) startButton.disabled = Boolean(dashboardCameraStream) || dashboardCameraStarting;
             if (stopButton) stopButton.disabled = !dashboardCameraStream;
+            if (scanButton) scanButton.disabled = !dashboardCameraStream || dashboardCameraStarting;
+        }
+
+        function resetDashboardFaceScanResult() {
+            const result = $("dashboardFaceScanResult");
+            if (!result) return;
+            result.innerHTML = `
+                <span class="entry-type">Demo only</span>
+                <p class="entry-muted">Start the camera, then select “Simulate face scan” to preview fictional visitor details. The video is not analyzed.</p>
+            `;
+        }
+
+        function showDashboardDemoFaceScan() {
+            if (!dashboardCameraStream) {
+                updateDashboardCameraControls("Start the camera before running the demo scan.");
+                return;
+            }
+            const result = $("dashboardFaceScanResult");
+            if (!result) return;
+            result.innerHTML = `
+                <span class="entry-type">Demo match · fictional sample</span>
+                <div class="entry-person-name">Demo Visitor</div>
+                <div class="entry-fields">
+                    <div class="entry-field"><small>Person type</small><b>Visitor</b></div>
+                    <div class="entry-field"><small>Purpose</small><b>Sample campus visit</b></div>
+                    <div class="entry-field"><small>Contact phone</small><b>Not provided</b></div>
+                </div>
+                <p class="entry-muted">Sample data only. No face was detected or identified.</p>
+            `;
+            updateDashboardCameraControls("Demo scan complete. This sample result is not based on camera analysis.");
         }
 
         function stopDashboardCamera() {
@@ -2946,6 +2995,7 @@
             }
             const video = $("dashboardCamera");
             if (video) video.srcObject = null;
+            resetDashboardFaceScanResult();
             updateDashboardCameraControls("Camera is off.");
         }
 
@@ -2981,10 +3031,12 @@
                     return;
                 }
                 video.srcObject = stream;
+                resetDashboardFaceScanResult();
                 stream.getVideoTracks().forEach(track => track.addEventListener("ended", () => {
                     if (dashboardCameraStream !== stream) return;
                     dashboardCameraStream = null;
                     video.srcObject = null;
+                    resetDashboardFaceScanResult();
                     updateDashboardCameraControls("The camera stopped or was disconnected.");
                 }, { once: true }));
                 updateDashboardCameraControls("Camera is live. Preview only; nothing is being saved.");
@@ -3209,6 +3261,10 @@
             }
             if (e.target.closest("#stopDashboardCamera")) {
                 stopDashboardCamera();
+                return;
+            }
+            if (e.target.closest("#simulateDashboardFaceScan")) {
+                showDashboardDemoFaceScan();
                 return;
             }
 
