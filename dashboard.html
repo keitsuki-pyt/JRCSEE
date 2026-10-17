@@ -931,6 +931,61 @@
             border-bottom: 0;
         }
 
+        .student-filter-tools {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(180px, .45fr);
+            gap: 10px;
+            margin: 14px 0 8px;
+        }
+
+        .student-filter-tools input,
+        .student-filter-tools select,
+        .course-picker select,
+        .course-picker input {
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .045);
+            color: var(--fg);
+            outline: none;
+        }
+
+        .student-filter-tools select,
+        .course-picker select {
+            appearance: none;
+            padding-right: 38px;
+            background-image: linear-gradient(45deg, transparent 50%, var(--mut) 50%), linear-gradient(135deg, var(--mut) 50%, transparent 50%);
+            background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px;
+            background-repeat: no-repeat;
+            background-size: 5px 5px, 5px 5px;
+            cursor: pointer;
+        }
+
+        .student-filter-tools input:focus,
+        .student-filter-tools select:focus,
+        .course-picker select:focus,
+        .course-picker input:focus {
+            border-color: var(--pri);
+            box-shadow: 0 0 0 3px rgba(var(--pri-rgb), .12);
+        }
+
+        .student-filter-count {
+            margin: 0 0 8px;
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .course-picker {
+            position: relative;
+        }
+
+        .course-picker select {
+            border-color: rgba(var(--pri-rgb), .36);
+            background-color: rgba(var(--pri-rgb), .08);
+        }
+
         .veil {
             display: none;
             position: fixed;
@@ -1027,6 +1082,10 @@
             }
 
             .data-form {
+                grid-template-columns: 1fr;
+            }
+
+            .student-filter-tools {
                 grid-template-columns: 1fr;
             }
 
@@ -2064,6 +2123,8 @@
         const S = {
             tab: appSettings.startTab || "dashboard",
             q: "",
+            studentQ: "",
+            studentCourse: "",
             range: 12,
             membersOpen: ["students", "staff", "visitors"].includes(appSettings.startTab)
         };
@@ -2444,10 +2505,17 @@
         }
 
         function students() {
+            const allStudents = PEOPLE.filter(person => person.person_type === "student");
+            const courses = [...new Map(allStudents
+                .map(person => String(person.course || "").trim())
+                .filter(Boolean)
+                .map(course => [course.toLocaleLowerCase(), course])).values()]
+                .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
             const studentsByCourse = new Map();
-            PEOPLE
-                .filter(person => person.person_type === "student")
+            allStudents
                 .filter(person => has(`${person.full_name} ${person.course} ${person.year_level} ${person.email}`, S.q))
+                .filter(person => has(`${person.full_name} ${person.course} ${person.year_level} ${person.email}`, S.studentQ))
+                .filter(person => !S.studentCourse || String(person.course || "").trim().toLocaleLowerCase() === S.studentCourse.toLocaleLowerCase())
                 .forEach(person => {
                     const course = String(person.course || "").trim() || "Unspecified course";
                     const key = course.toLocaleLowerCase();
@@ -2481,16 +2549,24 @@
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
                             <div><label for="studentEmail">Email</label><input id="studentEmail" name="email" type="email" required maxlength="254"></div>
-                            <div><label for="studentCourse">Course</label><input id="studentCourse" name="course" list="studentCourseOptions" required maxlength="160"><datalist id="studentCourseOptions"><option value="BSIT"><option value="BSBA"><option value="PSYCHOLOGY"><option value="EDUC"></datalist></div>
+                            <div><label for="studentCourse">Course</label><div class="course-picker"><select id="studentCourse" name="course" required><option value="">Choose a course</option><option value="BSIT">BSIT</option><option value="BSBA">BSBA</option><option value="PSYCHOLOGY">Psychology</option><option value="EDUC">Education (EDUC)</option><option value="__other">Other course…</option></select></div><input id="studentCustomCourse" name="course_custom" maxlength="160" placeholder="Enter course name" hidden></div>
                             <div><label for="studentYear">Year level</label><input id="studentYear" name="year_level" required maxlength="40" placeholder="e.g. 1st Year"></div>
                             <div class="data-form-actions"><span class="form-error" id="studentFormError" role="alert"></span><button type="button" data-cancel-edit="studentForm" hidden>Cancel edit</button><button class="primary" type="button" data-save-form="studentForm">Save student</button></div>
                         </form>
                     </div>` : ""}
                 <div class="card list">
-                    <h3 class="disp" style="margin-bottom:12px">STUDENTS</h3>
+                    <h3 class="disp">STUDENTS</h3>
+                    <div class="student-filter-tools">
+                        <input id="studentSearch" type="search" value="${esc(S.studentQ)}" placeholder="Search name, email, course, or year…" aria-label="Search students">
+                        <select id="studentCourseFilter" aria-label="Filter by course">
+                            <option value="">All courses</option>
+                            ${courses.map(course => `<option value="${esc(course)}" ${S.studentCourse.toLocaleLowerCase() === course.toLocaleLowerCase() ? "selected" : ""}>${esc(course)}</option>`).join("")}
+                        </select>
+                    </div>
+                    <p class="student-filter-count">${studentsByCourse.size ? `${[...studentsByCourse.values()].reduce((count, group) => count + group.students.length, 0)} students · ${studentsByCourse.size} courses` : ""}</p>
                     ${courseGroups
                         ? `<div class="student-course-list">${courseGroups}</div>`
-                        : `<div class="empty">${S.q ? "No students match your search." : "No students have been added yet."}</div>`}
+                        : `<div class="empty">${S.q || S.studentQ || S.studentCourse ? "No students match these filters." : "No students have been added yet."}</div>`}
                 </div>
             `;
         }
@@ -2891,6 +2967,55 @@
             }
         }, true);
 
+        $("main").addEventListener("input", e => {
+            if (e.target.id !== "studentSearch") return;
+            S.studentQ = e.target.value;
+            refreshStudentFilters(e.target.id, e.target.selectionStart);
+        });
+
+        $("main").addEventListener("change", e => {
+            if (e.target.id === "studentCourseFilter") {
+                S.studentCourse = e.target.value;
+                refreshStudentFilters(e.target.id);
+            } else if (e.target.id === "studentCourse") {
+                syncStudentCourseCustom(e.target.form);
+            }
+        });
+
+        function refreshStudentFilters(focusId, selectionStart = null) {
+            const form = $("studentForm");
+            const formValues = form ? [...new FormData(form).entries()] : [];
+            const scrollTop = $("main").scrollTop;
+            render();
+            $("main").scrollTop = scrollTop;
+
+            const refreshedForm = $("studentForm");
+            if (refreshedForm) {
+                formValues.forEach(([name, value]) => {
+                    const field = refreshedForm.elements.namedItem(name);
+                    if (field) field.value = value;
+                });
+                syncStudentCourseCustom(refreshedForm);
+            }
+
+            const focusTarget = $(focusId);
+            if (!focusTarget) return;
+            focusTarget.focus();
+            if (selectionStart !== null && focusTarget.setSelectionRange) {
+                focusTarget.setSelectionRange(selectionStart, selectionStart);
+            }
+        }
+
+        function syncStudentCourseCustom(form) {
+            const courseSelect = form?.querySelector('[name="course"]');
+            const customCourse = form?.querySelector('[name="course_custom"]');
+            if (!courseSelect || !customCourse) return;
+            const useCustomCourse = courseSelect.value === "__other";
+            customCourse.hidden = !useCustomCourse;
+            customCourse.required = useCustomCourse;
+            if (!useCustomCourse) customCourse.value = "";
+        }
+
         $("main").onsubmit = e => {
             const form = e.target;
             if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(form.getAttribute("id"))) return;
@@ -2901,6 +3026,7 @@
         async function saveDashboardForm(form) {
             const formId = form.getAttribute("id");
             if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(formId)) return;
+            if (formId === "studentForm") syncStudentCourseCustom(form);
             if (!form.reportValidity()) return;
             const formData = new FormData(form);
             const errorEl = $(formId.replace("Form", "FormError"));
@@ -2923,7 +3049,9 @@
                         person_type: typeByForm[formId],
                         full_name: String(formData.get("full_name")).trim(),
                         email: formId === "visitorForm" ? null : String(formData.get("email") || "").trim(),
-                        course: formId === "studentForm" ? String(formData.get("course")).trim() : null,
+                        course: formId === "studentForm"
+                            ? String(formData.get("course") === "__other" ? formData.get("course_custom") || "" : formData.get("course") || "").trim()
+                            : null,
                         year_level: formId === "studentForm" ? String(formData.get("year_level")).trim() : null,
                         staff_role: formId === "staffForm" ? String(formData.get("staff_role")).trim() : null,
                         department: formId === "staffForm" ? String(formData.get("department")).trim() : null,
@@ -3049,7 +3177,14 @@
             if (!form) return;
 
             for (const [key, value] of Object.entries(person)) {
-                if (form.elements[key]) form.elements[key].value = value ?? "";
+                if (key === "course" && person.person_type === "student") {
+                    const courseSelect = form.elements.course;
+                    const courseValue = String(value ?? "");
+                    const knownCourse = [...courseSelect.options].some(option => option.value === courseValue);
+                    courseSelect.value = knownCourse ? courseValue : "__other";
+                    form.elements.course_custom.value = knownCourse ? "" : courseValue;
+                    syncStudentCourseCustom(form);
+                } else if (form.elements[key]) form.elements[key].value = value ?? "";
             }
             const personLabel = person.person_type === "staff" ? "FACULTY" : person.person_type.toUpperCase();
             $(formId.replace("Form", "FormTitle")).textContent = `EDIT ${personLabel}`;
@@ -3062,6 +3197,7 @@
             const form = $(formId);
             if (!form) return;
             form.reset();
+            if (formId === "studentForm") syncStudentCourseCustom(form);
             $(formId.replace("Form", "FormTitle")).textContent = {
                 studentForm: "ADD STUDENT",
                 visitorForm: "REGISTER VISITOR",

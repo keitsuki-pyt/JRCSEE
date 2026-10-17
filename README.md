@@ -117,7 +117,7 @@ Admins have full read/write access to operational data tables under Supabase RLS
 
 #### People and visitor retention
 
-- Student records contain full name, course, year level, and email. Students are grouped by course alphabetically in the dashboard; course values remain editable. No student ID is required.
+- Student records contain full name, course, year level, and email. Students are grouped by course alphabetically, with a dedicated name/email/course/year search and course filter. The course selector offers common courses plus a custom-course option. No student ID is required.
 - Recent Activity includes report submissions and people-record additions, edits, and deletions.
 - Staff records contain full name, email, job role/title, and department.
 - Visitor records contain full name, purpose, and contact phone. Host name and host department are no longer collected. The database sets the 30-day expiration timestamp on registration.
