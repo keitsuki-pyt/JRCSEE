@@ -2499,12 +2499,16 @@
         }
 
 
+        function canManagePeople() {
+            return ["admin", "personnel"].includes(currentProfile?.role);
+        }
+
         function personActions(person) {
-            if (currentProfile?.role !== "admin") return "";
+            if (!canManagePeople()) return "";
             return `
                 <span>
                     <button class="record-delete" type="button" data-edit="${esc(person.id)}">Edit</button>
-                    <button class="record-delete" type="button" data-delete="people" data-id="${esc(person.id)}">Delete</button>
+                    ${currentProfile?.role === "admin" ? `<button class="record-delete" type="button" data-delete="people" data-id="${esc(person.id)}">Delete</button>` : ""}
                 </span>
             `;
         }
@@ -2520,12 +2524,13 @@
                         ${personActions(person)}
                     </div>
                 `).join("");
-            const canAdd = currentProfile?.role === "admin" || currentProfile?.role === "personnel";
+            const canAdd = canManagePeople();
 
             return `
                 ${canAdd ? `
                     <div class="card">
                         <h3 class="disp" id="studentFormTitle">ADD STUDENT</h3>
+                        <p class="sub">Add students who are officially enrolled at the campus.</p>
                         <form class="data-form" id="studentForm">
                             <input type="hidden" name="id">
                             <div><label for="studentName">Full name</label><input id="studentName" name="full_name" required maxlength="160"></div>
@@ -2543,6 +2548,7 @@
         }
 
         function visitors() {
+            const canAdd = canManagePeople();
             const rows = PEOPLE
                 .filter(person => person.person_type === "visitor")
                 .filter(person => has(`${person.full_name} ${person.purpose} ${person.host_name} ${person.host_department} ${person.contact_phone || ""}`, S.q))
@@ -2555,9 +2561,9 @@
                 `).join("");
 
             return `
-                <div class="card">
+                ${canAdd ? `<div class="card">
                     <h3 class="disp" id="visitorFormTitle">REGISTER VISITOR</h3>
-                    <p class="sub">Visitor records are automatically removed 30 days after registration. Entry logs and alerts remain anonymized.</p>
+                    <p class="sub">Register temporary visitors. Records are automatically removed 30 days after registration; entry logs and alerts remain anonymized.</p>
                     <form class="data-form" id="visitorForm">
                         <input type="hidden" name="id">
                         <div><label for="visitorName">Full name</label><input id="visitorName" name="full_name" required maxlength="160"></div>
@@ -2567,7 +2573,7 @@
                         <div><label for="visitorDepartment">Host department</label><input id="visitorDepartment" name="host_department" required maxlength="160"></div>
                         <div class="data-form-actions"><span class="form-error" id="visitorFormError" role="alert"></span><button type="button" data-cancel-edit="visitorForm" hidden>Cancel edit</button><button class="primary" type="submit">Register visitor</button></div>
                     </form>
-                </div>
+                </div>` : ""}
                 <div class="card list">
                     <h3 class="disp" style="margin-bottom:12px">VISITORS</h3>
                     ${rows || `<div class="empty">${S.q ? "No visitors match your search." : "No visitors have been registered."}</div>`}
@@ -2576,6 +2582,7 @@
         }
 
         function staff() {
+            const canAdd = canManagePeople();
             const rows = PEOPLE
                 .filter(person => person.person_type === "staff")
                 .filter(person => has(`${person.full_name} ${person.staff_role} ${person.department} ${person.email}`, S.q))
@@ -2587,9 +2594,9 @@
                     </div>
                 `).join("");
             return `
-                <div class="card">
+                ${canAdd ? `<div class="card">
                     <h3 class="disp" id="staffFormTitle">ADD FACULTY RECORD</h3>
-                    <p class="sub">Role is the faculty member's position or title. Portal access is assigned separately in the account profile.</p>
+                    <p class="sub">Add faculty currently working on campus. Role is their position or title; portal access is assigned separately in the account profile.</p>
                     <form class="data-form" id="staffForm">
                         <input type="hidden" name="id">
                         <div><label for="staffName">Full name</label><input id="staffName" name="full_name" required maxlength="160"></div>
@@ -2598,7 +2605,7 @@
                         <div><label for="staffDepartment">Department</label><input id="staffDepartment" name="department" required maxlength="160"></div>
                         <div class="data-form-actions"><span class="form-error" id="staffFormError" role="alert"></span><button type="button" data-cancel-edit="staffForm" hidden>Cancel edit</button><button class="primary" type="submit">Save faculty</button></div>
                     </form>
-                </div>
+                </div>` : ""}
                 <div class="card list">
                     <h3 class="disp" style="margin-bottom:12px">FACULTY</h3>
                     ${rows || `<div class="empty">${S.q ? "No faculty match your search." : "No faculty records have been added."}</div>`}
@@ -2654,7 +2661,7 @@
             const isPersonnel = currentProfile?.role === "personnel";
             const memberNav = [
                 ["students", "Students", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.100a4 4 0 0 1 0 7.800"/>'],
-                ...(!isPersonnel ? [["staff", "Faculty", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M16 11h6m-3-3v6"/>']] : []),
+                ["staff", "Faculty", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M16 11h6m-3-3v6"/>'],
                 ["visitors", "Visitors", '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/>']
             ];
             const memberIds = memberNav.map(([id]) => id);
@@ -2957,7 +2964,7 @@
                         host_department: form.id === "visitorForm" ? String(formData.get("host_department")).trim() : null
                     };
                     const id = String(formData.get("id") || "").trim();
-                    if (id && currentProfile.role !== "admin") throw new Error("Only Admin can edit people records.");
+                    if (id && !canManagePeople()) throw new Error("You do not have permission to edit people records.");
                     result = id
                         ? await supabaseClient.from("people").update(person).eq("id", id)
                         : await supabaseClient.from("people").insert(person);
@@ -3016,7 +3023,7 @@
         }
 
         function beginPersonEdit(id) {
-            if (currentProfile?.role !== "admin") return;
+            if (!canManagePeople()) return;
             const person = PEOPLE.find(record => record.id === id);
             if (!person) return;
             const formIds = {

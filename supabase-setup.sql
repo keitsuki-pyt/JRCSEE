@@ -347,12 +347,13 @@ grant select, insert, update, delete on public.members, public.projects to authe
 grant select, insert, update, delete on public.reports to authenticated;
 
 drop policy if exists "Admin and personnel can read students and visitors" on public.people;
-create policy "Admin and personnel can read students and visitors"
+drop policy if exists "Admin and personnel can read all people" on public.people;
+create policy "Admin and personnel can read all people"
 on public.people for select to authenticated
 using (
     public.is_admin()
     or (
-        person_type in ('student', 'visitor')
+        person_type in ('student', 'staff', 'visitor')
         and exists (
             select 1 from public.profiles
             where id = auth.uid() and role = 'personnel'
@@ -361,12 +362,13 @@ using (
 );
 
 drop policy if exists "Admin and personnel can add students and visitors" on public.people;
-create policy "Admin and personnel can add students and visitors"
+drop policy if exists "Admin and personnel can add all people" on public.people;
+create policy "Admin and personnel can add all people"
 on public.people for insert to authenticated
 with check (
     public.is_admin()
     or (
-        person_type in ('student', 'visitor')
+        person_type in ('student', 'staff', 'visitor')
         and exists (
             select 1 from public.profiles
             where id = auth.uid() and role = 'personnel'
@@ -375,10 +377,29 @@ with check (
 );
 
 drop policy if exists "Admins can update people" on public.people;
-create policy "Admins can update people"
+drop policy if exists "Admin and personnel can update all people" on public.people;
+create policy "Admin and personnel can update all people"
 on public.people for update to authenticated
-using (public.is_admin())
-with check (public.is_admin());
+using (
+    public.is_admin()
+    or (
+        person_type in ('student', 'staff', 'visitor')
+        and exists (
+            select 1 from public.profiles
+            where id = auth.uid() and role = 'personnel'
+        )
+    )
+)
+with check (
+    public.is_admin()
+    or (
+        person_type in ('student', 'staff', 'visitor')
+        and exists (
+            select 1 from public.profiles
+            where id = auth.uid() and role = 'personnel'
+        )
+    )
+);
 
 drop policy if exists "Admins can delete people" on public.people;
 create policy "Admins can delete people"
