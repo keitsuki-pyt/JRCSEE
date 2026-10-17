@@ -2962,15 +2962,17 @@
 
         $("main").onsubmit = e => {
             const form = e.target;
-            if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(form.id)) return;
+            if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(form.getAttribute("id"))) return;
             e.preventDefault();
             saveDashboardForm(form);
         };
 
         async function saveDashboardForm(form) {
+            const formId = form.getAttribute("id");
+            if (!["studentForm", "visitorForm", "staffForm", "reportForm"].includes(formId)) return;
             if (!form.reportValidity()) return;
             const formData = new FormData(form);
-            const errorEl = $(form.id.replace("Form", "FormError"));
+            const errorEl = $(formId.replace("Form", "FormError"));
             if (errorEl) errorEl.textContent = "";
             const submitButton = form.querySelector("[data-save-form]") || form.querySelector('button[type="submit"]');
             if (submitButton) submitButton.disabled = true;
@@ -2979,24 +2981,24 @@
 
             try {
                 let result;
-                if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) {
+                if (["studentForm", "visitorForm", "staffForm"].includes(formId)) {
                     const typeByForm = {
                         studentForm: "student",
                         visitorForm: "visitor",
                         staffForm: "staff"
                     };
                     const person = {
-                        person_type: typeByForm[form.id],
+                        person_type: typeByForm[formId],
                         full_name: String(formData.get("full_name")).trim(),
-                        email: form.id === "visitorForm" ? null : String(formData.get("email") || "").trim(),
-                        course: form.id === "studentForm" ? String(formData.get("course")).trim() : null,
-                        year_level: form.id === "studentForm" ? String(formData.get("year_level")).trim() : null,
-                        staff_role: form.id === "staffForm" ? String(formData.get("staff_role")).trim() : null,
-                        department: form.id === "staffForm" ? String(formData.get("department")).trim() : null,
-                        purpose: form.id === "visitorForm" ? String(formData.get("purpose")).trim() : null,
-                        contact_phone: form.id === "visitorForm" ? String(formData.get("contact_phone") || "").trim() || null : null,
-                        host_name: form.id === "visitorForm" ? String(formData.get("host_name")).trim() : null,
-                        host_department: form.id === "visitorForm" ? String(formData.get("host_department")).trim() : null
+                        email: formId === "visitorForm" ? null : String(formData.get("email") || "").trim(),
+                        course: formId === "studentForm" ? String(formData.get("course")).trim() : null,
+                        year_level: formId === "studentForm" ? String(formData.get("year_level")).trim() : null,
+                        staff_role: formId === "staffForm" ? String(formData.get("staff_role")).trim() : null,
+                        department: formId === "staffForm" ? String(formData.get("department")).trim() : null,
+                        purpose: formId === "visitorForm" ? String(formData.get("purpose")).trim() : null,
+                        contact_phone: formId === "visitorForm" ? String(formData.get("contact_phone") || "").trim() || null : null,
+                        host_name: formId === "visitorForm" ? String(formData.get("host_name")).trim() : null,
+                        host_department: formId === "visitorForm" ? String(formData.get("host_department")).trim() : null
                     };
                     const id = String(formData.get("id") || "").trim();
                     if (id && !canManagePeople()) throw new Error("You do not have permission to edit people records.");
@@ -3028,8 +3030,8 @@
                     throw new Error(`Supabase accepted the save (record ${savedPersonId}), but the dashboard cannot read it back from public.people. Check that you are viewing the same Supabase project and that the Admin/Personnel SELECT policy is applied.`);
                 }
                 form.reset();
-                if (["studentForm", "visitorForm", "staffForm"].includes(form.id)) cancelPersonEdit(form.id);
-                if (form.id === "reportForm") cancelReportEdit();
+                if (["studentForm", "visitorForm", "staffForm"].includes(formId)) cancelPersonEdit(formId);
+                if (formId === "reportForm") cancelReportEdit();
                 populateNotifList();
                 render();
                 showToast("Saved to Supabase.");
