@@ -3661,6 +3661,10 @@
 
             if (b) {
 
+                if (S.tab !== b.dataset.t) {
+                    S.q = "";
+                    $("q").value = "";
+                }
                 S.tab = b.dataset.t;
 
                 $("side")
