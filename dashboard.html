@@ -1215,6 +1215,15 @@
             gap: 8px;
         }
 
+        .camera-demo-type {
+            min-height: 36px;
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .04);
+            color: var(--fg);
+        }
+
         .course-picker {
             position: relative;
         }
@@ -2366,7 +2375,7 @@
         let dashboardCameraStream = null;
         let dashboardCameraRequest = 0;
         let dashboardCameraStarting = false;
-        let dashboardDemoFaceScan = false;
+        let dashboardDemoFaceScan = null;
         let dashboardFaceDetectionError = false;
         let dashboardFaceDetector = null;
         let dashboardFaceLibraryPromise = null;
@@ -2426,8 +2435,11 @@
             document.getElementById(id);
 
 
-        const has = (t, q) =>
-            t.toLowerCase().includes(q.trim().toLowerCase());
+        const has = (t, q) => {
+            const text = String(t || "").toLocaleLowerCase();
+            const terms = String(q || "").trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+            return terms.every(term => text.includes(term));
+        };
 
 
         const icon = p =>
@@ -2754,7 +2766,12 @@
                         <div class="camera-actions">
                             <button class="primary" id="startDashboardCamera" type="button">Start camera</button>
                             <button id="stopDashboardCamera" type="button" disabled>Stop camera</button>
-                            <button id="simulateDashboardFaceScan" type="button" disabled>Simulate face scan</button>
+                            <select class="camera-demo-type" id="dashboardDemoPersonType" aria-label="Demo person type">
+                                <option value="student">Demo student</option>
+                                <option value="faculty">Demo faculty</option>
+                                <option value="visitor">Demo visitor</option>
+                            </select>
+                            <button id="simulateDashboardFaceScan" type="button">Simulate face scan</button>
                         </div>
                     </section>
 
@@ -2768,39 +2785,87 @@
                     </section>
                 </div>
 
+                <div id="dashboardSearchResults">${renderDashboardSearchResults()}</div>
+
                 <div class="card">
                     <h3 class="disp">RECENT ACTIVITY</h3>
                     <div class="sub mono">Latest updates</div>
                     ${ACTIVITY_LOAD_ERROR ? `<div class="form-error">${esc(ACTIVITY_LOAD_ERROR)}</div>` : ""}
-                    <div class="act">
-
-                        ${RECENT_ACTIVITY
-                    .filter(activity => has(`${activity.user} ${activity.action} ${activity.subject}`, S.q))
-                    .map(
-                    a =>
-                        `
-                                <div class="a">
-                                    <div class="ic" style="background:rgba(var(--pri-rgb), .2);color:var(--pri)">
-                                        ${icon(
-                            '<circle cx="12" cy="12" r="4"/>'
-                        )}
-                                    </div>
-                                    <div>
-                                        <p><b>${esc(a.user)}</b> <span>${esc(a.action)}</span> <em>${esc(a.subject)}</em></p>
-                                        <small class="mono">${esc(a.time)}</small>
-                                    </div>
-                                </div>
-                            `
-                ).join("") || `<div class="empty">${S.q ? "No recent activity matches your search." : "No recent activity yet."}</div>`}
-                    </div>
+                    <div class="act" id="recentActivityList">${renderRecentActivityList()}</div>
                 </div>
             `;
+        }
+
+        function renderRecentActivityList() {
+            return RECENT_ACTIVITY
+                .filter(activity => has(`${activity.user} ${activity.action} ${activity.subject}`, S.q))
+                .map(activity => `
+                    <div class="a">
+                        <div class="ic" style="background:rgba(var(--pri-rgb), .2);color:var(--pri)">
+                            ${icon('<circle cx="12" cy="12" r="4"/>')}
+                        </div>
+                        <div>
+                            <p><b>${esc(activity.user)}</b> <span>${esc(activity.action)}</span> <em>${esc(activity.subject)}</em></p>
+                            <small class="mono">${esc(activity.time)}</small>
+                        </div>
+                    </div>
+                `).join("") || `<div class="empty">${S.q ? "No recent activity matches your search." : "No recent activity yet."}</div>`;
+        }
+
+        function renderDashboardSearchResults() {
+            const query = S.q.trim();
+            if (!query) return "";
+
+            const terms = query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+            const matches = [];
+            const addMatch = (category, label, detail, searchable) => {
+                const searchableText = `${category} ${label} ${detail} ${searchable}`.toLocaleLowerCase();
+                if (terms.every(term => searchableText.includes(term))) {
+                    matches.push(`<div class="row"><span>${esc(label)}<br><small>${esc(category)}</small></span><span>${esc(detail)}</span></div>`);
+                }
+            };
+
+            PEOPLE.forEach(person => {
+                const type = person.person_type === "staff" ? "Faculty" : person.person_type;
+                const detail = [person.course, person.year_level, person.staff_role, person.department, person.purpose, person.email, person.contact_phone]
+                    .filter(Boolean).join(" · ");
+                addMatch(
+                    `${type} record`,
+                    person.full_name || "Unnamed person",
+                    detail || "No additional details",
+                    `${person.person_type} ${person.full_name} ${detail}`
+                );
+            });
+
+            ENTRY_LOGS.forEach(log => {
+                const name = log.people?.full_name || "Anonymized / unlinked";
+                const detail = `${log.person_type || "Unknown type"} · ${log.entry_point || "Unknown entry point"} · ${log.status || "Unknown status"}`;
+                addMatch("Entry logs", name, detail, `${name} ${detail} ${new Date(log.occurred_at).toLocaleString()}`);
+            });
+
+            ACT.forEach(report => {
+                addMatch("Report", report.title, report.body || "No details", `${report.title} ${report.body || ""} ${report.profiles?.full_name || ""}`);
+            });
+
+            RECENT_ACTIVITY.forEach(activity => {
+                addMatch("Recent activity", `${activity.user} ${activity.action}`, activity.subject, `${activity.user} ${activity.action} ${activity.subject}`);
+            });
+
+            return `<section class="card list dashboard-search-card">
+                <h3 class="disp" style="margin-bottom:12px">SEARCH RESULTS</h3>
+                ${matches.join("") || `<div class="empty">No records match “${esc(query)}”.</div>`}
+            </section>`;
         }
 
 
         function dashboardEntrySignal() {
             if (dashboardFaceDetectionError) {
                 return { state: "error", label: "Face detection error" };
+            }
+
+            if (dashboardDemoFaceScan) {
+                const labels = { student: "Student", faculty: "Faculty", visitor: "Visitor" };
+                return { state: dashboardDemoFaceScan, label: `${labels[dashboardDemoFaceScan]} · demo` };
             }
 
             const latestLog = ENTRY_LOGS[0];
@@ -2830,18 +2895,30 @@
             indicator.querySelector(".entry-signal-label").textContent = signal.label;
         }
 
+        function updateDashboardEntryActivity() {
+            const card = document.querySelector(".entry-activity-card");
+            if (!card) return;
+            const content = card.querySelector(".entry-activity-content");
+            if (content) content.outerHTML = renderEntryActivity();
+            else card.insertAdjacentHTML("beforeend", renderEntryActivity());
+            updateDashboardEntrySignal();
+        }
+
 
         function renderEntryActivity() {
             if (dashboardDemoFaceScan) {
+                const demoDetails = {
+                    student: { label: "Student", name: "Demo Student", fields: [["Course", "Sample course"], ["Year", "Sample year"]] },
+                    faculty: { label: "Faculty", name: "Demo Faculty", fields: [["Role", "Sample faculty role"], ["Department", "Sample department"]] },
+                    visitor: { label: "Visitor", name: "Demo Visitor", fields: [["Purpose", "Sample campus visit"], ["Contact phone", "Not provided"]] }
+                }[dashboardDemoFaceScan];
                 return `<div class="entry-activity-content">
-                    <span class="entry-type">Demo match · fictional sample</span>
-                    <div class="entry-person-name">Demo Visitor</div>
+                    <span class="entry-type">Demo scan · sample data</span>
+                    <div class="entry-person-name">${demoDetails.name}</div>
                     <div class="entry-fields">
-                        <div class="entry-field"><small>Person type</small><b>Visitor</b></div>
-                        <div class="entry-field"><small>Purpose</small><b>Sample campus visit</b></div>
-                        <div class="entry-field"><small>Contact phone</small><b>Not provided</b></div>
+                        ${demoDetails.fields.map(([label, value]) => `<div class="entry-field"><small>${label}</small><b>${value}</b></div>`).join("")}
                     </div>
-                    <p class="entry-muted">Sample data only. No face was detected or identified.</p>
+                    <p class="entry-muted">Sample data only. No identity was matched or verified.</p>
                 </div>`;
             }
 
@@ -3043,7 +3120,7 @@
 
         function entryLogs() {
             const rows = ENTRY_LOGS
-                .filter(log => has(`${log.person_type} ${log.entry_point} ${log.status} ${log.people?.full_name || ""}`, S.q))
+                .filter(log => has(`entry logs ${log.person_type} ${log.entry_point} ${log.status} ${log.people?.full_name || ""}`, S.q))
                 .map(log => `
                     <div class="row">
                         <span>${esc(log.people?.full_name || "Anonymized / unlinked")}<br><small>${esc(log.person_type)}</small></span>
@@ -3149,7 +3226,7 @@
             if (status) status.textContent = message;
             if (startButton) startButton.disabled = Boolean(dashboardCameraStream) || dashboardCameraStarting;
             if (stopButton) stopButton.disabled = !dashboardCameraStream;
-            if (scanButton) scanButton.disabled = !dashboardCameraStream || dashboardCameraStarting;
+            if (scanButton) scanButton.disabled = dashboardCameraStarting;
         }
 
         function updateDashboardFaceTrackerStatus(message) {
@@ -3299,13 +3376,9 @@
         }
 
         function showDashboardDemoFaceScan() {
-            if (!dashboardCameraStream) {
-                updateDashboardCameraControls("Start the camera before running the demo scan.");
-                return;
-            }
-            dashboardDemoFaceScan = true;
-            render();
-            updateDashboardCameraControls("Demo scan complete. This sample result is not based on camera analysis.");
+            dashboardDemoFaceScan = $("dashboardDemoPersonType")?.value || "visitor";
+            updateDashboardEntryActivity();
+            updateDashboardCameraControls(`Demo ${dashboardDemoFaceScan} scan complete. This sample result is not based on camera analysis.`);
         }
 
         function stopDashboardCamera() {
@@ -3319,9 +3392,9 @@
                 dashboardCameraStream.getTracks().forEach(track => track.stop());
                 dashboardCameraStream = null;
             }
-            dashboardDemoFaceScan = false;
+            dashboardDemoFaceScan = null;
             dashboardFaceDetectionError = false;
-            updateDashboardEntrySignal();
+            updateDashboardEntryActivity();
             const video = $("dashboardCamera");
             if (video) video.srcObject = null;
             const overlay = $("dashboardCameraFaceOverlay");
@@ -3364,14 +3437,15 @@
                     return;
                 }
                 video.srcObject = stream;
-                dashboardDemoFaceScan = false;
+                dashboardDemoFaceScan = null;
+                updateDashboardEntryActivity();
                 updateDashboardFaceTrackerStatus("Loading on-device face tracker…");
                 stream.getVideoTracks().forEach(track => track.addEventListener("ended", () => {
                     if (dashboardCameraStream !== stream) return;
                     dashboardCameraStream = null;
-                    dashboardDemoFaceScan = false;
+                    dashboardDemoFaceScan = null;
                     dashboardFaceDetectionError = false;
-                    updateDashboardEntrySignal();
+                    updateDashboardEntryActivity();
                     if (dashboardFaceDetector) {
                         closeDashboardFaceDetector(dashboardFaceDetector);
                         dashboardFaceDetector = null;
@@ -3917,15 +3991,18 @@
         }
 
         $("q").oninput = e => {
+            S.q = e.target.value;
 
-            S.q =
-                e.target.value;
+            if (S.tab === "dashboard") {
+                const results = $("dashboardSearchResults");
+                const activityList = $("recentActivityList");
+                if (results) results.innerHTML = renderDashboardSearchResults();
+                if (activityList) activityList.innerHTML = renderRecentActivityList();
+                return;
+            }
 
-            const y =
-                $("main").scrollTop;
-
+            const y = $("main").scrollTop;
             render();
-
             $("main").scrollTop = y;
         };
 
