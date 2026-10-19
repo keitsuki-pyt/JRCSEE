@@ -215,6 +215,19 @@
             border-bottom: 1px solid var(--line)
         }
 
+        .brand-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            object-fit: contain
+        }
+
         .brand h1 {
             font-size: 30px;
             font-weight: 800;
@@ -1063,6 +1076,56 @@
             flex-direction: column;
         }
 
+        .entry-activity-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .entry-signal {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--mut);
+            font: 10px 'DM Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .entry-signal-light {
+            width: 9px;
+            height: 9px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #8b8497;
+            box-shadow: 0 0 8px rgba(139, 132, 151, .35);
+        }
+
+        .entry-signal[data-state="student"] .entry-signal-light {
+            background: #4ade80;
+            box-shadow: 0 0 9px rgba(74, 222, 128, .7);
+        }
+
+        .entry-signal[data-state="faculty"],
+        .entry-signal[data-state="visitor"] {
+            color: #fdba74;
+        }
+
+        .entry-signal[data-state="faculty"] .entry-signal-light,
+        .entry-signal[data-state="visitor"] .entry-signal-light {
+            background: #fb923c;
+            box-shadow: 0 0 9px rgba(251, 146, 60, .7);
+        }
+
+        .entry-signal[data-state="error"] {
+            color: #fca5a5;
+        }
+
+        .entry-signal[data-state="error"] .entry-signal-light {
+            background: #f87171;
+            box-shadow: 0 0 9px rgba(248, 113, 113, .7);
+        }
+
         .entry-activity-content {
             flex: 1;
             min-height: 220px;
@@ -1192,8 +1255,40 @@
                 display: block
             }
 
+            header {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr) auto auto;
+            }
+
+            header .grow {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            header #menu {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
             .search {
-                display: none
+                display: block;
+                grid-column: 1 / -1;
+                grid-row: 2;
+                width: 100%;
+            }
+
+            .search input {
+                width: 100%;
+            }
+
+            header #notifBell {
+                grid-column: 3;
+                grid-row: 1;
+            }
+
+            header #openSettings {
+                grid-column: 4;
+                grid-row: 1;
             }
 
             header {
@@ -1834,7 +1929,10 @@
         <aside id="side">
 
             <div class="brand">
-                <h1 class="disp">JRCSEE</h1>
+                <div class="brand-heading">
+                    <img class="brand-logo" src="JRCC.png" alt="JRCSEE logo">
+                    <h1 class="disp">JRCSEE</h1>
+                </div>
                 <p class="mono">Face Recognition Web</p>
             </div>
 
@@ -2269,6 +2367,7 @@
         let dashboardCameraRequest = 0;
         let dashboardCameraStarting = false;
         let dashboardDemoFaceScan = false;
+        let dashboardFaceDetectionError = false;
         let dashboardFaceDetector = null;
         let dashboardFaceLibraryPromise = null;
 
@@ -2660,7 +2759,10 @@
                     </section>
 
                     <section class="card entry-activity-card">
-                        <h3 class="disp">ENTRY ACTIVITY</h3>
+                        <div class="entry-activity-heading">
+                            <h3 class="disp">ENTRY ACTIVITY</h3>
+                            ${renderDashboardEntrySignal()}
+                        </div>
                         <p class="sub mono">Latest scan or entry record</p>
                         ${renderEntryActivity()}
                     </section>
@@ -2672,7 +2774,9 @@
                     ${ACTIVITY_LOAD_ERROR ? `<div class="form-error">${esc(ACTIVITY_LOAD_ERROR)}</div>` : ""}
                     <div class="act">
 
-                        ${RECENT_ACTIVITY.map(
+                        ${RECENT_ACTIVITY
+                    .filter(activity => has(`${activity.user} ${activity.action} ${activity.subject}`, S.q))
+                    .map(
                     a =>
                         `
                                 <div class="a">
@@ -2687,10 +2791,43 @@
                                     </div>
                                 </div>
                             `
-                ).join("") || `<div class="empty">No recent activity yet.</div>`}
+                ).join("") || `<div class="empty">${S.q ? "No recent activity matches your search." : "No recent activity yet."}</div>`}
                     </div>
                 </div>
             `;
+        }
+
+
+        function dashboardEntrySignal() {
+            if (dashboardFaceDetectionError) {
+                return { state: "error", label: "Face detection error" };
+            }
+
+            const latestLog = ENTRY_LOGS[0];
+            const person = latestLog
+                ? PEOPLE.find(item => String(item.id) === String(latestLog.person_id))
+                    || PEOPLE.find(item => String(item.full_name || "").toLowerCase() === String(latestLog.people?.full_name || "").toLowerCase())
+                : null;
+            const type = String(latestLog?.person_type || person?.person_type || "").toLowerCase();
+
+            if (type === "student") return { state: "student", label: "Student" };
+            if (type === "staff" || type === "faculty") return { state: "faculty", label: "Faculty" };
+            if (type === "visitor") return { state: "visitor", label: "Visitor" };
+            return { state: "waiting", label: "Awaiting entry" };
+        }
+
+        function renderDashboardEntrySignal() {
+            const signal = dashboardEntrySignal();
+            return `<span class="entry-signal" id="dashboardEntrySignal" data-state="${signal.state}" role="status" aria-label="${esc(signal.label)}"><span class="entry-signal-light" aria-hidden="true"></span><span class="entry-signal-label">${esc(signal.label)}</span></span>`;
+        }
+
+        function updateDashboardEntrySignal() {
+            const indicator = $("dashboardEntrySignal");
+            if (!indicator) return;
+            const signal = dashboardEntrySignal();
+            indicator.dataset.state = signal.state;
+            indicator.setAttribute("aria-label", signal.label);
+            indicator.querySelector(".entry-signal-label").textContent = signal.label;
         }
 
 
@@ -3114,6 +3251,8 @@
                 }
 
                 dashboardFaceDetector = detector;
+                dashboardFaceDetectionError = false;
+                updateDashboardEntrySignal();
                 updateDashboardFaceTrackerStatus("Looking for a face · no identity matching");
 
                 const detectNextFrame = async () => {
@@ -3131,6 +3270,8 @@
                         if (dashboardFaceDetector === detector) dashboardFaceDetector = null;
                         closeDashboardFaceDetector(detector);
                         const message = error?.message || "Unknown detection error.";
+                        dashboardFaceDetectionError = true;
+                        updateDashboardEntrySignal();
                         updateDashboardFaceTrackerStatus("Face tracker stopped.");
                         const overlay = $("dashboardCameraFaceOverlay");
                         if (overlay) overlay.replaceChildren();
@@ -3146,6 +3287,8 @@
                 if (request !== dashboardCameraRequest || dashboardCameraStream !== stream) return;
                 if (detector && dashboardFaceDetector !== detector) closeDashboardFaceDetector(detector);
                 const message = error?.message || "Unknown face tracker error.";
+                dashboardFaceDetectionError = true;
+                updateDashboardEntrySignal();
                 updateDashboardFaceTrackerStatus("Face tracker unavailable.");
                 updateDashboardCameraControls(`Camera is live, but face tracking could not start: ${message}`);
             }
@@ -3177,6 +3320,8 @@
                 dashboardCameraStream = null;
             }
             dashboardDemoFaceScan = false;
+            dashboardFaceDetectionError = false;
+            updateDashboardEntrySignal();
             const video = $("dashboardCamera");
             if (video) video.srcObject = null;
             const overlay = $("dashboardCameraFaceOverlay");
@@ -3197,6 +3342,8 @@
 
             const request = ++dashboardCameraRequest;
             dashboardCameraStarting = true;
+            dashboardFaceDetectionError = false;
+            updateDashboardEntrySignal();
             updateDashboardCameraControls("Waiting for camera permission…");
 
             try {
@@ -3223,6 +3370,8 @@
                     if (dashboardCameraStream !== stream) return;
                     dashboardCameraStream = null;
                     dashboardDemoFaceScan = false;
+                    dashboardFaceDetectionError = false;
+                    updateDashboardEntrySignal();
                     if (dashboardFaceDetector) {
                         closeDashboardFaceDetector(dashboardFaceDetector);
                         dashboardFaceDetector = null;
