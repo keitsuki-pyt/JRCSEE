@@ -1354,6 +1354,19 @@
             gap: 12px;
             padding: 11px 14px;
             border-bottom: 1px solid var(--line);
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .camera-float-bar.is-dragging {
+            cursor: grabbing;
+        }
+
+        .camera-float-title:focus-visible {
+            border-radius: 4px;
+            outline: 2px solid var(--acc);
+            outline-offset: 3px;
         }
 
         .camera-float-title {
@@ -1362,6 +1375,8 @@
             font-size: 11px;
             font-weight: 700;
             letter-spacing: .07em;
+            cursor: grab;
+            touch-action: none;
         }
 
         .camera-float-title small {
@@ -2309,7 +2324,8 @@
 
     <section class="camera-float" id="dashboardCameraFloat" aria-label="Floating webcam preview" hidden>
         <div class="camera-float-bar">
-            <div class="camera-float-title">
+            <div class="camera-float-title" id="dashboardCameraFloatDragHandle" tabindex="0" role="group"
+                aria-label="Move webcam preview. Use arrow keys to reposition.">
                 WEBCAM PREVIEW
                 <small>STAYS VISIBLE WHILE YOU BROWSE</small>
             </div>
@@ -2627,6 +2643,7 @@
         let dashboardFaceDetectionError = false;
         let dashboardFaceDetector = null;
         let dashboardFaceLibraryPromise = null;
+        let dashboardCameraDrag = null;
 
 
         const AI = {
@@ -4030,6 +4047,73 @@
             }
 
         };
+
+        function positionDashboardCameraFloat(left, top) {
+            const panel = $("dashboardCameraFloat");
+            const margin = 8;
+            const maxLeft = Math.max(margin, window.innerWidth - panel.offsetWidth - margin);
+            const maxTop = Math.max(margin, window.innerHeight - panel.offsetHeight - margin);
+            panel.style.left = `${Math.min(Math.max(margin, left), maxLeft)}px`;
+            panel.style.top = `${Math.min(Math.max(margin, top), maxTop)}px`;
+            panel.style.right = "auto";
+            panel.style.bottom = "auto";
+        }
+
+        const cameraFloatDragHandle = $("dashboardCameraFloatDragHandle");
+        cameraFloatDragHandle.addEventListener("pointerdown", e => {
+            if (e.button !== 0 || $("dashboardCameraFloat").hidden) return;
+            const panel = $("dashboardCameraFloat");
+            const bounds = panel.getBoundingClientRect();
+            dashboardCameraDrag = {
+                pointerId: e.pointerId,
+                offsetX: e.clientX - bounds.left,
+                offsetY: e.clientY - bounds.top
+            };
+            cameraFloatDragHandle.setPointerCapture(e.pointerId);
+            $("dashboardCameraFloat").querySelector(".camera-float-bar").classList.add("is-dragging");
+            e.preventDefault();
+        });
+
+        cameraFloatDragHandle.addEventListener("pointermove", e => {
+            if (!dashboardCameraDrag || dashboardCameraDrag.pointerId !== e.pointerId) return;
+            positionDashboardCameraFloat(
+                e.clientX - dashboardCameraDrag.offsetX,
+                e.clientY - dashboardCameraDrag.offsetY
+            );
+        });
+
+        const finishDashboardCameraFloatDrag = e => {
+            if (!dashboardCameraDrag || dashboardCameraDrag.pointerId !== e.pointerId) return;
+            dashboardCameraDrag = null;
+            $("dashboardCameraFloat").querySelector(".camera-float-bar").classList.remove("is-dragging");
+            if (cameraFloatDragHandle.hasPointerCapture(e.pointerId)) {
+                cameraFloatDragHandle.releasePointerCapture(e.pointerId);
+            }
+        };
+
+        cameraFloatDragHandle.addEventListener("pointerup", finishDashboardCameraFloatDrag);
+        cameraFloatDragHandle.addEventListener("pointercancel", finishDashboardCameraFloatDrag);
+        cameraFloatDragHandle.addEventListener("keydown", e => {
+            const deltas = {
+                ArrowUp: [0, -20],
+                ArrowDown: [0, 20],
+                ArrowLeft: [-20, 0],
+                ArrowRight: [20, 0]
+            };
+            const delta = deltas[e.key];
+            if (!delta || $("dashboardCameraFloat").hidden) return;
+            e.preventDefault();
+            const bounds = $("dashboardCameraFloat").getBoundingClientRect();
+            positionDashboardCameraFloat(bounds.left + delta[0], bounds.top + delta[1]);
+        });
+
+        window.addEventListener("resize", () => {
+            const panel = $("dashboardCameraFloat");
+            if (!panel.hidden && panel.style.left) {
+                const bounds = panel.getBoundingClientRect();
+                positionDashboardCameraFloat(bounds.left, bounds.top);
+            }
+        });
 
         $("main").addEventListener("submit", e => {
             if (["studentForm", "visitorForm", "staffForm", "reportForm"].includes(e.target.id)) {
