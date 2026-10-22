@@ -264,12 +264,13 @@
             font-weight: 500;
             margin-bottom: 2px;
             text-align: left;
-            transition: all .2s
+            transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease
         }
 
         nav button:hover {
             color: var(--fg);
-            background: rgba(255, 255, 255, .04)
+            background: rgba(255, 255, 255, .06);
+            transform: translateX(2px)
         }
 
         nav button.on {
@@ -735,11 +736,17 @@
                     var(--card) 60%,
                     rgba(10, 5, 18, 0.9) 100%);
             border: 1px solid var(--line);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
             min-width: 0;
             backdrop-filter: blur(var(--glass-blur, 12px));
-            transition: border-color .2s ease
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .16);
+            transition: border-color .2s ease, box-shadow .2s ease
+        }
+
+        .card:hover {
+            border-color: rgba(var(--acc-rgb), .2);
+            box-shadow: 0 16px 38px rgba(0, 0, 0, .22)
         }
 
         .card h3 {
@@ -1005,23 +1012,88 @@
 
         .camera-entry-grid > .card { min-width: 0; }
 
+        .camera-card {
+            border-color: rgba(var(--acc-rgb), .22);
+            background:
+                radial-gradient(ellipse at top right, rgba(var(--pri-rgb), .18), transparent 48%),
+                linear-gradient(145deg, var(--card), rgba(10, 5, 18, .96));
+        }
+
+        .camera-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .camera-heading h3 {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .camera-heading h3 svg {
+            width: 17px;
+            height: 17px;
+            color: var(--acc);
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+        }
+
+        .camera-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 9px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            background: rgba(255, 255, 255, .04);
+            color: var(--mut);
+            font: 10px 'DM Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .camera-live-badge::before {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #8b8497;
+            content: "";
+        }
+
+        .camera-live-badge[data-live="true"] {
+            border-color: rgba(74, 222, 128, .3);
+            background: rgba(74, 222, 128, .08);
+            color: #bbf7d0;
+        }
+
+        .camera-live-badge[data-live="true"]::before {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, .75);
+        }
+
         .camera-preview {
             display: block;
             width: 100%;
             max-height: 360px;
             aspect-ratio: 4 / 3;
             border: 1px solid var(--line);
-            border-radius: 10px;
+            border-radius: 12px;
             background: #08070d;
             object-fit: cover;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
         }
 
         .camera-tracker {
             position: relative;
             width: 100%;
             overflow: hidden;
-            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 13px;
             background: #08070d;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
         }
 
         .camera-tracker .camera-preview {
@@ -1204,15 +1276,46 @@
 
         .camera-status {
             min-height: 1.4em;
-            margin: 10px 0;
+            margin: 12px 0;
             color: var(--mut);
             font-size: 12px;
+            line-height: 1.55;
         }
 
         .camera-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+        }
+
+        .camera-actions button {
+            min-height: 38px;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .045);
+            color: var(--fg);
+            font-size: 12px;
+            font-weight: 600;
+            transition: border-color .2s ease, background .2s ease, transform .2s ease;
+        }
+
+        .camera-actions button:hover:not(:disabled) {
+            border-color: rgba(var(--acc-rgb), .4);
+            background: rgba(var(--pri-rgb), .16);
+            transform: translateY(-1px);
+        }
+
+        .camera-actions button.primary {
+            border-color: transparent;
+            background: linear-gradient(135deg, var(--pri), color-mix(in srgb, var(--pri) 62%, var(--cy)));
+            color: #fff;
+            box-shadow: 0 5px 16px rgba(var(--pri-rgb), .24);
+        }
+
+        .camera-actions button:disabled {
+            cursor: not-allowed;
+            opacity: .48;
         }
 
         .camera-demo-type {
@@ -1222,6 +1325,124 @@
             border-radius: 8px;
             background: rgba(255, 255, 255, .04);
             color: var(--fg);
+        }
+
+        .camera-float {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 90;
+            width: min(360px, calc(100vw - 32px));
+            max-height: calc(100dvh - 48px);
+            overflow: auto;
+            border: 1px solid rgba(var(--acc-rgb), .34);
+            border-radius: 17px;
+            background: color-mix(in srgb, var(--bg) 80%, var(--pri) 20%);
+            box-shadow: 0 22px 70px rgba(0, 0, 0, .62), 0 0 32px rgba(var(--pri-rgb), .18);
+            backdrop-filter: blur(22px);
+            animation: cameraFloatIn .24s cubic-bezier(.2, .8, .2, 1);
+        }
+
+        .camera-float[hidden] {
+            display: none;
+        }
+
+        .camera-float-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .camera-float-title {
+            display: grid;
+            gap: 2px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .07em;
+        }
+
+        .camera-float-title small {
+            color: var(--mut);
+            font: 9px 'DM Mono', monospace;
+            letter-spacing: .04em;
+        }
+
+        .camera-float-toggle {
+            display: grid;
+            width: 30px;
+            height: 30px;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--mut);
+            transition: color .2s ease, background .2s ease;
+        }
+
+        .camera-float-toggle:hover {
+            color: var(--fg);
+            background: rgba(255, 255, 255, .08);
+        }
+
+        .camera-float-toggle svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .camera-float-content .camera-card {
+            padding: 13px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .camera-float-content .camera-card:hover {
+            box-shadow: none;
+        }
+
+        .camera-float-content .camera-heading {
+            display: none;
+        }
+
+        .camera-float-content .camera-card > .sub {
+            display: none;
+        }
+
+        .camera-float-content .camera-preview {
+            max-height: 240px;
+        }
+
+        .camera-float-content .camera-status {
+            margin: 9px 0;
+            font-size: 11px;
+        }
+
+        .camera-float-content .camera-actions {
+            gap: 7px;
+        }
+
+        .camera-float-content .camera-actions button,
+        .camera-float-content .camera-demo-type {
+            min-height: 34px;
+            padding: 6px 9px;
+            font-size: 11px;
+        }
+
+        .camera-float.is-minimized .camera-float-content {
+            display: none;
+        }
+
+        @keyframes cameraFloatIn {
+            from { opacity: 0; transform: translateY(10px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .course-picker {
@@ -1355,6 +1576,13 @@
                 width: 100vw;
             }
 
+            .camera-float {
+                right: 12px;
+                bottom: 12px;
+                width: min(340px, calc(100vw - 24px));
+                max-height: calc(100dvh - 24px);
+            }
+
             .notif-popover {
                 right: 12px;
                 width: calc(100vw - 24px);
@@ -1392,6 +1620,12 @@
 
             main {
                 padding: 14px;
+            }
+
+            .camera-float {
+                right: 8px;
+                bottom: 8px;
+                width: calc(100vw - 16px);
             }
         }
 
@@ -2072,6 +2306,20 @@
         </div>
 
     </div>
+
+    <section class="camera-float" id="dashboardCameraFloat" aria-label="Floating webcam preview" hidden>
+        <div class="camera-float-bar">
+            <div class="camera-float-title">
+                WEBCAM PREVIEW
+                <small>STAYS VISIBLE WHILE YOU BROWSE</small>
+            </div>
+            <button class="camera-float-toggle ic" id="toggleDashboardCameraFloat" type="button"
+                aria-label="Minimize webcam preview" aria-expanded="true" title="Minimize preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+            </button>
+        </div>
+        <div class="camera-float-content" id="dashboardCameraFloatContent"></div>
+    </section>
 
     <!-- ================= SETTINGS DRAWER ================= -->
     <div class="settings-backdrop" id="settingsBackdrop" aria-hidden="true"></div>
@@ -2754,8 +3002,17 @@
                 </div>
 
                 <div class="camera-entry-grid">
-                    <section class="card">
-                        <h3 class="disp">LIVE WEBCAM</h3>
+                    <section class="card camera-card" id="dashboardCameraCard">
+                        <div class="camera-heading">
+                            <h3 class="disp">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="6" width="13" height="12" rx="2"/>
+                                    <path d="m16 10 5-3v10l-5-3z"/>
+                                </svg>
+                                LIVE WEBCAM
+                            </h3>
+                            <span class="camera-live-badge mono" id="dashboardCameraLiveBadge" data-live="false">OFFLINE</span>
+                        </div>
                         <p class="sub">Camera preview</p>
                         <div class="camera-tracker" id="dashboardCameraTracker">
                             <video class="camera-preview" id="dashboardCamera" autoplay muted playsinline aria-label="Live webcam preview"></video>
@@ -3162,7 +3419,14 @@
 
 
         function render() {
-            if (S.tab !== "dashboard") stopDashboardCamera();
+            const cameraFloat = $("dashboardCameraFloat");
+            const cameraFloatContent = $("dashboardCameraFloatContent");
+            const cameraCard = $("dashboardCameraCard");
+            const cameraIsFloating = cameraCard && cameraFloatContent?.contains(cameraCard);
+            if (S.tab !== "dashboard" && cameraCard && (dashboardCameraStream || cameraIsFloating)) {
+                cameraFloatContent.append(cameraCard);
+                cameraFloat.hidden = false;
+            }
 
             const isPersonnel = currentProfile?.role === "personnel";
             const memberNav = [
@@ -3211,6 +3475,20 @@
                     reports
                 }[S.tab]();
 
+            if (S.tab === "dashboard" && cameraFloatContent) {
+                const floatingCameraCard = cameraFloatContent.querySelector("#dashboardCameraCard");
+                const dashboardCameraPlaceholder = $("dashboardCameraCard");
+                if (floatingCameraCard && dashboardCameraPlaceholder) {
+                    dashboardCameraPlaceholder.replaceWith(floatingCameraCard);
+                    cameraFloat.hidden = true;
+                    cameraFloat.classList.remove("is-minimized");
+                    const toggle = $("toggleDashboardCameraFloat");
+                    toggle.setAttribute("aria-expanded", "true");
+                    toggle.setAttribute("aria-label", "Minimize webcam preview");
+                    toggle.title = "Minimize preview";
+                }
+            }
+
             if (S.tab === "dashboard" && dashboardCameraStream) {
                 const video = $("dashboardCamera");
                 if (video) video.srcObject = dashboardCameraStream;
@@ -3223,7 +3501,12 @@
             const startButton = $("startDashboardCamera");
             const stopButton = $("stopDashboardCamera");
             const scanButton = $("simulateDashboardFaceScan");
+            const liveBadge = $("dashboardCameraLiveBadge");
             if (status) status.textContent = message;
+            if (liveBadge) {
+                liveBadge.dataset.live = String(Boolean(dashboardCameraStream));
+                liveBadge.textContent = dashboardCameraStream ? "LIVE" : "OFFLINE";
+            }
             if (startButton) startButton.disabled = Boolean(dashboardCameraStream) || dashboardCameraStarting;
             if (stopButton) stopButton.disabled = !dashboardCameraStream;
             if (scanButton) scanButton.disabled = dashboardCameraStarting;
@@ -3424,8 +3707,14 @@
                     audio: false,
                     video: { facingMode: "user" }
                 });
-                if (request !== dashboardCameraRequest || S.tab !== "dashboard") {
+                if (request !== dashboardCameraRequest) {
                     stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+                if (!$("dashboardCamera")?.isConnected) {
+                    stream.getTracks().forEach(track => track.stop());
+                    dashboardCameraStarting = false;
+                    updateDashboardCameraControls("Camera start was cancelled because the dashboard changed.");
                     return;
                 }
 
@@ -3721,6 +4010,25 @@
             if (cancelButton) cancelPersonEdit(cancelButton.dataset.cancelEdit);
 
             if (e.target.closest("[data-cancel-report]")) cancelReportEdit();
+        };
+
+        $("dashboardCameraFloat").onclick = e => {
+            const toggle = e.target.closest("#toggleDashboardCameraFloat");
+            if (toggle) {
+                const minimized = $("dashboardCameraFloat").classList.toggle("is-minimized");
+                toggle.setAttribute("aria-expanded", String(!minimized));
+                toggle.setAttribute("aria-label", minimized ? "Show webcam preview" : "Minimize webcam preview");
+                toggle.title = minimized ? "Show preview" : "Minimize preview";
+                return;
+            }
+            if (e.target.closest("#startDashboardCamera")) {
+                startDashboardCamera();
+            } else if (e.target.closest("#stopDashboardCamera")) {
+                stopDashboardCamera();
+            } else if (e.target.closest("#simulateDashboardFaceScan")) {
+                showDashboardDemoFaceScan();
+            }
+
         };
 
         $("main").addEventListener("submit", e => {
