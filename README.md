@@ -17,6 +17,7 @@ JRCSEE is a web-based interface for an administrative dashboard. It supports Sup
 - **Members navigation** groups Students, Faculty, and Visitors in one expandable sidebar section
 - **Dashboard color themes** with palette presets that update the dashboard accents and surfaces together
 - **Optional webcam face tracker** on the dashboard, with an on-device box around visible faces and a clearly labeled demo scan that shows fictional visitor details in the Entry Activity panel; starts only after permission is granted and does not record or upload camera frames
+- **Daily webcam count** that records each continuously tracked face once and updates the Supabase-backed daily total live; it does not identify people or deduplicate the same person after a long absence or camera restart
 - **Visitor retention** with automatic deletion after 30 days and anonymized linked logs/alerts
 - **Search** for filtering the information shown on each page
 - **Responsive layout** with a collapsible sidebar on smaller screens
@@ -70,6 +71,7 @@ The HTML files use the Supabase JavaScript client and call `supabase.auth.signIn
 
 1. Open the JRCSEE project in [Supabase](https://supabase.com/).
 2. In **SQL Editor**, run [`supabase-setup.sql`](./supabase-setup.sql). It creates the people, entry-log, alert, and account tables/views, applies row-level security, and schedules expired visitor cleanup through `pg_cron`. The script is designed to be rerun; when upgrading an existing setup it keeps the old `members`, `projects`, and `reports` tables, but old member rows are not automatically converted into student/staff records.
+   - Run [`supabase-face-scan-counts.sql`](./supabase-face-scan-counts.sql) after setup to create the daily webcam count table, permissions, and live updates. This is required for both new and existing projects to use the daily count.
    - For an existing project where the tables already exist, run [`supabase-people-fix.sql`](./supabase-people-fix.sql) to refresh people-table and category-view permissions without changing account roles. It assumes the setup script has already created the tables, views, and `is_admin()` function.
    - To remove the visitor host requirements from an existing database, run [`supabase-visitor-fields-fix.sql`](./supabase-visitor-fields-fix.sql) after the setup script. Existing host values are preserved but the updated form no longer collects or displays them.
    - To enable Recent Activity entries for student, faculty, and visitor additions, edits, and deletions in an existing database, run [`supabase-activity-fix.sql`](./supabase-activity-fix.sql).
@@ -125,7 +127,7 @@ Admins have full read/write access to operational data tables under Supabase RLS
 - Expired visitor records are deleted by an hourly `pg_cron` job. The linked `person_id` in entry logs and alerts is set to `NULL` on deletion, leaving those records anonymized.
 - The `students`, `staff`, and `visitors` views are filtered views over `people`; authenticated users can read, insert, and update through them subject to the same row-level security policies. The dashboard writes through `people` with an explicit person type.
 - If a dashboard save fails, read the message below the form. A row-level-security or permission error usually means the current account is not approved as Admin/Personnel or the latest policies from `supabase-setup.sql` have not been applied. Student records must be saved as `person_type = 'student'` in `public.people` (or inserted through the `public.students` view with its required fields); older records in `public.members` are not shown as students.
-- Face photos, biometric templates, and identity recognition are not included. The webcam tracker detects visible faces locally in the browser and draws a box around them; it does not identify people. The face-detection library and model are downloaded from public CDNs when the camera starts, but camera frames are processed locally and are not uploaded. Entry logs and alerts will remain empty until an authorized access-control device/service writes to them.
+- Face photos, biometric templates, and identity recognition are not included. The webcam tracker detects visible faces locally in the browser, draws a box around them, and records one count per tracked face after several consecutive detections. A track is retained briefly through occlusions, but the same person may be counted again after leaving the frame for a while, restarting the camera, or using another device. The daily total uses the browser's local calendar day and updates across connected dashboards through Supabase Realtime. The face-detection library and model are downloaded from public CDNs when the camera starts, but camera frames and facial data are not saved or uploaded. Entry logs and alerts remain separate and will stay empty until an authorized access-control device/service writes to them.
 
 The dashboard database starts empty. The names and reports previously shown in the dashboard were sample data and are not copied into your project.
 
@@ -148,7 +150,7 @@ After successful authentication, the login page redirects to `dashboard.html`.
 - The **Remember me** checkbox is present in the interface, but persistent-login behavior is not implemented by that checkbox.
 - The account email update requires confirmation from the email inbox.
 - The supplied dashboard checks whether a Supabase user is signed in and uses Supabase Row Level Security (RLS) to protect database operations.
-- The dashboard's webcam requires HTTPS or localhost plus browser camera permission. The on-device face tracker draws boxes around visible faces but does not recognize identities. The "Simulate face scan" button shows fictional visitor details in Entry Activity for demonstration only; it does not match identities, record video, or provide face-based attendance/identity verification.
+- The dashboard's webcam requires HTTPS or localhost plus browser camera permission. It automatically counts tracked face appearances but does not recognize identities or provide identity-verified attendance. The "Simulate face scan" button shows fictional visitor details in Entry Activity for demonstration only; simulated scans do not affect the daily face count.
 
 ## Suggested Improvements
 
